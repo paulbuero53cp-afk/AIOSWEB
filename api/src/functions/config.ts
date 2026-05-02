@@ -9,6 +9,8 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/fu
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
 import { findItem, createItem, updateItem } from '../lib/sharepoint';
 
+const MOCK = process.env['USE_MOCK_DATA'] === 'true';
+
 interface AppConfig {
   name: string;
   short: string;
@@ -29,6 +31,8 @@ async function handleGet(req: HttpRequest): Promise<HttpResponseInit> {
   const principal = requireAuth(req);
   if (isAuthError(principal)) return principal;
 
+  if (MOCK) return { status: 200, jsonBody: DEFAULT_CONFIG };
+
   const item = await findItem('CONFIG', `fields/ConfigKey eq 'COMPANY'`);
   if (!item) return { status: 200, jsonBody: DEFAULT_CONFIG };
 
@@ -46,6 +50,7 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
   if (isAuthError(principal)) return principal;
 
   const body = await req.json() as Partial<AppConfig>;
+  if (MOCK) return { status: 200, jsonBody: { ...DEFAULT_CONFIG, ...body } };
   const configJson = JSON.stringify(body);
 
   const existing = await findItem('CONFIG', `fields/ConfigKey eq 'COMPANY'`);

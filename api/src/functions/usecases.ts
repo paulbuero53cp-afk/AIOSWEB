@@ -12,6 +12,9 @@ import { requireAuth, requireRole, isAuthError } from '../lib/auth';
 import { listItems, findItem, createItem, updateItem } from '../lib/sharepoint';
 import { spToUC, ucToSp, UseCase } from '../lib/mappers';
 import { writeAuditLog, diffObjects } from '../lib/audit';
+import { MOCK_USECASES } from '../lib/mockData';
+
+const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
 // ── GET /api/usecases ─────────────────────────────────────────
 async function handleGet(
@@ -19,6 +22,8 @@ async function handleGet(
 ): Promise<HttpResponseInit> {
   const principal = requireAuth(req);
   if (isAuthError(principal)) return principal;
+
+  if (MOCK) return { status: 200, jsonBody: MOCK_USECASES.filter(uc => uc.act) };
 
   const spItems = await listItems('USECASES');
   const useCases: UseCase[] = spItems
@@ -36,6 +41,13 @@ async function handleGetOne(
   const principal = requireAuth(req);
   if (isAuthError(principal)) return principal;
 
+  if (MOCK) {
+    const uc = MOCK_USECASES.find(u => u.id === ucId);
+    return uc
+      ? { status: 200, jsonBody: uc }
+      : { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
+  }
+
   const item = await findItem('USECASES', `fields/UCId eq '${ucId}'`);
   if (!item) return { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
 
@@ -50,6 +62,13 @@ async function handlePost(
   if (isAuthError(principal)) return principal;
 
   const body = await req.json() as Partial<UseCase>;
+
+  if (MOCK) {
+    const now = new Date().toISOString();
+    const defaults: UseCase = { id: `UC-${Date.now()}`, title: '', act: true, cl: '', sys: '', legacy: '', own: '', cap: '', kiType: [], auto: '', lc: 'Idea', pd: 'Start', rt: 'Low', tier: '1', rev: 'yes', vs: 1, fs: 1, rs: 1, kpi: 'no', app: 'Not required', or: 'Not ready', hitl: 'yes', gt: [false,false,false,false], sb: [false,false,false,false], mc: [false,false,false,false,false,false,false], desc: '', link: '', createdAt: now, updatedAt: now, createdBy: principal.userDetails, updatedBy: principal.userDetails };
+    const result: UseCase = { ...defaults, ...body as UseCase };
+    return { status: 201, jsonBody: result };
+  }
   if (!body.title?.trim()) {
     return { status: 400, jsonBody: { error: 'title ist Pflichtfeld' } };
   }
@@ -95,6 +114,12 @@ async function handlePatch(
   );
   if (isAuthError(principal)) return principal;
 
+  if (MOCK) {
+    const uc = MOCK_USECASES.find(u => u.id === ucId);
+    if (!uc) return { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
+    return { status: 200, jsonBody: { ...uc, ...body, updatedAt: new Date().toISOString(), updatedBy: principal.userDetails } };
+  }
+
   const item = await findItem('USECASES', `fields/UCId eq '${ucId}'`);
   if (!item) return { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
 
@@ -132,6 +157,8 @@ async function handleDelete(
 ): Promise<HttpResponseInit> {
   const principal = requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
+
+  if (MOCK) return { status: 204 };
 
   const item = await findItem('USECASES', `fields/UCId eq '${ucId}'`);
   if (!item) return { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };

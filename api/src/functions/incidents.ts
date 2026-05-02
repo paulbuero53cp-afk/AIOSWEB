@@ -11,10 +11,15 @@ import { requireAuth, requireRole, isAuthError } from '../lib/auth';
 import { listItems, findItem, createItem, updateItem } from '../lib/sharepoint';
 import { spToIncident, incidentToSp, Incident } from '../lib/mappers';
 import { writeAuditLog, diffObjects } from '../lib/audit';
+import { MOCK_INCIDENTS } from '../lib/mockData';
+
+const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
 async function handleGet(req: HttpRequest): Promise<HttpResponseInit> {
   const principal = requireAuth(req);
   if (isAuthError(principal)) return principal;
+
+  if (MOCK) return { status: 200, jsonBody: MOCK_INCIDENTS };
 
   const spItems = await listItems('INCIDENTS');
   return {
@@ -28,6 +33,12 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
   if (isAuthError(principal)) return principal;
 
   const body = await req.json() as Partial<Incident>;
+
+  if (MOCK) {
+    const now = new Date().toISOString();
+    const result: Incident = { id: `INC-${Date.now()}`, ucid: '', type: 'Incident', sev: 'Low', st: 'Open', desc: '', act: '', date: now.slice(0, 10), createdAt: now, updatedAt: now, createdBy: principal.userDetails, updatedBy: principal.userDetails, ...body };
+    return { status: 201, jsonBody: result };
+  }
   if (!body.ucid) return { status: 400, jsonBody: { error: 'ucid ist Pflichtfeld' } };
 
   const now = new Date().toISOString();
@@ -52,6 +63,13 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
 async function handlePatch(req: HttpRequest, incId: string): Promise<HttpResponseInit> {
   const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
+
+  if (MOCK) {
+    const inc = MOCK_INCIDENTS.find(i => i.id === incId);
+    if (!inc) return { status: 404, jsonBody: { error: `Incident ${incId} nicht gefunden` } };
+    const body = await req.json() as Partial<Incident>;
+    return { status: 200, jsonBody: { ...inc, ...body, updatedAt: new Date().toISOString(), updatedBy: principal.userDetails } };
+  }
 
   const item = await findItem('INCIDENTS', `fields/IncId eq '${incId}'`);
   if (!item) return { status: 404, jsonBody: { error: `Incident ${incId} nicht gefunden` } };

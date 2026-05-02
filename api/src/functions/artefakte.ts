@@ -12,6 +12,9 @@ import { requireAuth, requireRole, isAuthError } from '../lib/auth';
 import { listItems, findItem, createItem, updateItem } from '../lib/sharepoint';
 import { spToArtefakt, artefaktToSp, Artefakt } from '../lib/mappers';
 import { writeAuditLog } from '../lib/audit';
+import { MOCK_ARTEFAKTE } from '../lib/mockData';
+
+const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
 const VALID_TYPES = ['ra', 'gc', 'bc', 'dsfa'] as const;
 type ArtType = typeof VALID_TYPES[number];
@@ -28,6 +31,11 @@ async function handleGet(
 ): Promise<HttpResponseInit> {
   const principal = requireAuth(req);
   if (isAuthError(principal)) return principal;
+
+  if (MOCK) {
+    const payload = MOCK_ARTEFAKTE[ucId]?.[type] ?? {};
+    return { status: 200, jsonBody: payload };
+  }
 
   const item = await findItem(
     'ARTEFAKTE',
@@ -48,6 +56,11 @@ async function handleGetAll(
   const principal = requireAuth(req);
   if (isAuthError(principal)) return principal;
 
+  if (MOCK) {
+    const uc = MOCK_ARTEFAKTE[ucId] ?? {};
+    return { status: 200, jsonBody: { ra: uc['ra'] ?? {}, gc: uc['gc'] ?? {}, bc: uc['bc'] ?? {}, dsfa: uc['dsfa'] ?? {} } };
+  }
+
   const items = await listItems('ARTEFAKTE', `fields/UCId eq '${ucId}'`);
   const result: Record<string, unknown> = { ra: {}, gc: {}, bc: {}, dsfa: {} };
 
@@ -63,6 +76,8 @@ async function handleGetAll(
 async function handleExport(req: HttpRequest): Promise<HttpResponseInit> {
   const principal = requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
+
+  if (MOCK) return { status: 200, jsonBody: MOCK_ARTEFAKTE };
 
   const items = await listItems('ARTEFAKTE');
   const artDB: Record<string, Record<string, Record<string, unknown>>> = {
@@ -89,6 +104,8 @@ async function handlePost(
   if (isAuthError(principal)) return principal;
 
   const payload = await req.json() as Record<string, unknown>;
+
+  if (MOCK) return { status: 200, jsonBody: payload };
   const now = new Date().toISOString();
 
   // Bestehendes Item suchen

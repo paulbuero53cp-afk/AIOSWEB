@@ -4,8 +4,9 @@
   "description": "AI Management System — Azure Static Web App",
   "type": "module",
   "scripts": {
-    "dev": "swa start http://localhost:5173 --api-location api",
+    "dev": "swa start --configuration aios",
     "dev:vite": "vite",
+    "dev:full": "concurrently -k -n vite,swa -c cyan,yellow \"vite\" \"swa start --configuration aios\"",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@azure/static-web-apps-cli": "^2.0.2",
+    "concurrently": "^9.1.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
