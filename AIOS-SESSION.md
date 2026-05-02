@@ -115,16 +115,16 @@
 - [ ] Sandbox-Test mit AIOS v4 Export
 
 ### 📋 Backlog
-- AP 1.3.1 — Azure Functions API-Layer (wartet auf Tenant/Client ID)
-- AP 1.3.2 — AuthContext mit echten Daten testen
-- AP 1.3.3 — Dashboard Screen (React)
-- AP 1.3.4 — Use Case Management CRUD
-- AP 1.3.5 — Governance Cockpit + Incident Log
-- AP 1.4.1 — Risk Assessment
-- AP 1.4.2 — Gate Checklisten
-- AP 1.4.3 — Business Case
-- ~~AP 1.4.4 — DSFA~~ ✅
-- ~~AP 1.4.5 — Export-Funktionen~~ ✅
+- ~~AP 1.3.1 — Azure Functions API-Layer~~ ✅ Session #2
+- AP 1.3.2 — AuthContext mit echten Daten testen (wartet auf Azure SWA + Entra App)
+- ~~AP 1.3.3 — Dashboard Screen~~ ✅ Session #3
+- ~~AP 1.3.4 — Use Case Management CRUD~~ ✅ Session #3
+- ~~AP 1.3.5 — Governance Cockpit + Incident Log~~ ✅ Session #4
+- ~~AP 1.4.1 — Risk Assessment~~ ✅ Session #5
+- ~~AP 1.4.2 — Gate Checklisten~~ ✅ Session #5
+- ~~AP 1.4.3 — Business Case~~ ✅ Session #5
+- ~~AP 1.4.4 — DSFA~~ ✅ Session #6
+- ~~AP 1.4.5 — Export-Funktionen~~ ✅ Session #6
 
 ## Bekannte Issues / Bugs
 - [ ] `setChk()`-Hilfsfunktion in AIOS HTML v4 prüfen (Bug-Verdacht aus Review)
