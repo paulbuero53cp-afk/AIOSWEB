@@ -4,9 +4,10 @@
   "description": "AI Management System — Azure Static Web App",
   "type": "module",
   "scripts": {
-    "dev": "swa start --configuration aios",
+    "dev": "concurrently -k -n api,vite -c green,cyan \"npm run --prefix api watch\" \"vite --port 5173\"",
     "dev:vite": "vite",
-    "dev:full": "concurrently -k -n vite,swa -c cyan,yellow \"vite\" \"swa start --configuration aios\"",
+    "dev:swa": "swa start http://localhost:5173 --api-location api",
+    "dev:full": "npm run --prefix api build && concurrently -k -n vite,api,swa -c cyan,green,yellow \"vite --port 5173\" \"npm run --prefix api watch\" \"wait-on http://localhost:5173 && swa start http://localhost:5173 --api-location api\"",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -15,21 +16,22 @@
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "swr": "^2.2.5",
-    "react-hook-form": "^7.52.0"
+    "react-hook-form": "^7.52.0",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
     "@azure/static-web-apps-cli": "^2.0.2",
-    "concurrently": "^9.1.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.1.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
     "typescript": "^5.4.5",
-    "vite": "^5.3.1"
+    "vite": "^5.3.1",
+    "wait-on": "^9.0.5"
   }
 }

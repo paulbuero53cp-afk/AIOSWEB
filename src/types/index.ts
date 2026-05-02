@@ -296,7 +296,7 @@ export interface PaginatedResponse<T> {
 export type Screen =
   | 'dashboard' | 'portfolio' | 'usecases' | 'new'
   | 'governance' | 'incidents' | 'agenthub' | 'artefakthub'
-  | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog';
+  | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog' | 'info';
 
 export type Language = 'de' | 'en';
 

@@ -8,18 +8,27 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/fu
 import { requireRole, isAuthError } from '../lib/auth';
 import { listItems } from '../lib/sharepoint';
 import { spToAudit } from '../lib/mappers';
+import { MOCK_AUDIT } from '../lib/mockData';
+
+const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
 async function auditlogHandler(
   req: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
-  // Nur Admin kann Audit Log lesen
   const principal = requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   const limitParam  = req.query.get('limit');
   const entityParam = req.query.get('entity');
   const limit = Math.min(parseInt(limitParam ?? '100'), 500);
+
+  if (MOCK) {
+    const entries = MOCK_AUDIT
+      .filter(e => !entityParam || e.entity === entityParam)
+      .slice(0, limit);
+    return { status: 200, jsonBody: entries };
+  }
 
   try {
     const filter = entityParam
@@ -29,7 +38,7 @@ async function auditlogHandler(
     const items = await listItems('AUDITLOG', filter, undefined, limit);
     const entries = items
       .map(i => spToAudit(i.id, i.fields as Record<string, unknown>))
-      .sort((a, b) => b.ts.localeCompare(a.ts));  // Neueste zuerst
+      .sort((a, b) => b.ts.localeCompare(a.ts));
 
     return { status: 200, jsonBody: entries };
   } catch (err) {

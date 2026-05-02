@@ -13,6 +13,9 @@ import GateChecks        from '@/components/screens/GateChecks';
 import BusinessCase      from '@/components/screens/BusinessCase';
 import DsfaScreen        from '@/components/screens/Dsfa';
 import ArtefaktHub       from '@/components/screens/ArtefaktHub';
+import PortfolioBoard    from '@/components/screens/PortfolioBoard';
+import AuditLogScreen    from '@/components/screens/AuditLog';
+import InfoScreen        from '@/components/screens/Info';
 import { swrFetcher } from '@/lib/api';
 import type { Screen, Language, UseCase, Incident } from '@/types';
 import '@/styles/global.css';
@@ -43,6 +46,7 @@ const NAV_ITEMS: { id: Screen; label: string; icon: string }[] = [
   { id: 'bizcases',     label: 'Business Cases',     icon: '📈' },
   { id: 'dsfa',         label: 'DSFA',               icon: '🔒' },
   { id: 'auditlog',     label: 'Audit Log',          icon: '📋' },
+  { id: 'info',         label: 'Info & Config',      icon: 'ℹ️' },
 ];
 
 function Sidebar({
@@ -187,13 +191,14 @@ function AppShell() {
           {screen === 'governance' && <Governance  onNav={(s) => setScreen(s as Screen)} />}
           {screen === 'incidents'  && <IncidentLog />}
           {screen === 'agenthub'   && <AgentHub />}
-          {screen === 'portfolio'  && <PlaceholderScreen name="Portfolio Board" />}
+          {screen === 'portfolio'  && <PortfolioBoard />}
           {screen === 'artefakthub'&& <ArtefaktHub onNav={(s) => setScreen(s as Screen)} />}
           {screen === 'riskassess' && <RiskAssessment />}
           {screen === 'gatechecks' && <GateChecks />}
           {screen === 'bizcases'   && <BusinessCase />}
           {screen === 'dsfa'       && <DsfaScreen />}
-          {screen === 'auditlog'   && <PlaceholderScreen name="Audit Log" />}
+          {screen === 'auditlog'   && <AuditLogScreen />}
+          {screen === 'info'       && <InfoScreen />}
         </div>
       </div>
 

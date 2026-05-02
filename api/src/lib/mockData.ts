@@ -52,7 +52,7 @@ export const MOCK_USECASES: UseCase[] = [
     kiType: ['einsatz', 'erstellung'],
     auto: 'Entscheidet',
     lc: 'Pilot',
-    pd: 'Invest',
+    pd: 'Scale',
     rt: 'Medium',
     tier: '2',
     rev: 'yes',
