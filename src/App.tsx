@@ -16,38 +16,60 @@ import ArtefaktHub       from '@/components/screens/ArtefaktHub';
 import PortfolioBoard    from '@/components/screens/PortfolioBoard';
 import AuditLogScreen    from '@/components/screens/AuditLog';
 import InfoScreen        from '@/components/screens/Info';
+import AiStrategyScreen  from '@/components/screens/AiStrategy';
 import { swrFetcher } from '@/lib/api';
 import type { Screen, Language, UseCase, Incident } from '@/types';
 import '@/styles/global.css';
 
-// ── Placeholder Screen ────────────────────────────────────────
-function PlaceholderScreen({ name }: { name: string }) {
-  return (
-    <div>
-      <div className="sec-title">{name}</div>
-      <div className="sec-sub">Implementierung folgt in nächster Session</div>
-      <div className="empty">🚧 In Entwicklung</div>
-    </div>
-  );
-}
+// ── Sidebar Navigation Structure ─────────────────────────────
+type NavItem = { id: Screen; label: string; icon: string };
+type NavSection = { title: string; items: NavItem[] };
 
-// ── Sidebar ───────────────────────────────────────────────────
-const NAV_ITEMS: { id: Screen; label: string; icon: string }[] = [
-  { id: 'dashboard',    label: 'Dashboard',         icon: '📊' },
-  { id: 'portfolio',    label: 'Portfolio Board',   icon: '📁' },
-  { id: 'usecases',     label: 'Alle Use Cases',    icon: '🤖' },
-  { id: 'agenthub',     label: 'AI Agent Hub',      icon: '⚡' },
-  { id: 'new',          label: 'Neu erfassen',       icon: '➕' },
-  { id: 'governance',   label: 'Governance Cockpit', icon: '🛡' },
-  { id: 'incidents',    label: 'Incident Log',       icon: '⚠️' },
-  { id: 'artefakthub',  label: 'Dokumentations-Hub', icon: '📄' },
-  { id: 'riskassess',   label: 'Risk Assessment',    icon: '⚠' },
-  { id: 'gatechecks',   label: 'Gate-Checklisten',   icon: '✓' },
-  { id: 'bizcases',     label: 'Business Cases',     icon: '📈' },
-  { id: 'dsfa',         label: 'DSFA',               icon: '🔒' },
-  { id: 'auditlog',     label: 'Audit Log',          icon: '📋' },
-  { id: 'info',         label: 'Info & Config',      icon: 'ℹ️' },
+const NAV_SECTIONS: NavSection[] = [
+  {
+    title: 'Übersicht',
+    items: [
+      { id: 'dashboard',   label: 'Dashboard',        icon: '📊' },
+      { id: 'portfolio',   label: 'Portfolio Board',  icon: '📁' },
+      { id: 'aistrategy',  label: 'KI bei STOCKMEIER',icon: '💡' },
+    ],
+  },
+  {
+    title: 'Use Cases',
+    items: [
+      { id: 'usecases',    label: 'Alle Use Cases',   icon: '🤖' },
+      { id: 'agenthub',    label: 'AI Agent Hub',     icon: '⚡' },
+      { id: 'new',         label: 'Neu erfassen',      icon: '➕' },
+    ],
+  },
+  {
+    title: 'Governance',
+    items: [
+      { id: 'governance',  label: 'Governance Cockpit', icon: '🛡' },
+      { id: 'incidents',   label: 'Incident Log',       icon: '⚠️' },
+    ],
+  },
+  {
+    title: 'Dokumente',
+    items: [
+      { id: 'artefakthub', label: 'Dokumentations-Hub', icon: '📄' },
+      { id: 'riskassess',  label: 'Risk Assessment',    icon: '⚠' },
+      { id: 'gatechecks',  label: 'Gate-Checklisten',   icon: '✓' },
+      { id: 'bizcases',    label: 'Business Cases',     icon: '📈' },
+      { id: 'dsfa',        label: 'DSFA',               icon: '🔒' },
+    ],
+  },
+  {
+    title: 'Admin',
+    items: [
+      { id: 'auditlog',    label: 'Audit Log',          icon: '📋' },
+      { id: 'info',        label: 'Info & Config',      icon: 'ℹ️' },
+    ],
+  },
 ];
+
+// Flat list for topbar title lookup
+const NAV_ITEMS: NavItem[] = NAV_SECTIONS.flatMap(s => s.items);
 
 function Sidebar({
   active,
@@ -71,20 +93,25 @@ function Sidebar({
         <div className="slogo-bot">AI Management System</div>
       </div>
       <nav className="snav">
-        {NAV_ITEMS.map(item => (
-          <div
-            key={item.id}
-            className={`ni${active === item.id ? ' active' : ''}`}
-            onClick={() => onNav(item.id)}
-          >
-            <span>{item.icon}</span>
-            <span>{item.label}</span>
-            {item.id === 'governance' && govBadge > 0 && (
-              <span className="nbadge">{govBadge}</span>
-            )}
-            {item.id === 'incidents' && incBadge > 0 && (
-              <span className="nbadge">!</span>
-            )}
+        {NAV_SECTIONS.map(section => (
+          <div key={section.title}>
+            <div className="nsec">{section.title}</div>
+            {section.items.map(item => (
+              <div
+                key={item.id}
+                className={`ni${active === item.id ? ' active' : ''}`}
+                onClick={() => onNav(item.id)}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+                {item.id === 'governance' && govBadge > 0 && (
+                  <span className="nbadge">{govBadge}</span>
+                )}
+                {item.id === 'incidents' && incBadge > 0 && (
+                  <span className="nbadge">!</span>
+                )}
+              </div>
+            ))}
           </div>
         ))}
       </nav>
@@ -199,6 +226,7 @@ function AppShell() {
           {screen === 'dsfa'       && <DsfaScreen />}
           {screen === 'auditlog'   && <AuditLogScreen />}
           {screen === 'info'       && <InfoScreen />}
+          {screen === 'aistrategy' && <AiStrategyScreen onNav={(s) => setScreen(s as Screen)} />}
         </div>
       </div>
 

@@ -170,12 +170,13 @@ export default function UseCases({ onNav }: { onNav: (s: string) => void }) {
               <th>Approval</th>
               <th>KI-Typ</th>
               <th>KPI</th>
+              <th style={{ width: 130 }}>Artefakte</th>
             </tr>
           </thead>
           <tbody>
             {paged.length === 0 ? (
               <tr>
-                <td colSpan={9} className="empty">Keine Use Cases gefunden.</td>
+                <td colSpan={10} className="empty">Keine Use Cases gefunden.</td>
               </tr>
             ) : (
               paged.map(uc => (
@@ -221,6 +222,26 @@ export default function UseCases({ onNav }: { onNav: (s: string) => void }) {
                     <span className={`badge ${uc.kpi === 'yes' ? 'bg' : 'bgr'}`}>
                       {uc.kpi === 'yes' ? 'Ja' : 'Nein'}
                     </span>
+                  </td>
+                  <td onClick={e => e.stopPropagation()}>
+                    <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                      {[
+                        { label: 'RA',  screen: 'riskassess', title: 'Risk Assessment' },
+                        { label: 'GC',  screen: 'gatechecks', title: 'Gate Checks' },
+                        { label: 'BC',  screen: 'bizcases',   title: 'Business Case' },
+                        { label: 'DSFA',screen: 'dsfa',       title: 'DSFA' },
+                      ].map(({ label, screen, title }) => (
+                        <button
+                          key={screen}
+                          className="btn btn-outline btn-sm"
+                          style={{ fontSize: 10, padding: '2px 6px' }}
+                          title={title}
+                          onClick={() => onNav(screen)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </td>
                 </tr>
               ))

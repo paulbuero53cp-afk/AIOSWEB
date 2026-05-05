@@ -196,7 +196,7 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
   return (
     <>
       {/* KPI Grid */}
-      <div className="kpi-grid" style={{ marginBottom: 24 }}>
+      <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', marginBottom: 24 }}>
         <KpiCard label="Use Cases (gesamt)" value={total} sub="aktiv" />
         <KpiCard label="In Betrieb (Run)"   value={active} color="green" />
         <KpiCard

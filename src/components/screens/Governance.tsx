@@ -118,7 +118,7 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
       {/* KPI-Leiste */}
       <div
         className="kpi-grid"
-        style={{ gridTemplateColumns: 'repeat(4,1fr)', marginBottom: 24 }}
+        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', marginBottom: 24 }}
       >
         <GovKpi
           label="Freigabe ausstehend"

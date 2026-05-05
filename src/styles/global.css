@@ -92,10 +92,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .ch-title { font-size: 13px; font-weight: 600; color: var(--petrol); }
 
 /* ── Grids ───────────────────────────────────────────────────── */
-.dash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
-.gg { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.dash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; align-items: start; }
+.gg { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 
 /* ── Table ───────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+.uc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sort-icon { font-size: 11px; color: var(--muted); margin-left: 3px; }
+.filter-select { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--surface); outline: none; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { background: var(--surface2); padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); }
 th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
@@ -182,6 +186,16 @@ textarea { resize: vertical; min-height: 80px; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.toast-success { background: var(--green); }
 .toast.toast-error { background: var(--red); }
+
+/* ── List Items (used in cards) ──────────────────────────────── */
+.li { padding: 12px 20px; border-bottom: 1px solid var(--border); }
+.li:last-child { border-bottom: none; }
+.li-hd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+.li-title { font-size: 13px; font-weight: 600; color: var(--petrol); margin-bottom: 3px; }
+.li-meta { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* ── Form Section Title ──────────────────────────────────────── */
+.dstitle { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); padding: 4px 0 10px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
 
 /* ── Misc ────────────────────────────────────────────────────── */
 .sec-title { font-size: 18px; font-weight: 700; color: var(--petrol); margin-bottom: 4px; }

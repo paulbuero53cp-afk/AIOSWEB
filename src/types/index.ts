@@ -294,7 +294,7 @@ export interface PaginatedResponse<T> {
 
 // ── UI State ──────────────────────────────────────────────────
 export type Screen =
-  | 'dashboard' | 'portfolio' | 'usecases' | 'new'
+  | 'dashboard' | 'portfolio' | 'aistrategy' | 'usecases' | 'new'
   | 'governance' | 'incidents' | 'agenthub' | 'artefakthub'
   | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog' | 'info';
 

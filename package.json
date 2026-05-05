@@ -4,7 +4,7 @@
   "description": "AI Management System — Azure Static Web App",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n api,vite -c green,cyan \"npm run --prefix api watch\" \"vite --port 5173\"",
+    "dev": "npm run --prefix api build && concurrently -k -n func,vite -c green,cyan \"npm run --prefix api start\" \"vite --port 5173\"",
     "dev:vite": "vite",
     "dev:swa": "swa start http://localhost:5173 --api-location api",
     "dev:full": "npm run --prefix api build && concurrently -k -n vite,api,swa -c cyan,green,yellow \"vite --port 5173\" \"npm run --prefix api watch\" \"wait-on http://localhost:5173 && swa start http://localhost:5173 --api-location api\"",
