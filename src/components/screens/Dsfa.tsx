@@ -173,8 +173,8 @@ const TABS = ['Teil I — Hintergrund', 'Teil II — Risiken', 'Teil III — Aus
               'Trigger-Prüfung', 'Schritt 2 — Beschreibung', 'Schritt 3 — Risikobewertung', 'Schritt 4 — Maßnahmen'];
 
 // ── DSFA Screen ───────────────────────────────────────────────
-export default function DsfaScreen() {
-  const [ucId,   setUcId]   = useState('');
+export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {}) {
+  const [ucId,   setUcId]   = useState(initialUcId ?? '');
   const [tab,    setTab]    = useState(0);
   const [dirty,  setDirty]  = useState(false);
   const [saving, setSaving] = useState(false);

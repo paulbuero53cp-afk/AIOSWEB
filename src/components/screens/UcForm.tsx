@@ -22,6 +22,16 @@ export interface UcFormValues {
   mc0: boolean; mc1: boolean; mc2: boolean; mc3: boolean;
   mc4: boolean; mc5: boolean; mc6: boolean;
   app: string; or: string;
+  // ── Reliability (Tab 3) ──────────────────────────────────
+  rl: string;
+  hitlMode: string;
+  autonomyLevel: string;
+  fm_accuracy: boolean;
+  fm_inconsistency: boolean;
+  fm_drift: boolean;
+  fm_agentic: boolean;
+  fm_infrastructure: boolean;
+  monitoringSla: string;
 }
 
 function ucToFormValues(uc?: Partial<UseCase>): UcFormValues {
@@ -54,6 +64,16 @@ function ucToFormValues(uc?: Partial<UseCase>): UcFormValues {
     mc4: mc[4] ?? false, mc5: mc[5] ?? false, mc6: mc[6] ?? false,
     app:          uc?.app ?? 'Not required',
     or:           uc?.or ?? 'Not ready',
+    // Reliability
+    rl:              uc?.rl ?? '',
+    hitlMode:        uc?.hitlMode ?? '',
+    autonomyLevel:   uc?.autonomyLevel ?? '',
+    fm_accuracy:     uc?.failureModes?.includes('accuracy')       ?? false,
+    fm_inconsistency:uc?.failureModes?.includes('inconsistency')  ?? false,
+    fm_drift:        uc?.failureModes?.includes('drift')          ?? false,
+    fm_agentic:      uc?.failureModes?.includes('agentic')        ?? false,
+    fm_infrastructure:uc?.failureModes?.includes('infrastructure') ?? false,
+    monitoringSla:   uc?.monitoringSla ?? '',
   };
 }
 
@@ -85,6 +105,18 @@ export function formValuesToUcPatch(v: UcFormValues): Partial<UseCase> {
     mc:   [v.mc0, v.mc1, v.mc2, v.mc3, v.mc4, v.mc5, v.mc6],
     app:  v.app as UseCase['app'],
     or:   v.or as UseCase['or'],
+    // Reliability
+    rl:           (v.rl || undefined) as UseCase['rl'],
+    hitlMode:     (v.hitlMode || undefined) as UseCase['hitlMode'],
+    autonomyLevel:(v.autonomyLevel || undefined) as UseCase['autonomyLevel'],
+    failureModes: [
+      ...(v.fm_accuracy      ? ['accuracy']       : []),
+      ...(v.fm_inconsistency ? ['inconsistency']   : []),
+      ...(v.fm_drift         ? ['drift']           : []),
+      ...(v.fm_agentic       ? ['agentic']         : []),
+      ...(v.fm_infrastructure? ['infrastructure']  : []),
+    ] as UseCase['failureModes'],
+    monitoringSla: v.monitoringSla || undefined,
   };
 }
 
@@ -124,27 +156,27 @@ function ScoreSelect({ label, name, register }: {
   );
 }
 
-// ── Governance-Trigger-Definitionen ──────────────────────────
-const GT_LABELS = [
-  'GT01 — Entscheidungen mit erheblicher rechtlicher Wirkung auf Personen',
-  'GT02 — Verarbeitung besonderer Datenkategorien (Art. 9 DSGVO)',
-  'GT03 — Systematische Überwachung von Mitarbeitenden oder Öffentlichkeit',
-  'GT04 — Vollständig autonome Entscheidungen ohne Human-in-the-Loop',
+// ── Governance-Trigger-Definitionen (1:1 aus HTML-Basisversion) ──
+export const GT_LABELS = [
+  'GT01 – KI ist in Systeme oder Workflows integriert',
+  'GT02 – KI-Ergebnisse werden geteilt oder wiederverwendet',
+  'GT03 – KI beeinflusst Entscheidungen über den individuellen Nutzer hinaus',
+  'GT04 – KI wird skaliert oder operationalisiert',
 ];
-const SB_LABELS = [
-  'SB01 — Personenbezogene Daten von Mitarbeitenden',
-  'SB02 — Kundendaten / personenbezogene Drittdaten',
-  'SB03 — Sensible Unternehmensdaten / IP / Geschäftsgeheimnisse',
-  'SB04 — Finanzdaten / regulierte Daten',
+export const SB_LABELS = [
+  'SB01 – Pricing / Konditionsentscheidungen',
+  'SB02 – Kundenkommunikation',
+  'SB03 – HR-Entscheidungen',
+  'SB04 – Finanzielle Verpflichtungen',
 ];
-const MC_LABELS = [
-  'MC01 — Zweck und Funktionsweise des KI-Systems sind dokumentiert',
-  'MC02 — Datenbasis und Qualität sind geprüft und dokumentiert',
-  'MC03 — Human-in-the-Loop ist definiert (sofern Risk Tier ≥ Medium)',
-  'MC04 — Datenschutzrechtliche Prüfung ist durchgeführt',
-  'MC05 — IT-Security-Review ist durchgeführt',
-  'MC06 — Betroffene Mitarbeitende sind informiert',
-  'MC07 — Monitoring und Review-Zyklus sind festgelegt',
+export const MC_LABELS = [
+  'MC01 - Datenschutz und DSGVO geprueft',
+  'MC02 - KPI definiert',
+  'MC03 - Business Owner benannt',
+  'MC04 - Risk Assessment abgeschlossen',
+  'MC05 - Rollback / Fallback definiert',
+  'MC06 - Human Oversight Mechanismus definiert',
+  'MC07 - Stakeholder informiert',
 ];
 
 // ── Haupt-Formular-Komponente ─────────────────────────────────
@@ -154,6 +186,7 @@ interface UcFormProps {
   onCancel: () => void;
   submitLabel?: string;
   isSubmitting?: boolean;
+  initialTab?: number;
 }
 
 export default function UcForm({
@@ -162,8 +195,9 @@ export default function UcForm({
   onCancel,
   submitLabel = 'Speichern',
   isSubmitting = false,
+  initialTab = 0,
 }: UcFormProps) {
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const {
     register, handleSubmit,
@@ -176,7 +210,7 @@ export default function UcForm({
     await onSubmit(formValuesToUcPatch(v));
   });
 
-  const tabs = ['Stammdaten', 'Bewertung', 'Governance'];
+  const tabs = ['Stammdaten', 'Bewertung', 'Governance', 'Reliabilität'];
 
   return (
     <form onSubmit={handleFormSubmit} noValidate>
@@ -363,12 +397,78 @@ export default function UcForm({
         </div>
       </div>
 
+      {/* Tab 3 — Reliabilität */}
+      <div className={`tp${activeTab === 3 ? ' active' : ''}`}>
+        {/* R-Tier */}
+        <div style={{ marginBottom: 20 }}>
+          <div className="dstitle">Reliability Tier</div>
+          <div className="fg">
+            <Field label="R-Tier">
+              <select {...register('rl')}>
+                <option value="">— nicht zugewiesen —</option>
+                <option value="R1">R1 — Empfehlung (Mensch entscheidet immer)</option>
+                <option value="R2">R2 — Bestätigung (Mensch bestätigt vor Ausführung)</option>
+                <option value="R3">R3 — Überwacht (Mensch kann jederzeit stoppen)</option>
+                <option value="R4">R4 — Automation (stichprobenartige Kontrolle)</option>
+                <option value="R5">R5 — Agentic (kein direkter menschlicher Eingriff)</option>
+              </select>
+            </Field>
+            <Field label="HITL-Modus">
+              <select {...register('hitlMode')}>
+                <option value="">— nicht definiert —</option>
+                <option value="HITL">HITL — Human In The Loop (Mensch entscheidet aktiv mit)</option>
+                <option value="HOTL">HOTL — Human On The Loop (Mensch überwacht, greift ein bei Bedarf)</option>
+                <option value="none">none — Kein menschlicher Oversight</option>
+              </select>
+            </Field>
+            <Field label="Automationsgrad">
+              <select {...register('autonomyLevel')}>
+                <option value="">— nicht definiert —</option>
+                <option value="supervised">supervised — Vollständig beaufsichtigt</option>
+                <option value="semi-auto">semi-auto — Teilweise autonom</option>
+                <option value="autonomous">autonomous — Vollständig autonom</option>
+              </select>
+            </Field>
+            <Field label="Monitoring SLA">
+              <select {...register('monitoringSla')}>
+                <option value="">— keins definiert —</option>
+                <option value="Echtzeit">Echtzeit</option>
+                <option value="täglich">Täglich</option>
+                <option value="wöchentlich">Wöchentlich</option>
+                <option value="monatlich">Monatlich</option>
+                <option value="quartalsweise">Quartalsweise</option>
+              </select>
+            </Field>
+          </div>
+        </div>
+
+        {/* Failure-Mode-Risiken */}
+        <div>
+          <div className="dstitle">Bekannte Failure-Mode-Risiken</div>
+          <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
+            Welche Zuverlässigkeits-Risikokategorien sind für diesen Use Case relevant?
+          </p>
+          {[
+            { name: 'fm_accuracy'      as const, label: 'Accuracy-Drift — KI-Ergebnisse weichen von erwarteter Qualität ab' },
+            { name: 'fm_inconsistency' as const, label: 'Inkonsistenz — Gleiche Eingabe, unterschiedliche Ausgaben (non-determinism)' },
+            { name: 'fm_drift'         as const, label: 'Temporal Drift — Modell veraltet durch Daten- oder Umfeldveränderungen' },
+            { name: 'fm_agentic'       as const, label: 'Agentic Eskalation — Autonomes System überschreitet definierten Handlungsrahmen' },
+            { name: 'fm_infrastructure'as const, label: 'Infrastruktur-Ausfall — Abhängigkeiten (APIs, Modelle, Daten) nicht verfügbar' },
+          ].map(({ name, label }) => (
+            <label key={name} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10, fontSize: 13, cursor: 'pointer' }}>
+              <input type="checkbox" {...register(name)} style={{ marginTop: 2, flexShrink: 0 }} />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {/* Footer */}
       <div className="mf" style={{ position: 'static', borderTop: '1px solid var(--border)', marginTop: 20, padding: '12px 0 0', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
         <button type="button" className="btn btn-outline" onClick={onCancel}>
           Abbrechen
         </button>
-        {activeTab < 2 && (
+        {activeTab < tabs.length - 1 && (
           <button type="button" className="btn btn-outline" onClick={() => setActiveTab(t => t + 1)}>
             Weiter →
           </button>

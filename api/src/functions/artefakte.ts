@@ -9,7 +9,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
-import { listItems, findItem, createItem, updateItem } from '../lib/sharepoint';
+import { listItems, findItem, createItem, updateItem } from '../lib/storage';
 import { spToArtefakt, artefaktToSp, Artefakt } from '../lib/mappers';
 import { writeAuditLog } from '../lib/audit';
 import { MOCK_ARTEFAKTE } from '../lib/mockData';
@@ -72,7 +72,34 @@ async function handleGetAll(
   return { status: 200, jsonBody: result };
 }
 
-// ── GET vollständiger Export (Admin) ──────────────────────────
+// ── GET Status-Map (alle Rollen) ─────────────────────────────
+// Gibt { [ucId]: ['ra', 'gc', ...] } zurück — welche Typen existieren
+async function handleStatus(req: HttpRequest): Promise<HttpResponseInit> {
+  const principal = requireAuth(req);
+  if (isAuthError(principal)) return principal;
+
+  if (MOCK) {
+    const status: Record<string, string[]> = {};
+    for (const [ucId, arts] of Object.entries(MOCK_ARTEFAKTE)) {
+      status[ucId] = Object.keys(arts).filter(k => Object.keys(arts[k] ?? {}).length > 0);
+    }
+    return { status: 200, jsonBody: status };
+  }
+
+  const items = await listItems('ARTEFAKTE');
+  const status: Record<string, string[]> = {};
+
+  for (const item of items) {
+    const art = spToArtefakt(item.id, item.fields as Record<string, unknown>);
+    if (!isValidType(art.type)) continue;
+    if (!status[art.ucId]) status[art.ucId] = [];
+    if (!status[art.ucId].includes(art.type)) status[art.ucId].push(art.type);
+  }
+
+  return { status: 200, jsonBody: status };
+}
+
+// ── GET vollständiger Export (Admin) ─────────────────────────
 async function handleExport(req: HttpRequest): Promise<HttpResponseInit> {
   const principal = requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
@@ -147,10 +174,13 @@ async function artefakteHandler(
 
   try {
     // /api/artefakte/export
-    if (type === 'export' && req.method === 'GET') return handleExport(req);
+    if (type === 'export' && req.method === 'GET') return await handleExport(req);
+
+    // /api/artefakte/status
+    if (type === 'status' && req.method === 'GET') return await handleStatus(req);
 
     // /api/artefakte/all/{ucId}
-    if (type === 'all' && ucId && req.method === 'GET') return handleGetAll(req, ucId);
+    if (type === 'all' && ucId && req.method === 'GET') return await handleGetAll(req, ucId);
 
     // Typ-Validierung
     if (!isValidType(type)) {
@@ -158,8 +188,8 @@ async function artefakteHandler(
     }
     if (!ucId) return { status: 400, jsonBody: { error: 'ucId fehlt' } };
 
-    if (req.method === 'GET')  return handleGet(req, type, ucId);
-    if (req.method === 'POST') return handlePost(req, type, ucId);
+    if (req.method === 'GET')  return await handleGet(req, type, ucId);
+    if (req.method === 'POST') return await handlePost(req, type, ucId);
 
     return { status: 405 };
   } catch (err) {

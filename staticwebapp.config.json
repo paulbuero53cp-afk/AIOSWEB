@@ -3,7 +3,7 @@
     "identityProviders": {
       "azureActiveDirectory": {
         "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/TENANT_ID/v2.0",
+          "openIdIssuer": "https://login.microsoftonline.com/73971f7b-211f-4ac6-a4b9-e16c4f9fd920/v2.0",
           "clientIdSettingName": "AZURE_CLIENT_ID",
           "clientSecretSettingName": "AZURE_CLIENT_SECRET"
         }
@@ -31,9 +31,8 @@
     }
   },
   "globalHeaders": {
-    "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://graph.microsoft.com",
+    "content-security-policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://graph.microsoft.com; frame-ancestors https://*.sharepoint.com",
     "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
     "X-XSS-Protection": "1; mode=block"
   },
   "navigationFallback": {

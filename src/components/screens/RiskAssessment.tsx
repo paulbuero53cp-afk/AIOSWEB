@@ -99,8 +99,8 @@ function CheckList({
 }
 
 // ── Risk Assessment Screen ────────────────────────────────────
-export default function RiskAssessmentScreen() {
-  const [ucId,   setUcId]   = useState('');
+export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: string } = {}) {
+  const [ucId,   setUcId]   = useState(initialUcId ?? '');
   const [dirty,  setDirty]  = useState(false);
   const [saving, setSaving] = useState(false);
   const { showToast }       = useToast();

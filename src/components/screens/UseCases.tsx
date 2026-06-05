@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
+import useSWR from 'swr';
 import { useUseCases } from '@/hooks/useUseCases';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
+import { swrFetcher } from '@/lib/api';
 import {
-  RiskBadge, LifecycleBadge, KiTypeBadges,
+  RiskBadge, LifecycleBadge, KiTypeBadges, ReliabilityBadge,
 } from '@/components/common/Badge';
 import EditModal from './EditModal';
 import type { UseCase } from '@/types';
@@ -42,10 +44,15 @@ function InlineSelect({
 }
 
 // ── UC-Tabelle ────────────────────────────────────────────────
-export default function UseCases({ onNav }: { onNav: (s: string) => void }) {
+export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) => void }) {
   const { useCases, loading, updateUC } = useUseCases();
   const { showToast } = useToast();
   const { isEditor, isApprover } = useAuth();
+
+  // Artefakt-Status: { [ucId]: ['ra', 'gc', ...] }
+  const { data: artStatus } = useSWR<Record<string, string[]>>(
+    '/api/artefakte/status', swrFetcher,
+  );
 
   const [filters, setFilters] = useState<Filters>({
     search: '', rt: '', lc: '', app: '', kpi: '',
@@ -163,6 +170,9 @@ export default function UseCases({ onNav }: { onNav: (s: string) => void }) {
               <th className="sortable" onClick={() => toggleSort('rt')}>
                 Risk Tier <SortIcon field="rt" />
               </th>
+              <th className="sortable" onClick={() => toggleSort('rl')}>
+                R-Tier <SortIcon field="rl" />
+              </th>
               <th className="sortable" onClick={() => toggleSort('lc')}>
                 Lifecycle <SortIcon field="lc" />
               </th>
@@ -176,7 +186,7 @@ export default function UseCases({ onNav }: { onNav: (s: string) => void }) {
           <tbody>
             {paged.length === 0 ? (
               <tr>
-                <td colSpan={10} className="empty">Keine Use Cases gefunden.</td>
+                <td colSpan={11} className="empty">Keine Use Cases gefunden.</td>
               </tr>
             ) : (
               paged.map(uc => (
@@ -200,6 +210,7 @@ export default function UseCases({ onNav }: { onNav: (s: string) => void }) {
                   </td>
                   <td>{uc.cl}</td>
                   <td><RiskBadge tier={uc.rt} /></td>
+                  <td><ReliabilityBadge tier={uc.rl} /></td>
                   <td><LifecycleBadge lc={uc.lc} /></td>
                   <td>
                     <InlineSelect
@@ -226,21 +237,24 @@ export default function UseCases({ onNav }: { onNav: (s: string) => void }) {
                   <td onClick={e => e.stopPropagation()}>
                     <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                       {[
-                        { label: 'RA',  screen: 'riskassess', title: 'Risk Assessment' },
-                        { label: 'GC',  screen: 'gatechecks', title: 'Gate Checks' },
-                        { label: 'BC',  screen: 'bizcases',   title: 'Business Case' },
-                        { label: 'DSFA',screen: 'dsfa',       title: 'DSFA' },
-                      ].map(({ label, screen, title }) => (
-                        <button
-                          key={screen}
-                          className="btn btn-outline btn-sm"
-                          style={{ fontSize: 10, padding: '2px 6px' }}
-                          title={title}
-                          onClick={() => onNav(screen)}
-                        >
-                          {label}
-                        </button>
-                      ))}
+                        { label: 'RA',  artKey: 'ra',   screen: 'riskassess', title: 'Risk Assessment' },
+                        { label: 'GC',  artKey: 'gc',   screen: 'gatechecks', title: 'Gate Checks' },
+                        { label: 'BC',  artKey: 'bc',   screen: 'bizcases',   title: 'Business Case' },
+                        { label: 'DSFA',artKey: 'dsfa', screen: 'dsfa',       title: 'DSFA' },
+                      ].map(({ label, artKey, screen, title }) => {
+                        const done = artStatus?.[uc.id]?.includes(artKey) ?? false;
+                        return (
+                          <button
+                            key={screen}
+                            className={`btn btn-sm${done ? ' btn-primary' : ' btn-outline'}`}
+                            style={{ fontSize: 10, padding: '2px 6px', opacity: done ? 1 : 0.65 }}
+                            title={`${title}${done ? ' ✓' : ' — noch nicht ausgefüllt'}`}
+                            onClick={() => onNav(screen, uc.id)}
+                          >
+                            {label}{done ? ' ✓' : ''}
+                          </button>
+                        );
+                      })}
                     </div>
                   </td>
                 </tr>
@@ -270,7 +284,12 @@ export default function UseCases({ onNav }: { onNav: (s: string) => void }) {
       )}
 
       {/* Edit Modal */}
-      <EditModal uc={editUC} onClose={() => setEditUC(null)} />
+      <EditModal
+        uc={editUC}
+        onClose={() => setEditUC(null)}
+        artStatus={artStatus}
+        onNavToArt={(screen, ucId) => { setEditUC(null); onNav(screen, ucId); }}
+      />
     </div>
   );
 }

@@ -48,6 +48,29 @@
 - [x] CI/CD Pipeline verifiziert (Hello-World-Build)
 - [x] SESSION.md aktualisiert
 
+### ✅ Abgeschlossen (Session #8 — KW 20/2026) — AI Reliability Framework
+**P0 — Datenmodell & Grundtypen**
+- [x] `src/types/index.ts` — `ReliabilityTier`, `HitlMode`, `AutonomyLevel`, `FailureMode` Types; `UseCase` + `Incident` + `GateChecks` erweitert
+- [x] `src/components/common/Badge.tsx` — `ReliabilityBadge` (R1 grün → R5 rot)
+- [x] `src/components/screens/UcForm.tsx` — Tab 4 "Reliabilität" (R-Tier, HITL-Modus, Autonomiegrad, Monitoring SLA, 5 Failure-Mode-Checkboxen)
+- [x] `src/components/screens/UseCases.tsx` — R-Tier-Spalte (sortierbar)
+- [x] `api/src/lib/mappers.ts` — 5 Reliability-Felder in spToUC/ucToSp; FailureMode in Incident-Mapper
+- [x] `api/src/lib/mockData.ts` — Beispiel-Werte für UC-001/002/003 + INC-001/002
+
+**P1 — Governance & Incidents**
+- [x] `src/components/screens/Governance.tsx` — Reliability Snapshot (RlDistBar, R4/R5-Warnzeilen ohne SLA/Oversight), neues KPI-Tile
+- [x] `src/components/screens/IncidentLog.tsx` — Failure-Mode-Filter, FM-Badge in IncCard, FM-Dropdown in Modal mit R4/R5-Warnung
+
+**P2 — Gate-Checklisten & KI-Strategie**
+- [x] `src/lib/constants.ts` — `GATES_RELIABILITY` (base R3+: 5 Items, agentic R5: 3 Items)
+- [x] `src/components/screens/GateChecks.tsx` — Tier-spezifische Reliability Controls (nur ab R3), GatePanel generisch refaktoriert, Gesamtfortschritt korrekt
+- [x] `src/components/screens/AiStrategy.tsx` — Sektion 12 "Meine Rolle" (HITL/HOTL-Erklärung, R-Tier-Grid, Agentic AI, Incident-CTA)
+
+**P3 — AgentHub & Setup-Paket**
+- [x] `src/components/screens/AgentHub.tsx` — Kontrollen-Ampel (4 Dots: Oversight/SLA/Gate-Check/Autonomy), R-Tier-Filter, KPI-Tiles (R4/R5-Count, Controls-Warnung)
+- [x] `scripts/Provision-SharePointLists.ps1` — 5 RL-Spalten zu AIOS_UseCases + FailureMode zu AIOS_Incidents
+- [x] TypeScript: 0 Fehler (Frontend + API)
+
 ### 🔄 In Arbeit / Offen
 
 ### ✅ Abgeschlossen (Session #3 — KW 22)

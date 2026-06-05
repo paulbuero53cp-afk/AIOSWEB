@@ -26,6 +26,21 @@ export type ApprovalStatus =
 export type OperationalReadiness = 'Not ready' | 'Operational Ready';
 export type KiTypeDimension = 'einsatz' | 'erstellung';
 
+// ── Reliability ───────────────────────────────────────────────
+/** R1 = Human always decides · R5 = Fully autonomous agentic */
+export type ReliabilityTier = 'R1' | 'R2' | 'R3' | 'R4' | 'R5';
+/** HITL = human in the loop · HOTL = human on the loop · none = no oversight */
+export type HitlMode = 'HITL' | 'HOTL' | 'none';
+/** Overall automation posture */
+export type AutonomyLevel = 'supervised' | 'semi-auto' | 'autonomous';
+/** The five reliability failure-mode categories */
+export type FailureMode =
+  | 'accuracy'
+  | 'inconsistency'
+  | 'drift'
+  | 'agentic'
+  | 'infrastructure';
+
 export interface UseCase {
   id: string;                          // UC-001
   title: string;                       // Pflichtfeld
@@ -47,7 +62,14 @@ export interface UseCase {
   kpi: 'yes' | 'no';
   app: ApprovalStatus;
   or: OperationalReadiness;
-  hitl: 'yes' | 'no';                 // Human in the Loop
+  hitl: 'yes' | 'no';                 // Human in the Loop (Legacy: yes/no)
+  // ── Reliability (P0 — neu) ────────────────────────────────
+  rl?: ReliabilityTier;              // Reliability Tier R1–R5
+  hitlMode?: HitlMode;               // HITL / HOTL / none (präziser als hitl)
+  autonomyLevel?: AutonomyLevel;     // supervised / semi-auto / autonomous
+  failureModes?: FailureMode[];      // bekannte Failure-Mode-Risiken
+  monitoringSla?: string;            // z.B. "täglich", "wöchentlich", "Echtzeit"
+  // ─────────────────────────────────────────────────────────
   gt: [boolean, boolean, boolean, boolean]; // Governance-Trigger GT01-GT04
   sb: [boolean, boolean, boolean, boolean]; // Sensible Bereiche SB01-SB04
   mc: boolean[];                       // Minimum Standard Checks (7)
@@ -74,6 +96,7 @@ export interface Incident {
   desc: string;
   act: string;                         // Ergriffene Maßnahmen
   date: string;
+  failureMode?: FailureMode;           // Reliability Failure-Mode-Kategorie (P1)
   createdAt?: string;
   updatedAt?: string;
   createdBy?: string;
@@ -119,6 +142,10 @@ export interface GateChecks {
   // Gate C (10 Punkte)
   c1: boolean; c2: boolean; c3: boolean; c4: boolean; c5: boolean;
   c6: boolean; c7: boolean; c8: boolean; c9: boolean; c10: boolean;
+  // Reliability Controls — nur für R-Tier R3/R4/R5 (optional)
+  rl1?: boolean; rl2?: boolean; rl3?: boolean; rl4?: boolean; rl5?: boolean;
+  // Agentic Controls — nur für R5 (optional)
+  rl6?: boolean; rl7?: boolean; rl8?: boolean;
   savedAt?: string;
   savedBy?: string;
 }
@@ -296,7 +323,8 @@ export interface PaginatedResponse<T> {
 export type Screen =
   | 'dashboard' | 'portfolio' | 'aistrategy' | 'usecases' | 'new'
   | 'governance' | 'incidents' | 'agenthub' | 'artefakthub'
-  | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog' | 'info';
+  | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog' | 'info'
+  | 'ucdashboard';
 
 export type Language = 'de' | 'en';
 

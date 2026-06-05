@@ -87,8 +87,8 @@ function ResultKpi({ label, value, color }: { label: string; value: string; colo
 }
 
 // ── Business Case Screen ──────────────────────────────────────
-export default function BusinessCaseScreen() {
-  const [ucId,   setUcId]   = useState('');
+export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: string } = {}) {
+  const [ucId,   setUcId]   = useState(initialUcId ?? '');
   const [dirty,  setDirty]  = useState(false);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();

@@ -7,7 +7,13 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
-import { findItem, createItem, updateItem } from '../lib/sharepoint';
+import { listItems, createItem, updateItem } from '../lib/storage';
+
+// CONFIG-Liste hat < 10 Einträge → alle laden, in JS filtern (kein SP-Index nötig)
+async function findConfigItem(key: string) {
+  const items = await listItems('CONFIG');
+  return items.find(i => i.fields['ConfigKey'] === key || i.fields['Title'] === key) ?? null;
+}
 
 const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
@@ -33,7 +39,7 @@ async function handleGet(req: HttpRequest): Promise<HttpResponseInit> {
 
   if (MOCK) return { status: 200, jsonBody: DEFAULT_CONFIG };
 
-  const item = await findItem('CONFIG', `fields/ConfigKey eq 'COMPANY'`);
+  const item = await findConfigItem('COMPANY');
   if (!item) return { status: 200, jsonBody: DEFAULT_CONFIG };
 
   try {
@@ -53,7 +59,7 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
   if (MOCK) return { status: 200, jsonBody: { ...DEFAULT_CONFIG, ...body } };
   const configJson = JSON.stringify(body);
 
-  const existing = await findItem('CONFIG', `fields/ConfigKey eq 'COMPANY'`);
+  const existing = await findConfigItem('COMPANY');
   if (existing) {
     await updateItem('CONFIG', existing.id, { ConfigValue: configJson });
   } else {
@@ -73,8 +79,8 @@ async function configHandler(
 ): Promise<HttpResponseInit> {
   context.log(`${req.method} /api/config`);
   try {
-    if (req.method === 'GET')  return handleGet(req);
-    if (req.method === 'POST') return handlePost(req);
+    if (req.method === 'GET')  return await handleGet(req);
+    if (req.method === 'POST') return await handlePost(req);
     return { status: 405 };
   } catch (err) {
     context.error('config error:', err);

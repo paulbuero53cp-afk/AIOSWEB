@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { useAppConfig } from '@/context/AppConfigContext';
 
 type Lang = 'de' | 'en';
 
@@ -15,6 +16,7 @@ const NAV = [
   { num: '09', id: 's09', de: 'Automatisierung',   en: 'Automation' },
   { num: '10', id: 's10', de: 'Beispiele',         en: 'Examples' },
   { num: '11', id: 's11', de: 'Grundprinzip',      en: 'Foundation' },
+  { num: '12', id: 's12', de: 'Meine Rolle',       en: 'My Role' },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────
@@ -67,6 +69,7 @@ export default function AiStrategy({ onNav }: { onNav?: (s: string) => void }) {
   const [lang, setLang] = useState<Lang>('de');
   const [active, setActive] = useState('s01');
   const contentRef = useRef<HTMLDivElement>(null);
+  const { name: companyName } = useAppConfig();
 
   const t = (de: string, en: string) => lang === 'de' ? de : en;
 
@@ -156,7 +159,7 @@ export default function AiStrategy({ onNav }: { onNav?: (s: string) => void }) {
           <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 6 }}>
             Artificial Intelligence Operating System (AIOS) · {t('Zentrales Referenzartefakt', 'Central Reference Document')}
           </div>
-          <div style={{ fontSize: 26, fontWeight: 700, color: 'var(--petrol)', marginBottom: 8 }}>AI @ STOCKMEIER</div>
+          <div style={{ fontSize: 26, fontWeight: 700, color: 'var(--petrol)', marginBottom: 8 }}>AI @ {companyName}</div>
           <div style={{ fontSize: 14, color: 'var(--muted)', maxWidth: 600, lineHeight: 1.65 }}>
             {t(
               'Das verbindliche Rahmenwerk für alle KI-Aktivitäten — Definition, Governance, Risiko, Automatisierungsgrenzen und strategische Leitplanken.',
@@ -171,7 +174,7 @@ export default function AiStrategy({ onNav }: { onNav?: (s: string) => void }) {
             <div style={{ fontSize: 13.5, fontStyle: 'italic', color: 'var(--petrol)', marginBottom: 3 }}>
               💬 "If you can't show it, you don't have it."
             </div>
-            <div style={{ fontSize: 11, color: 'var(--muted)' }}>STOCKMEIER · {t('Governance-Leitsatz', 'Governance Principle')}</div>
+            <div style={{ fontSize: 11, color: 'var(--muted)' }}>{companyName} · {t('Governance-Leitsatz', 'Governance Principle')}</div>
           </div>
         </div>
 
@@ -179,8 +182,8 @@ export default function AiStrategy({ onNav }: { onNav?: (s: string) => void }) {
         <Section id="s01" num="01" title={t('Definition von KI', 'Definition of AI')}>
           <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 16, lineHeight: 1.6 }}>
             {t(
-              'KI wird bei STOCKMEIER über die verwendete Technologie definiert — nicht über Anwendungsfall, Business Impact oder Skalierung.',
-              'AI at STOCKMEIER is defined by the technology used — not by use case, business impact or scale.',
+              `KI wird bei ${companyName} über die verwendete Technologie definiert — nicht über Anwendungsfall, Business Impact oder Skalierung.`,
+              `AI at ${companyName} is defined by the technology used — not by use case, business impact or scale.`,
             )}
           </p>
           <ChemBox text={t('Ein Stoff ist das, was er ist — unabhängig vom Einsatzgebiet', 'A substance is what it is — regardless of its application area')} />
@@ -539,6 +542,122 @@ export default function AiStrategy({ onNav }: { onNav?: (s: string) => void }) {
               <button className="btn btn-outline" onClick={() => onNav('dashboard')}>← {t('Zurück zum Dashboard', 'Back to Dashboard')}</button>
             </div>
           )}
+        </Section>
+
+        {/* ── 12 My Role ───────────────────────────────── */}
+        <Section id="s12" num="12" title={t('KI-Zuverlässigkeit & meine Rolle', 'AI Reliability & My Role')}>
+          <p style={{ fontSize: 13.5, color: 'var(--muted)', marginBottom: 20, lineHeight: 1.6 }}>
+            {t(
+              'Wenn du täglich mit KI-Systemen arbeitest, ist es wichtig zu verstehen, welche Rolle du spielst — und wann du eingreifen musst.',
+              'When you work with AI systems daily, it is important to understand what role you play — and when you need to intervene.',
+            )}
+          </p>
+
+          {/* HITL / HOTL */}
+          <Sub>{t('Zwei Betriebsmodi — was bin ich?', 'Two operating modes — which am I?')}</Sub>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 }}>
+            {/* HITL */}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderTop: '3px solid var(--green)', borderRadius: '0 0 8px 8px', padding: '16px' }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 11, fontWeight: 700, color: 'var(--green)', marginBottom: 6 }}>HITL</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--petrol)', marginBottom: 8 }}>
+                {t('Human In The Loop', 'Human In The Loop')}
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 12 }}>
+                {t(
+                  'Die KI gibt eine Empfehlung — du triffst aktiv die Entscheidung. Ohne deine explizite Bestätigung passiert nichts.',
+                  'The AI gives a recommendation — you actively make the decision. Nothing happens without your explicit confirmation.',
+                )}
+              </div>
+              <div style={{ background: 'var(--green-bg)', borderRadius: 6, padding: '8px 12px', fontSize: 12 }}>
+                <strong>{t('Erkennungsmerkmal:', 'How to recognise it:')}</strong>{' '}
+                {t(
+                  'Du siehst eine Empfehlung und musst sie bestätigen, bevor sie wirksam wird.',
+                  'You see a recommendation and must confirm it before it takes effect.',
+                )}
+              </div>
+            </div>
+            {/* HOTL */}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderTop: '3px solid var(--yellow)', borderRadius: '0 0 8px 8px', padding: '16px' }}>
+              <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 11, fontWeight: 700, color: 'var(--yellow)', marginBottom: 6 }}>HOTL</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--petrol)', marginBottom: 8 }}>
+                {t('Human On The Loop', 'Human On The Loop')}
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 12 }}>
+                {t(
+                  'Die KI handelt eigenständig — du überwachst den Prozess und kannst jederzeit eingreifen und stoppen.',
+                  'The AI acts independently — you monitor the process and can intervene and stop it at any time.',
+                )}
+              </div>
+              <div style={{ background: 'var(--yellow-bg)', borderRadius: 6, padding: '8px 12px', fontSize: 12 }}>
+                <strong>{t('Erkennungsmerkmal:', 'How to recognise it:')}</strong>{' '}
+                {t(
+                  'Das System läuft automatisch. Du bekommst Benachrichtigungen bei Anomalien.',
+                  'The system runs automatically. You receive notifications for anomalies.',
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Wann eingreifen */}
+          <Sub>{t('Wann muss ich eingreifen?', 'When do I need to intervene?')}</Sub>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
+            {[
+              t('Ein Ergebnis ist unplausibel oder widerspricht dem gesunden Menschenverstand', 'A result is implausible or contradicts common sense'),
+              t('Das System tut etwas, das außerhalb des erwarteten Rahmens liegt', 'The system does something that is outside the expected scope'),
+              t('Du siehst eine Anomalie im Monitoring oder eine unerwartete Benachrichtigung', 'You see an anomaly in monitoring or an unexpected notification'),
+              t('Du bist dir bei einem Ergebnis nicht sicher — im Zweifel immer stoppen', 'You are unsure about a result — when in doubt, always stop'),
+            ].map((text, i) => (
+              <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: '3px solid var(--accent)', borderRadius: '0 8px 8px 0', padding: '10px 14px' }}>
+                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 11, color: 'var(--accent)', fontWeight: 700, flexShrink: 0 }}>0{i + 1}</span>
+                <span style={{ fontSize: 13, color: 'var(--petrol)', lineHeight: 1.5 }}>{text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* R-Tier Übersicht kompakt */}
+          <Sub>{t('R-Tier — was bedeutet das für mich?', 'R-Tier — what does this mean for me?')}</Sub>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10, marginBottom: 24 }}>
+            {[
+              { tier: 'R1', color: '#22c55e', role: t('HITL immer', 'HITL always'), desc: t('Ich entscheide aktiv — die KI empfiehlt nur', 'I decide actively — the AI only recommends') },
+              { tier: 'R2', color: '#84cc16', role: t('HITL mit Bestätigung', 'HITL with confirmation'), desc: t('Ich bestätige explizit, bevor die KI handelt', 'I confirm explicitly before the AI acts') },
+              { tier: 'R3', color: '#f59e0b', role: t('HOTL — ich überwache', 'HOTL — I monitor'), desc: t('Ich kann jederzeit stoppen (Kill-Switch)', 'I can stop at any time (kill switch)') },
+              { tier: 'R4', color: '#f97316', role: t('HOTL — Stichproben', 'HOTL — spot checks'), desc: t('Automatisiert — ich prüfe regelmäßig', 'Automated — I check regularly') },
+              { tier: 'R5', color: '#ef4444', role: t('Agentic — nur Monitoring', 'Agentic — monitoring only'), desc: t('Vollautonomous — ich greife bei Eskalation ein', 'Fully autonomous — I intervene on escalation') },
+            ].map(({ tier, color, role, desc }) => (
+              <div key={tier} style={{ background: 'var(--surface)', border: `1px solid ${color}40`, borderTop: `3px solid ${color}`, borderRadius: '0 0 8px 8px', padding: '12px 14px' }}>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 12, fontWeight: 700, color, marginBottom: 4 }}>{tier}</div>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--petrol)', marginBottom: 5 }}>{role}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.5 }}>{desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Agentic AI einfach erklärt */}
+          <Sub>{t('Was ist ein Agentic AI System?', 'What is an Agentic AI System?')}</Sub>
+          <div style={{ background: 'var(--surface)', border: '1px solid #ef444430', borderLeft: '4px solid #ef4444', borderRadius: '0 8px 8px 0', padding: '14px 18px', marginBottom: 20 }}>
+            <div style={{ fontSize: 13.5, color: 'var(--petrol)', lineHeight: 1.65 }}>
+              {t(
+                'Ein Agentic System kann selbstständig Schritte planen und ausführen — es braucht keine Bestätigung für jeden Schritt. Es hat einen R5-Tier im AIOS. Solche Systeme haben besondere Kontrollen: Kill-Switch, Execution Tracing und eine Boundary Map.',
+                'An Agentic system can independently plan and execute steps — it does not need confirmation for each step. It has an R5 tier in AIOS. Such systems have special controls: kill switch, execution tracing and a boundary map.',
+              )}
+            </div>
+          </div>
+
+          {/* Vorfälle melden */}
+          <div style={{ background: 'var(--accent-pale)', border: '1px solid var(--accent)', borderRadius: 8, padding: '16px 20px', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 24, flexShrink: 0 }}>⚠️</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--petrol)', marginBottom: 6 }}>
+                {t('Vorfälle melden — auch Near-Misses', 'Report incidents — including near-misses')}
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.6 }}>
+                {t(
+                  'Nutze den Incident Log im AIOS. Auch wenn nichts passiert ist, aber fast — melde es. Near-Misses sind wichtige Frühwarnsignale für das gesamte System.',
+                  'Use the Incident Log in AIOS. Even if nothing happened, but almost did — report it. Near-misses are important early warning signals for the entire system.',
+                )}
+              </div>
+            </div>
+          </div>
         </Section>
 
       </div>

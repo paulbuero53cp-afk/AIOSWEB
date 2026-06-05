@@ -8,7 +8,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
-import { listItems, findItem, createItem, updateItem } from '../lib/sharepoint';
+import { listItems, findItem, createItem, updateItem } from '../lib/storage';
 import { spToIncident, incidentToSp, Incident } from '../lib/mappers';
 import { writeAuditLog, diffObjects } from '../lib/audit';
 import { MOCK_INCIDENTS } from '../lib/mockData';
@@ -94,9 +94,9 @@ async function incidentsHandler(req: HttpRequest, context: InvocationContext): P
   const incId = req.params['id'];
   context.log(`${req.method} /api/incidents${incId ? '/' + incId : ''}`);
   try {
-    if (req.method === 'GET')   return handleGet(req);
-    if (req.method === 'POST')  return handlePost(req);
-    if (req.method === 'PATCH') return incId ? handlePatch(req, incId) : { status: 400 };
+    if (req.method === 'GET')   return await handleGet(req);
+    if (req.method === 'POST')  return await handlePost(req);
+    if (req.method === 'PATCH') return incId ? await handlePatch(req, incId) : { status: 400 };
     return { status: 405 };
   } catch (err) {
     context.error('incidents error:', err);

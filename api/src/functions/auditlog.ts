@@ -6,7 +6,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireRole, isAuthError } from '../lib/auth';
-import { listItems } from '../lib/sharepoint';
+import { listItems } from '../lib/storage';
 import { spToAudit } from '../lib/mappers';
 import { MOCK_AUDIT } from '../lib/mockData';
 

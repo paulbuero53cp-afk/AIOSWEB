@@ -99,7 +99,13 @@ $ucFields = @(
     @{ N="MC01"; D="MC01"; T="Boolean" }, @{ N="MC02"; D="MC02"; T="Boolean" },
     @{ N="MC03"; D="MC03"; T="Boolean" }, @{ N="MC04"; D="MC04"; T="Boolean" },
     @{ N="MC05"; D="MC05"; T="Boolean" }, @{ N="MC06"; D="MC06"; T="Boolean" },
-    @{ N="MC07"; D="MC07"; T="Boolean" }
+    @{ N="MC07"; D="MC07"; T="Boolean" },
+    # ── Reliability (P0 — AI Reliability Framework) ──────────────
+    @{ N="ReliabilityTier"; D="Reliability Tier (R1-R5)"; T="Choice"; Extra=@{Choices=@("R1","R2","R3","R4","R5")} },
+    @{ N="HitlMode";        D="HITL-Modus";               T="Choice"; Extra=@{Choices=@("HITL","HOTL","none")} },
+    @{ N="AutonomyLevel";   D="Automationsgrad";           T="Choice"; Extra=@{Choices=@("supervised","semi-auto","autonomous")} },
+    @{ N="FailureModes";    D="Failure Mode Risiken (JSON)"; T="Note" },
+    @{ N="MonitoringSla";   D="Monitoring SLA";            T="Choice"; Extra=@{Choices=@("Echtzeit","täglich","wöchentlich","monatlich","quartalsweise")} }
 )
 
 foreach ($f in $ucFields) {
@@ -122,7 +128,9 @@ $incFields = @(
     @{ N="Description";   D="Beschreibung";          T="Note" },
     @{ N="Actions";       D="Ergriffene Maßnahmen";  T="Note" },
     @{ N="IncDate";       D="Datum des Vorfalls";    T="DateTime" },
-    @{ N="CreatedBy_x";   D="Erstellt von (Actor)";  T="Text" }
+    @{ N="CreatedBy_x";   D="Erstellt von (Actor)";  T="Text" },
+    # ── Reliability (P1 — Failure Mode Filter) ───────────────────
+    @{ N="FailureMode";   D="Reliability Failure Mode"; T="Choice"; Extra=@{Choices=@("accuracy","inconsistency","drift","agentic","infrastructure")} }
 )
 foreach ($f in $incFields) {
     $extra = if ($f.Extra) { $f.Extra } else { @{} }

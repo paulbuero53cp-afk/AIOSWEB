@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useArtefakt } from '@/hooks/useArtefakt';
 import { useToast } from '@/context/ToastContext';
+import { useUseCases } from '@/hooks/useUseCases';
 import { ArtHeader } from '@/components/common/ArtHeader';
-import { GATES } from '@/lib/constants';
+import { GATES, GATES_RELIABILITY } from '@/lib/constants';
+import { ReliabilityBadge } from '@/components/common/Badge';
 import type { GateChecks } from '@/types';
 
 // ── Fortschrittsbalken ────────────────────────────────────────
@@ -25,23 +27,34 @@ function ProgressBar({ done, total, color }: { done: number; total: number; colo
   );
 }
 
-// ── Gate-Panel ────────────────────────────────────────────────
+// ── Gate-Panel (generisch) ────────────────────────────────────
+type GateDef = {
+  name: string;
+  desc: string;
+  color: string;
+  bg?: string;
+  items: readonly { key: string; label: string }[];
+};
+
 function GatePanel({
-  gateKey, data, onChange,
+  gate, data, onChange, badge,
 }: {
-  gateKey: keyof typeof GATES;
+  gate: GateDef;
   data: Record<string, unknown>;
   onChange: (key: string, val: boolean) => void;
+  badge?: React.ReactNode;
 }) {
-  const gate = GATES[gateKey];
   const done  = gate.items.filter(i => Boolean(data[i.key])).length;
   const total = gate.items.length;
 
   return (
-    <div className="card" style={{ marginBottom: 16 }}>
-      <div className="ch">
-        <span className="ch-title">{gate.name}</span>
-        <span style={{ fontSize: 12, color: 'var(--muted)' }}>{gate.desc}</span>
+    <div className="card" style={{ marginBottom: 16, borderTop: `3px solid ${gate.color}` }}>
+      <div className="ch" style={gate.bg ? { background: gate.bg } : undefined}>
+        <div style={{ flex: 1 }}>
+          <span className="ch-title">{gate.name}</span>
+          {badge && <span style={{ marginLeft: 8 }}>{badge}</span>}
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{gate.desc}</div>
+        </div>
       </div>
       <div style={{ padding: '0 20px 8px' }}>
         <div style={{ padding: '12px 0 14px' }}>
@@ -73,11 +86,12 @@ function GatePanel({
 }
 
 // ── Gate-Checks Screen ────────────────────────────────────────
-export default function GateChecksScreen() {
-  const [ucId,   setUcId]   = useState('');
+export default function GateChecksScreen({ initialUcId }: { initialUcId?: string } = {}) {
+  const [ucId,   setUcId]   = useState(initialUcId ?? '');
   const [dirty,  setDirty]  = useState(false);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
+  const { useCases }   = useUseCases();
 
   const { data, loading, save } = useArtefakt<Partial<GateChecks>>('gc', ucId || null);
   const [local, setLocal] = useState<Record<string, unknown>>({});
@@ -91,9 +105,17 @@ export default function GateChecksScreen() {
     setDirty(true);
   }, []);
 
-  // Gesamt-Fortschritt
+  // ── Reliability-Tier des gewählten UC ───────────────────────
+  const selectedUc    = useCases.find(u => u.id === ucId);
+  const rlTier        = selectedUc?.rl ?? '';
+  const showRlBase    = ['R3', 'R4', 'R5'].includes(rlTier);
+  const showRlAgentic = rlTier === 'R5';
+
+  // Gesamt-Fortschritt (Reliability-Items nur wenn zutreffend)
   const allItems = [
     ...GATES.A.items, ...GATES.B.items, ...GATES.C.items,
+    ...(showRlBase    ? [...GATES_RELIABILITY.base.items]    : []),
+    ...(showRlAgentic ? [...GATES_RELIABILITY.agentic.items] : []),
   ];
   const totalDone  = allItems.filter(i => Boolean(local[i.key])).length;
   const totalCount = allItems.length;
@@ -130,11 +152,45 @@ export default function GateChecksScreen() {
         <div className="empty">Lade…</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: 18, alignItems: 'start' }}>
-          {/* Gates */}
+          {/* Gates A / B / C */}
           <div>
             {(['A', 'B', 'C'] as const).map(k => (
-              <GatePanel key={k} gateKey={k} data={local} onChange={set} />
+              <GatePanel key={k} gate={GATES[k]} data={local} onChange={set} />
             ))}
+
+            {/* Reliability Controls — nur für R3/R4/R5 */}
+            {showRlBase && (
+              <>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  margin: '24px 0 12px',
+                  paddingTop: 8, borderTop: '2px dashed var(--border)',
+                }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--petrol)' }}>
+                    🎯 Reliability-Pflichtkontrollen
+                  </span>
+                  <ReliabilityBadge tier={rlTier} />
+                  <span style={{ fontSize: 11, color: 'var(--muted)' }}>
+                    — aktiviert weil R-Tier {rlTier}
+                  </span>
+                </div>
+                <GatePanel
+                  gate={GATES_RELIABILITY.base}
+                  data={local}
+                  onChange={set}
+                />
+              </>
+            )}
+
+            {/* Agentic Controls — nur für R5 */}
+            {showRlAgentic && (
+              <GatePanel
+                gate={GATES_RELIABILITY.agentic}
+                data={local}
+                onChange={set}
+                badge={<ReliabilityBadge tier="R5" />}
+              />
+            )}
           </div>
 
           {/* Sidebar-Übersicht */}
@@ -144,7 +200,7 @@ export default function GateChecksScreen() {
               <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <ProgressBar done={totalDone} total={totalCount} color="var(--accent)" />
 
-                {/* Pro Gate */}
+                {/* Pro Gate A/B/C */}
                 {(['A', 'B', 'C'] as const).map(k => {
                   const gate = GATES[k];
                   const d = gate.items.filter(i => Boolean(local[i.key])).length;
@@ -157,6 +213,33 @@ export default function GateChecksScreen() {
                     </div>
                   );
                 })}
+
+                {/* Reliability Controls (nur wenn zutreffend) */}
+                {showRlBase && (
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: GATES_RELIABILITY.base.color, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      Reliability Controls
+                      <ReliabilityBadge tier={rlTier} />
+                    </div>
+                    <ProgressBar
+                      done={GATES_RELIABILITY.base.items.filter(i => Boolean(local[i.key])).length}
+                      total={GATES_RELIABILITY.base.items.length}
+                      color={GATES_RELIABILITY.base.color}
+                    />
+                  </div>
+                )}
+                {showRlAgentic && (
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: GATES_RELIABILITY.agentic.color, marginBottom: 4 }}>
+                      Agentic Controls
+                    </div>
+                    <ProgressBar
+                      done={GATES_RELIABILITY.agentic.items.filter(i => Boolean(local[i.key])).length}
+                      total={GATES_RELIABILITY.agentic.items.length}
+                      color={GATES_RELIABILITY.agentic.color}
+                    />
+                  </div>
+                )}
 
                 <button
                   className="btn btn-primary"

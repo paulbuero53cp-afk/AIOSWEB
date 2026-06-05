@@ -1,4 +1,4 @@
-import type { RiskTier, ApprovalStatus, Lifecycle, PortfolioDecision } from '@/types';
+import type { RiskTier, ApprovalStatus, Lifecycle, PortfolioDecision, ReliabilityTier } from '@/types';
 
 // ── Risk Tier ─────────────────────────────────────────────────
 const RISK_CSS: Record<RiskTier, string> = {
@@ -66,4 +66,29 @@ export function KiTypeBadges({ kiType }: { kiType?: string[] }) {
 // ── KPI ───────────────────────────────────────────────────────
 export function KpiBadge({ kpi }: { kpi: string }) {
   return <span className={`badge ${kpi === 'yes' ? 'bg' : 'bgr'}`}>{kpi === 'yes' ? 'Ja' : 'Nein'}</span>;
+}
+
+// ── Reliability Tier ──────────────────────────────────────────
+// R1 (grün) → sicher / immer menschlich → R5 (rot) → vollautonomes Agentic-System
+const RL_STYLE: Record<ReliabilityTier, { bg: string; label: string }> = {
+  R1: { bg: '#22c55e', label: 'R1 — Empfehlung' },
+  R2: { bg: '#84cc16', label: 'R2 — Bestätigung' },
+  R3: { bg: '#f59e0b', label: 'R3 — Überwacht' },
+  R4: { bg: '#f97316', label: 'R4 — Automation' },
+  R5: { bg: '#ef4444', label: 'R5 — Agentic' },
+};
+
+export function ReliabilityBadge({ tier }: { tier?: string }) {
+  if (!tier) return <span className="badge bgr">—</span>;
+  const s = RL_STYLE[tier as ReliabilityTier];
+  if (!s) return <span className="badge bgr">{tier}</span>;
+  return (
+    <span
+      className="badge"
+      style={{ background: s.bg, color: '#fff' }}
+      title={s.label}
+    >
+      {tier}
+    </span>
+  );
 }

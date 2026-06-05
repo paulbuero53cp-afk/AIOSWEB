@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import useSWR from 'swr';
 import { useUseCases } from '@/hooks/useUseCases';
-import { RiskBadge } from '@/components/common/Badge';
+import { RiskBadge, ReliabilityBadge } from '@/components/common/Badge';
+import { swrFetcher } from '@/lib/api';
 import type { UseCase } from '@/types';
 
 // ── Cluster → Emoji-Mapping ───────────────────────────────────
@@ -22,8 +24,113 @@ function clusterEmoji(cl: string): string {
   return CLUSTER_EMOJI[cl] ?? '🤖';
 }
 
+// ── Kontrollen-Ampel ──────────────────────────────────────────
+type DotStatus = 'green' | 'yellow' | 'red' | 'grey';
+
+const DOT_COLOR: Record<DotStatus, string> = {
+  green:  '#22c55e',
+  yellow: '#f59e0b',
+  red:    '#ef4444',
+  grey:   '#9ca3af',
+};
+
+function AmpelDot({ status, label, title }: { status: DotStatus; label: string; title: string }) {
+  return (
+    <span
+      title={title}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        fontSize: 10, color: 'var(--muted)', cursor: 'default',
+      }}
+    >
+      <span style={{
+        width: 8, height: 8, borderRadius: '50%',
+        background: DOT_COLOR[status], flexShrink: 0,
+        boxShadow: status !== 'grey' ? `0 0 4px ${DOT_COLOR[status]}60` : 'none',
+      }} />
+      {label}
+    </span>
+  );
+}
+
+function ControlAmpel({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
+  // Only render for R3/R4/R5
+  const rl = uc.rl ?? '';
+  if (!['R3', 'R4', 'R5'].includes(rl)) return null;
+
+  // 1. Oversight: HITL/HOTL = green, none = red, unset = grey
+  const oversightStatus: DotStatus =
+    uc.hitlMode === 'HITL' ? 'green'
+    : uc.hitlMode === 'HOTL' ? 'yellow'
+    : uc.hitlMode === 'none' ? 'red'
+    : 'grey';
+  const oversightTitle =
+    uc.hitlMode === 'HITL' ? 'Human in the Loop aktiv'
+    : uc.hitlMode === 'HOTL' ? 'Human on the Loop (überwacht)'
+    : uc.hitlMode === 'none' ? '⚠ Kein Mensch im Loop definiert'
+    : 'Oversight-Modus nicht gesetzt';
+
+  // 2. Monitoring SLA: set = green, unset = red
+  const slaStatus: DotStatus = uc.monitoringSla ? 'green' : 'red';
+  const slaTitle = uc.monitoringSla
+    ? `Monitoring SLA: ${uc.monitoringSla}`
+    : '⚠ Kein Monitoring SLA definiert';
+
+  // 3. Gate Check (Kill-Switch / Tracing documented): GC artefakt exists = green
+  const gcStatus: DotStatus = gcExists ? 'green' : 'yellow';
+  const gcTitle = gcExists
+    ? 'Gate-Checklisten ausgefüllt'
+    : 'Gate-Checklisten noch nicht ausgefüllt';
+
+  // 4. Bounded Autonomy: supervised = green, semi-auto = yellow, autonomous = red
+  const baStatus: DotStatus =
+    uc.autonomyLevel === 'supervised' ? 'green'
+    : uc.autonomyLevel === 'semi-auto' ? 'yellow'
+    : uc.autonomyLevel === 'autonomous' ? 'red'
+    : 'grey';
+  const baTitle =
+    uc.autonomyLevel === 'supervised' ? 'Supervised — Bounded Autonomy definiert'
+    : uc.autonomyLevel === 'semi-auto' ? 'Semi-Auto — eingeschränkte Autonomie'
+    : uc.autonomyLevel === 'autonomous' ? '⚠ Vollständig autonom — Agentic Controls prüfen'
+    : 'Autonomiegrad nicht gesetzt';
+
+  const worstStatus =
+    [oversightStatus, slaStatus, gcStatus, baStatus].includes('red') ? 'red'
+    : [oversightStatus, slaStatus, gcStatus, baStatus].includes('yellow') ? 'yellow'
+    : 'green';
+
+  return (
+    <div style={{
+      marginTop: 8,
+      padding: '8px 10px',
+      background: worstStatus === 'red' ? '#ef444408'
+        : worstStatus === 'yellow' ? '#f59e0b08'
+        : '#22c55e08',
+      borderRadius: 6,
+      border: `1px solid ${
+        worstStatus === 'red' ? '#ef444430'
+        : worstStatus === 'yellow' ? '#f59e0b30'
+        : '#22c55e30'
+      }`,
+    }}>
+      <div style={{
+        fontSize: 10, fontWeight: 700, color: 'var(--muted)',
+        marginBottom: 5, letterSpacing: '0.05em', textTransform: 'uppercase',
+      }}>
+        🚦 Kontrollen-Ampel
+      </div>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <AmpelDot status={oversightStatus} label="Oversight"   title={oversightTitle} />
+        <AmpelDot status={slaStatus}       label="SLA"         title={slaTitle} />
+        <AmpelDot status={gcStatus}        label="Gate-Check"  title={gcTitle} />
+        <AmpelDot status={baStatus}        label="Autonomy"    title={baTitle} />
+      </div>
+    </div>
+  );
+}
+
 // ── Agent-Tile ────────────────────────────────────────────────
-function AgentTile({ uc }: { uc: UseCase }) {
+function AgentTile({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
   const emoji = clusterEmoji(uc.cl);
 
   function openLink(e: React.MouseEvent) {
@@ -44,6 +151,7 @@ function AgentTile({ uc }: { uc: UseCase }) {
         <div className="agent-tile-title">{uc.title}</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
           <RiskBadge tier={uc.rt} />
+          <ReliabilityBadge tier={uc.rl} />
           {uc.kiType?.includes('einsatz') && (
             <span className="badge bp" style={{ fontSize: 10 }}>KI im Einsatz</span>
           )}
@@ -56,6 +164,9 @@ function AgentTile({ uc }: { uc: UseCase }) {
             Legacy: {uc.legacy}
           </div>
         )}
+
+        {/* Kontrollen-Ampel — nur für R3+ */}
+        <ControlAmpel uc={uc} gcExists={gcExists} />
       </div>
 
       {/* Footer */}
@@ -79,13 +190,16 @@ function AgentTile({ uc }: { uc: UseCase }) {
 }
 
 // ── Filter-Bar ────────────────────────────────────────────────
-interface Filters { search: string; cl: string; rt: string; or: string; }
+interface Filters { search: string; cl: string; rt: string; or: string; rl: string; }
 
 // ── AI Agent Hub ──────────────────────────────────────────────
 export default function AgentHub() {
   const { useCases, loading } = useUseCases();
+  const { data: artStatus } = useSWR<Record<string, string[]>>(
+    '/api/artefakte/status', swrFetcher
+  );
   const [filters, setFilters] = useState<Filters>({
-    search: '', cl: '', rt: '', or: '',
+    search: '', cl: '', rt: '', or: '', rl: '',
   });
 
   function setFilter(key: keyof Filters, val: string) {
@@ -102,11 +216,22 @@ export default function AgentHub() {
     if (filters.cl && uc.cl !== filters.cl) return false;
     if (filters.rt && uc.rt !== filters.rt) return false;
     if (filters.or === 'ready' && uc.or !== 'Operational Ready') return false;
+    if (filters.rl && uc.rl !== filters.rl) return false;
     return true;
   });
 
   // Einzigartige Cluster
   const clusters = [...new Set(agents.map(u => u.cl))].sort();
+
+  // Reliability-KPIs
+  const highAutonomyCount = agents.filter(u => u.rl === 'R4' || u.rl === 'R5').length;
+  const controlsWarning   = agents.filter(u => {
+    if (!u.rl || !['R3', 'R4', 'R5'].includes(u.rl)) return false;
+    const gcOk = artStatus?.[u.id]?.includes('gc') ?? false;
+    const slaOk = !!u.monitoringSla;
+    const oversightOk = u.hitlMode !== 'none';
+    return !gcOk || !slaOk || !oversightOk;
+  }).length;
 
   if (loading) return <div className="empty">Lade AI Agent Hub…</div>;
 
@@ -130,6 +255,16 @@ export default function AgentHub() {
             {agents.filter(u => u.rt === 'High').length}
           </div>
         </div>
+        <div className="kc" style={{ flex: '0 0 auto', minWidth: 120 }}>
+          <div className="kc-label">R4/R5 Agenten</div>
+          <div className="kc-value">{highAutonomyCount}</div>
+        </div>
+        {controlsWarning > 0 && (
+          <div className="kc red" style={{ flex: '0 0 auto', minWidth: 150 }}>
+            <div className="kc-label">🚦 Controls fehlen</div>
+            <div className="kc-value">{controlsWarning}</div>
+          </div>
+        )}
         <div className="kc" style={{ flex: '0 0 auto', minWidth: 120 }}>
           <div className="kc-label">Mit Link</div>
           <div className="kc-value">
@@ -163,6 +298,14 @@ export default function AgentHub() {
           {['High', 'Medium', 'Low'].map(o => <option key={o}>{o}</option>)}
         </select>
         <select
+          value={filters.rl}
+          onChange={e => setFilter('rl', e.target.value)}
+          style={{ width: 130 }}
+        >
+          <option value="">Alle R-Tier</option>
+          {['R1', 'R2', 'R3', 'R4', 'R5'].map(o => <option key={o}>{o}</option>)}
+        </select>
+        <select
           value={filters.or}
           onChange={e => setFilter('or', e.target.value)}
           style={{ width: 170 }}
@@ -187,11 +330,15 @@ export default function AgentHub() {
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
           gap: 16,
         }}>
           {filtered.map(uc => (
-            <AgentTile key={uc.id} uc={uc} />
+            <AgentTile
+              key={uc.id}
+              uc={uc}
+              gcExists={artStatus?.[uc.id]?.includes('gc') ?? false}
+            />
           ))}
         </div>
       )}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ToastProvider, useToast } from '@/context/ToastContext';
+import { AppConfigProvider, useAppConfig } from '@/context/AppConfigContext';
 import Dashboard    from '@/components/screens/Dashboard';
 import UseCases     from '@/components/screens/UseCases';
 import NewUseCase   from '@/components/screens/NewUseCase';
@@ -17,8 +18,9 @@ import PortfolioBoard    from '@/components/screens/PortfolioBoard';
 import AuditLogScreen    from '@/components/screens/AuditLog';
 import InfoScreen        from '@/components/screens/Info';
 import AiStrategyScreen  from '@/components/screens/AiStrategy';
+import UcDashboard       from '@/components/screens/UcDashboard';
 import { swrFetcher } from '@/lib/api';
-import type { Screen, Language, UseCase, Incident } from '@/types';
+import type { Screen, Language, UseCase, Incident, AppConfig } from '@/types';
 import '@/styles/global.css';
 
 // ── Sidebar Navigation Structure ─────────────────────────────
@@ -31,13 +33,14 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { id: 'dashboard',   label: 'Dashboard',        icon: '📊' },
       { id: 'portfolio',   label: 'Portfolio Board',  icon: '📁' },
-      { id: 'aistrategy',  label: 'KI bei STOCKMEIER',icon: '💡' },
+      { id: 'aistrategy',  label: 'KI-Strategie',      icon: '💡' },
     ],
   },
   {
     title: 'Use Cases',
     items: [
       { id: 'usecases',    label: 'Alle Use Cases',   icon: '🤖' },
+      { id: 'ucdashboard', label: 'UC Dashboard',     icon: '📊' },
       { id: 'agenthub',    label: 'AI Agent Hub',     icon: '⚡' },
       { id: 'new',         label: 'Neu erfassen',      icon: '➕' },
     ],
@@ -78,6 +81,7 @@ function Sidebar({
   onLangToggle,
   govBadge,
   incBadge,
+  config,
 }: {
   active: Screen;
   onNav: (s: Screen) => void;
@@ -85,12 +89,13 @@ function Sidebar({
   onLangToggle: () => void;
   govBadge: number;
   incBadge: number;
+  config: AppConfig;
 }) {
   return (
     <div className="sidebar">
       <div className="slogo">
-        <div className="slogo-top">STOCKMEIER</div>
-        <div className="slogo-bot">AI Management System</div>
+        <div className="slogo-top">{config.name}</div>
+        <div className="slogo-bot">{config.tag}</div>
       </div>
       <nav className="snav">
         {NAV_SECTIONS.map(section => (
@@ -103,7 +108,7 @@ function Sidebar({
                 onClick={() => onNav(item.id)}
               >
                 <span>{item.icon}</span>
-                <span>{item.label}</span>
+                <span>{item.id === 'aistrategy' ? `KI bei ${config.name}` : item.label}</span>
                 {item.id === 'governance' && govBadge > 0 && (
                   <span className="nbadge">{govBadge}</span>
                 )}
@@ -116,7 +121,7 @@ function Sidebar({
         ))}
       </nav>
       <div className="sfooter">
-        <div style={{ marginBottom: 6 }}>ISO 42001 aligned</div>
+        <div style={{ marginBottom: 6 }}>{config.iso}</div>
         <button
           onClick={onLangToggle}
           style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', cursor: 'pointer', fontSize: 11 }}
@@ -131,7 +136,9 @@ function Sidebar({
 // ── AppShell ──────────────────────────────────────────────────
 function AppShell() {
   const { loading, principal, isAuthenticated } = useAuth();
+  const config = useAppConfig();
   const [screen, setScreen] = useState<Screen>('dashboard');
+  const [selectedUcId, setSelectedUcId] = useState<string | undefined>(undefined);
   const [lang, setLang] = useState<Language>('de');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -179,11 +186,12 @@ function AppShell() {
       <div className={sidebarOpen ? 'sidebar mob-open' : 'sidebar'}>
         <Sidebar
           active={screen}
-          onNav={(s) => { setScreen(s); setSidebarOpen(false); }}
+          onNav={(s) => { setScreen(s); setSelectedUcId(undefined); setSidebarOpen(false); }}
           lang={lang}
           onLangToggle={() => setLang(l => l === 'de' ? 'en' : 'de')}
           govBadge={govBadge}
           incBadge={incBadge}
+          config={config}
         />
       </div>
 
@@ -213,17 +221,18 @@ function AppShell() {
 
         <div className="content">
           {screen === 'dashboard'  && <Dashboard   onNav={(s) => setScreen(s as Screen)} />}
-          {screen === 'usecases'   && <UseCases    onNav={(s) => setScreen(s as Screen)} />}
+          {screen === 'usecases'   && <UseCases    onNav={(s, ucId) => { setSelectedUcId(ucId); setScreen(s as Screen); }} />}
           {screen === 'new'        && <NewUseCase  onNav={(s) => setScreen(s as Screen)} />}
           {screen === 'governance' && <Governance  onNav={(s) => setScreen(s as Screen)} />}
           {screen === 'incidents'  && <IncidentLog />}
           {screen === 'agenthub'   && <AgentHub />}
           {screen === 'portfolio'  && <PortfolioBoard />}
           {screen === 'artefakthub'&& <ArtefaktHub onNav={(s) => setScreen(s as Screen)} />}
-          {screen === 'riskassess' && <RiskAssessment />}
-          {screen === 'gatechecks' && <GateChecks />}
-          {screen === 'bizcases'   && <BusinessCase />}
-          {screen === 'dsfa'       && <DsfaScreen />}
+          {screen === 'riskassess' && <RiskAssessment    key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
+          {screen === 'gatechecks' && <GateChecks        key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
+          {screen === 'bizcases'   && <BusinessCase      key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
+          {screen === 'dsfa'       && <DsfaScreen        key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
+          {screen === 'ucdashboard'&& <UcDashboard       key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
           {screen === 'auditlog'   && <AuditLogScreen />}
           {screen === 'info'       && <InfoScreen />}
           {screen === 'aistrategy' && <AiStrategyScreen onNav={(s) => setScreen(s as Screen)} />}
@@ -252,7 +261,9 @@ export default function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <AppShell />
+        <AppConfigProvider>
+          <AppShell />
+        </AppConfigProvider>
       </ToastProvider>
     </AuthProvider>
   );

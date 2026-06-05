@@ -3,7 +3,7 @@
 //  Jede schreibende Aktion loggt einen unveränderlichen Eintrag
 // ─────────────────────────────────────────────────────────────
 
-import { createItem } from './sharepoint';
+import { createItem } from './storage';
 import { auditToSp } from './mappers';
 import type { ClientPrincipal } from './auth';
 

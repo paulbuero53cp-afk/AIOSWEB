@@ -194,6 +194,34 @@ export const LIFECYCLE_OPTIONS: string[] = ['Idea', 'Build', 'Run', 'Retire'];
 export const PD_OPTIONS: string[] = ['Start', 'Scale', 'Stop', 'Hold', 'Backlog'];
 export const RISK_TIER_OPTIONS: string[] = ['Low', 'Medium', 'High'];
 
+// ── Reliability Gate-Checklisten (ab R-Tier R3) ───────────────
+export const GATES_RELIABILITY = {
+  base: {
+    name: 'Reliability Controls (R3+)',
+    desc: 'Pflichtkontrollen für überwachte bis hochautomatisierte KI-Systeme',
+    color: '#f59e0b',          // amber — passend zu R3/R4
+    bg:    '#f59e0b15',
+    items: [
+      { key: 'rl1', label: 'Kill-Switch / Emergency-Stop dokumentiert, implementiert und getestet' },
+      { key: 'rl2', label: 'Execution Tracing aktiviert — alle Aktionen werden vollständig protokolliert' },
+      { key: 'rl3', label: 'Bounded Autonomy definiert — Scope, Limits und Grenzwerte sind dokumentiert' },
+      { key: 'rl4', label: 'Rollback-Prozess beschrieben, getestet und für alle Betreiber bekannt' },
+      { key: 'rl5', label: 'Monitoring SLA vereinbart, technisch konfiguriert und im Betrieb validiert' },
+    ],
+  },
+  agentic: {
+    name: 'Agentic Controls (R5)',
+    desc: 'Zusätzliche Pflichtkontrollen für vollautonome Agentic-Systeme (R5)',
+    color: '#ef4444',          // rot — R5
+    bg:    '#ef444412',
+    items: [
+      { key: 'rl6', label: 'Agentic Boundary Map erstellt — erlaubte Aktionen und Systemgrenzen dokumentiert' },
+      { key: 'rl7', label: 'Human Escalation Path definiert — automatische Eskalation konfiguriert und getestet' },
+      { key: 'rl8', label: 'Multi-Agent Orchestration dokumentiert (Abhängigkeiten, Datenaustausch, Fehlerbehandlung)' },
+    ],
+  },
+} as const;
+
 // ── Business Case Defaults ────────────────────────────────────
 export const BC_DEFAULT_LOHNKOSTEN = 65; // €/h
 
@@ -206,6 +234,6 @@ export function calcRiskScore(data: Record<string, string | boolean>): {
   const sum = vals.reduce((a, b) => a + b, 0);
   const maxSum = dims.length * 3; // 21
   const pct = Math.round((sum / maxSum) * 100);
-  const tier = pct >= 67 ? 'High' : pct >= 34 ? 'Medium' : 'Low';
+  const tier = pct >= 70 ? 'High' : pct >= 40 ? 'Medium' : 'Low';  // 1:1 HTML-Baseline
   return { raw: sum, pct, tier };
 }

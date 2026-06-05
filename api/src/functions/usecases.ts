@@ -9,7 +9,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
-import { listItems, findItem, createItem, updateItem } from '../lib/sharepoint';
+import { listItems, findItem, createItem, updateItem } from '../lib/storage';
 import { spToUC, ucToSp, UseCase } from '../lib/mappers';
 import { writeAuditLog, diffObjects } from '../lib/audit';
 import { MOCK_USECASES } from '../lib/mockData';
@@ -54,6 +54,25 @@ async function handleGetOne(
   return { status: 200, jsonBody: spToUC(item.id, item.fields as Record<string, unknown>) };
 }
 
+// ── ID-Generator  UC-YYYY-MM-NNN ─────────────────────────────
+async function generateUcId(): Promise<string> {
+  const d   = new Date();
+  const yr  = d.getFullYear();
+  const mo  = String(d.getMonth() + 1).padStart(2, '0');
+  const pfx = `UC-${yr}-${mo}-`;
+
+  // Alle vorhandenen IDs laden und höchste Sequenznummer ermitteln
+  const allItems = await listItems('USECASES');
+  const maxSeq = allItems.reduce((max, item) => {
+    const id = String((item.fields as Record<string, unknown>)['UCId'] ?? '');
+    if (!id.startsWith(pfx)) return max;
+    const seq = parseInt(id.slice(pfx.length), 10);
+    return isNaN(seq) ? max : Math.max(max, seq);
+  }, 0);
+
+  return `${pfx}${String(maxSeq + 1).padStart(3, '0')}`;
+}
+
 // ── POST /api/usecases ────────────────────────────────────────
 async function handlePost(
   req: HttpRequest,
@@ -65,7 +84,9 @@ async function handlePost(
 
   if (MOCK) {
     const now = new Date().toISOString();
-    const defaults: UseCase = { id: `UC-${Date.now()}`, title: '', act: true, cl: '', sys: '', legacy: '', own: '', cap: '', kiType: [], auto: '', lc: 'Idea', pd: 'Start', rt: 'Low', tier: '1', rev: 'yes', vs: 1, fs: 1, rs: 1, kpi: 'no', app: 'Not required', or: 'Not ready', hitl: 'yes', gt: [false,false,false,false], sb: [false,false,false,false], mc: [false,false,false,false,false,false,false], desc: '', link: '', createdAt: now, updatedAt: now, createdBy: principal.userDetails, updatedBy: principal.userDetails };
+    const d = new Date();
+    const mockId = `UC-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(Date.now()).slice(-3)}`;
+    const defaults: UseCase = { id: mockId, title: '', act: true, cl: '', sys: '', legacy: '', own: '', cap: '', kiType: [], auto: '', lc: 'Idea', pd: 'Start', rt: 'Low', tier: '1', rev: 'yes', vs: 1, fs: 1, rs: 1, kpi: 'no', app: 'Not required', or: 'Not ready', hitl: 'yes', gt: [false,false,false,false], sb: [false,false,false,false], mc: [false,false,false,false,false,false,false], desc: '', link: '', createdAt: now, updatedAt: now, createdBy: principal.userDetails, updatedBy: principal.userDetails };
     const result: UseCase = { ...defaults, ...body as UseCase };
     return { status: 201, jsonBody: result };
   }
@@ -78,9 +99,13 @@ async function handlePost(
     return { status: 400, jsonBody: { error: 'link muss mit https:// beginnen' } };
   }
 
-  const now = new Date().toISOString();
+  const now  = new Date().toISOString();
+  // ID generieren: UC-YYYY-MM-NNN (fortlaufend pro Monat)
+  const ucId = body.id?.trim() || await generateUcId();
+
   const newUC: Partial<UseCase> = {
     ...body,
+    id:        ucId,
     act:       true,
     createdAt: now,
     updatedAt: now,
@@ -93,7 +118,7 @@ async function handlePost(
   const result  = spToUC(created.id, { ...fields, Created: now, Modified: now });
 
   // Audit
-  await writeAuditLog(principal, 'create', 'UseCase', body.id ?? result.id, {}, '');
+  await writeAuditLog(principal, 'create', 'UseCase', ucId, {}, '');
 
   return { status: 201, jsonBody: result };
 }
@@ -182,10 +207,10 @@ async function usecasesHandler(
   context.log(`${req.method} /api/usecases${ucId ? '/' + ucId : ''}`);
 
   try {
-    if (req.method === 'GET')    return ucId ? handleGetOne(req, ucId) : handleGet(req);
-    if (req.method === 'POST')   return handlePost(req);
-    if (req.method === 'PATCH')  return ucId ? handlePatch(req, ucId) : { status: 400 };
-    if (req.method === 'DELETE') return ucId ? handleDelete(req, ucId) : { status: 400 };
+    if (req.method === 'GET')    return ucId ? await handleGetOne(req, ucId) : await handleGet(req);
+    if (req.method === 'POST')   return await handlePost(req);
+    if (req.method === 'PATCH')  return ucId ? await handlePatch(req, ucId) : { status: 400 };
+    if (req.method === 'DELETE') return ucId ? await handleDelete(req, ucId) : { status: 400 };
 
     return { status: 405, jsonBody: { error: 'Method not allowed' } };
   } catch (err) {

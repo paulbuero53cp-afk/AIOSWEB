@@ -10,11 +10,13 @@ import type { Incident } from '@/types';
 interface IncidentFormState {
   ucid: string; type: string; sev: string;
   st: string; desc: string; act: string; date: string;
+  failureMode: string;
 }
 
 const EMPTY_FORM: IncidentFormState = {
   ucid: '', type: 'Incident', sev: 'Low',
   st: 'Open', desc: '', act: '', date: new Date().toISOString().split('T')[0],
+  failureMode: '',
 };
 
 function incidentToForm(inc: Incident): IncidentFormState {
@@ -26,8 +28,25 @@ function incidentToForm(inc: Incident): IncidentFormState {
     desc: inc.desc,
     act:  inc.act,
     date: inc.date?.split('T')[0] ?? '',
+    failureMode: inc.failureMode ?? '',
   };
 }
+
+// ── Failure Mode Labels + Farben ──────────────────────────────
+const FM_LABEL: Record<string, string> = {
+  accuracy:       'Accuracy-Drift',
+  inconsistency:  'Inkonsistenz',
+  drift:          'Temporal Drift',
+  agentic:        'Agentic Eskalation',
+  infrastructure: 'Infrastruktur',
+};
+const FM_CSS: Record<string, string> = {
+  accuracy:       'br',
+  inconsistency:  'by',
+  drift:          'by',
+  agentic:        'br',
+  infrastructure: 'bgr',
+};
 
 // ── Incident-Modal ────────────────────────────────────────────
 function IncidentModal({
@@ -70,6 +89,10 @@ function IncidentModal({
       setSubmitting(false);
     }
   }
+
+  // Ermittle R-Tier des gewählten Use Cases für Hinweis
+  const selectedUc = useCases.find(u => u.id === form.ucid);
+  const ucIsHighAuto = selectedUc?.rl === 'R4' || selectedUc?.rl === 'R5';
 
   const label = (t: string) => (
     <label className="fl" style={{ marginBottom: 4 }}>{t}</label>
@@ -147,6 +170,27 @@ function IncidentModal({
             placeholder="Welche Maßnahmen wurden eingeleitet?"
           />
         </div>
+
+        {/* Failure Mode */}
+        <div className="fgroup full">
+          {label(`Reliability Failure Mode${ucIsHighAuto ? ' *' : ''}`)}
+          {ucIsHighAuto && (
+            <div style={{ fontSize: 11, color: 'var(--red)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+              ⚠ Dieses System hat R-Tier {selectedUc?.rl} — bitte Failure Mode angeben
+            </div>
+          )}
+          <select
+            value={form.failureMode}
+            onChange={e => set('failureMode', e.target.value)}
+          >
+            <option value="">— nicht kategorisiert —</option>
+            <option value="accuracy">Accuracy-Drift — Ergebnisqualität weicht ab</option>
+            <option value="inconsistency">Inkonsistenz — gleiche Eingabe, unterschiedliche Ausgabe</option>
+            <option value="drift">Temporal Drift — Modell veraltet durch Umfeldveränderung</option>
+            <option value="agentic">Agentic Eskalation — System überschreitet Handlungsrahmen</option>
+            <option value="infrastructure">Infrastruktur-Ausfall — API, Modell oder Daten nicht verfügbar</option>
+          </select>
+        </div>
       </div>
     </Modal>
   );
@@ -172,6 +216,11 @@ function IncCard({
       <div className="inc-card-head">
         <span className={`badge ${SEV_CSS[inc.sev] ?? 'bgr'}`}>{inc.sev}</span>
         <span className="badge bgr" style={{ fontSize: 10 }}>{inc.type}</span>
+        {inc.failureMode && (
+          <span className={`badge ${FM_CSS[inc.failureMode] ?? 'bgr'}`} style={{ fontSize: 10 }}>
+            {FM_LABEL[inc.failureMode] ?? inc.failureMode}
+          </span>
+        )}
         <span style={{ fontFamily: 'DM Mono,monospace', fontSize: 10, color: 'var(--muted)', marginLeft: 'auto' }}>
           {inc.id}
         </span>
@@ -193,8 +242,10 @@ export default function IncidentLog() {
   const { useCases }           = useUseCases();
   const { isEditor }           = useAuth();
 
-  const [modalOpen, setModalOpen]  = useState(false);
-  const [editInc,   setEditInc]    = useState<Incident | null>(null);
+  const [modalOpen, setModalOpen]   = useState(false);
+  const [editInc,   setEditInc]     = useState<Incident | null>(null);
+  const [fmFilter,  setFmFilter]    = useState('');
+  const [sevFilter, setSevFilter]   = useState('');
 
   function ucTitle(ucid: string) {
     const uc = useCases.find(u => u.id === ucid);
@@ -216,6 +267,19 @@ export default function IncidentLog() {
     setEditInc(null);
   }
 
+  // ── Filterlogik ───────────────────────────────────────────
+  const filtered = incidents.filter(i => {
+    if (fmFilter  && i.failureMode  !== fmFilter)  return false;
+    if (sevFilter && i.sev          !== sevFilter)  return false;
+    return true;
+  });
+
+  // Failure-Mode-Zähler für Badge-Hints im Filter
+  const fmCounts = Object.keys(FM_LABEL).reduce(
+    (acc, fm) => { acc[fm] = incidents.filter(i => i.failureMode === fm).length; return acc; },
+    {} as Record<string, number>,
+  );
+
   const colDef: { key: Incident['st']; label: string; css: string }[] = [
     { key: 'Open',        label: 'Open',        css: 'open' },
     { key: 'In Progress', label: 'In Progress',  css: 'prog' },
@@ -226,8 +290,46 @@ export default function IncidentLog() {
 
   return (
     <div>
-      {/* Topbar-Aktion */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+      {/* Toolbar */}
+      <div className="fb" style={{ marginBottom: 16 }}>
+        {/* Failure-Mode-Filter */}
+        <select
+          value={fmFilter}
+          onChange={e => setFmFilter(e.target.value)}
+          style={{ minWidth: 200 }}
+        >
+          <option value="">Alle Failure Modes</option>
+          {Object.entries(FM_LABEL).map(([val, lbl]) => (
+            <option key={val} value={val}>
+              {lbl}{fmCounts[val] > 0 ? ` (${fmCounts[val]})` : ''}
+            </option>
+          ))}
+        </select>
+
+        {/* Schweregrad-Filter */}
+        <select
+          value={sevFilter}
+          onChange={e => setSevFilter(e.target.value)}
+          style={{ width: 130 }}
+        >
+          <option value="">Alle Schweregrade</option>
+          {['High', 'Medium', 'Low'].map(s => (
+            <option key={s}>{s}</option>
+          ))}
+        </select>
+
+        {/* Aktive Filter zurücksetzen */}
+        {(fmFilter || sevFilter) && (
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={() => { setFmFilter(''); setSevFilter(''); }}
+          >
+            ✕ Filter
+          </button>
+        )}
+
+        <div style={{ flex: 1 }} />
+
         {isEditor && (
           <button className="btn btn-primary" onClick={openNew}>
             ⚠️ Incident melden
@@ -235,10 +337,19 @@ export default function IncidentLog() {
         )}
       </div>
 
+      {/* Gefiltert-Info */}
+      {(fmFilter || sevFilter) && (
+        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>
+          {filtered.length} von {incidents.length} Incidents
+          {fmFilter && <> · Failure Mode: <strong>{FM_LABEL[fmFilter]}</strong></>}
+          {sevFilter && <> · Schweregrad: <strong>{sevFilter}</strong></>}
+        </div>
+      )}
+
       {/* Kanban */}
       <div className="ib">
         {colDef.map(col => {
-          const colItems = incidents.filter(i => i.st === col.key);
+          const colItems = filtered.filter(i => i.st === col.key);
           return (
             <div key={col.key} className="ib-col">
               <div className={`ib-head ${col.css}`}>
@@ -271,7 +382,9 @@ export default function IncidentLog() {
 
       {/* Summary */}
       <div style={{ marginTop: 12, fontSize: 12, color: 'var(--muted)', textAlign: 'right' }}>
-        Gesamt: {incidents.length} Incidents
+        {filtered.length !== incidents.length
+          ? `${filtered.length} gefiltert von ${incidents.length} Incidents`
+          : `Gesamt: ${incidents.length} Incidents`}
       </div>
 
       {/* Modal */}

@@ -15,6 +15,12 @@ export interface UseCase {
   gt: boolean[]; sb: boolean[]; mc: boolean[];
   act: boolean; desc: string; link: string;
   createdAt: string; updatedAt: string; createdBy: string; updatedBy: string;
+  // ── Reliability (P0) ──────────────────────────────────────
+  rl?: string;            // R1–R5
+  hitlMode?: string;      // HITL | HOTL | none
+  autonomyLevel?: string; // supervised | semi-auto | autonomous
+  failureModes?: string[]; // bekannte Failure-Mode-Kategorien
+  monitoringSla?: string;  // täglich | wöchentlich | …
   _spId?: string;   // interner SP Item-ID (nicht exponiert)
 }
 
@@ -30,13 +36,15 @@ function n(v: unknown, fallback = 0): number {
 }
 
 export function spToUC(spId: string, f: Record<string, unknown>): UseCase {
-  // KiType kommt als { values: [{value}] } (MultiChoice)
-  const kiTypeRaw = f['KiType'] as { values?: { value: string }[] } | string[] | null;
+  // KiType: kommagetrennte Textzeile oder MultiChoice-Objekt (rückwärtskompatibel)
+  const kiTypeRaw = f['KiType'] as { values?: { value: string }[] } | string[] | string | null;
   let kiType: string[] = [];
   if (Array.isArray(kiTypeRaw)) {
     kiType = kiTypeRaw.map(v => typeof v === 'string' ? v : String(v));
-  } else if (kiTypeRaw?.values) {
-    kiType = kiTypeRaw.values.map(v => v.value);
+  } else if (kiTypeRaw && typeof kiTypeRaw === 'object' && 'values' in kiTypeRaw) {
+    kiType = (kiTypeRaw.values ?? []).map(v => v.value);
+  } else if (typeof kiTypeRaw === 'string' && kiTypeRaw.length > 0) {
+    kiType = kiTypeRaw.split(',').map(s => s.trim()).filter(Boolean);
   }
   // Normalisieren auf interne Werte
   kiType = kiType.map(v => {
@@ -79,19 +87,26 @@ export function spToUC(spId: string, f: Record<string, unknown>): UseCase {
     updatedAt:  s(f['Modified']),
     createdBy:  s(f['CreatedBy_x']),
     updatedBy:  s(f['UpdatedBy_x']),
+    // Reliability
+    rl:           s(f['ReliabilityTier']) || undefined,
+    hitlMode:     s(f['HitlMode'])        || undefined,
+    autonomyLevel:s(f['AutonomyLevel'])   || undefined,
+    failureModes: (() => {
+      try { return JSON.parse(s(f['FailureModes'], '[]')) as string[]; }
+      catch { return []; }
+    })(),
+    monitoringSla:s(f['MonitoringSla'])   || undefined,
   };
 }
 
 export function ucToSp(uc: Partial<UseCase>): Record<string, unknown> {
   const fields: Record<string, unknown> = {};
 
-  // KiType: interne Keys → SP MultiChoice-Labels
+  // KiType: als kommagetrennte Textzeile (kompatibel mit manuell angelegten SP-Listen)
   if (uc.kiType !== undefined) {
-    fields['KiType'] = {
-      values: uc.kiType.map(k => ({
-        value: k === 'einsatz' ? 'KI im Einsatz' : 'KI in der Erstellung',
-      })),
-    };
+    fields['KiType'] = uc.kiType
+      .map(k => k === 'einsatz' ? 'KI im Einsatz' : 'KI in der Erstellung')
+      .join(', ');
   }
 
   const map: [keyof UseCase, string][] = [
@@ -115,6 +130,13 @@ export function ucToSp(uc: Partial<UseCase>): Record<string, unknown> {
   if (uc.sb) { uc.sb.forEach((v, i) => { fields[`SB0${i + 1}`] = v; }); }
   if (uc.mc) { uc.mc.forEach((v, i) => { fields[`MC0${i + 1}`] = v; }); }
 
+  // Reliability
+  if (uc.rl !== undefined)            fields['ReliabilityTier'] = uc.rl;
+  if (uc.hitlMode !== undefined)      fields['HitlMode']        = uc.hitlMode;
+  if (uc.autonomyLevel !== undefined) fields['AutonomyLevel']   = uc.autonomyLevel;
+  if (uc.failureModes !== undefined)  fields['FailureModes']    = JSON.stringify(uc.failureModes);
+  if (uc.monitoringSla !== undefined) fields['MonitoringSla']   = uc.monitoringSla;
+
   return fields;
 }
 
@@ -123,6 +145,7 @@ export function ucToSp(uc: Partial<UseCase>): Record<string, unknown> {
 export interface Incident {
   id: string; ucid: string; type: string; sev: string;
   st: string; desc: string; act: string; date: string;
+  failureMode?: string;   // Reliability Failure-Mode-Kategorie (P1)
   createdAt?: string; updatedAt?: string;
   createdBy?: string; updatedBy?: string;
   _spId?: string;
@@ -138,11 +161,12 @@ export function spToIncident(spId: string, f: Record<string, unknown>): Incident
     st:       s(f['Status'], 'Open'),
     desc:     s(f['Description']),
     act:      s(f['Actions']),
-    date:     s(f['IncDate']),
-    createdAt:  s(f['Created']),
-    updatedAt:  s(f['Modified']),
-    createdBy:  s(f['CreatedBy_x']),
-    updatedBy:  s(f['UpdatedBy_x']),
+    date:        s(f['IncDate']),
+    failureMode: s(f['FailureMode']) || undefined,
+    createdAt:   s(f['Created']),
+    updatedAt:   s(f['Modified']),
+    createdBy:   s(f['CreatedBy_x']),
+    updatedBy:   s(f['UpdatedBy_x']),
   };
 }
 
@@ -151,7 +175,7 @@ export function incidentToSp(inc: Partial<Incident>): Record<string, unknown> {
   const map: [keyof Incident, string][] = [
     ['id', 'IncId'], ['ucid', 'UCRef'], ['type', 'IncType'],
     ['sev', 'Severity'], ['st', 'Status'], ['desc', 'Description'],
-    ['act', 'Actions'], ['date', 'IncDate'],
+    ['act', 'Actions'], ['date', 'IncDate'], ['failureMode', 'FailureMode'],
     ['createdBy', 'CreatedBy_x'], ['updatedBy', 'UpdatedBy_x'],
   ];
   for (const [tsKey, spKey] of map) {

@@ -1,5 +1,8 @@
 {
   "version": "2.0",
+  "healthMonitor": {
+    "enabled": false
+  },
   "logging": {
     "applicationInsights": {
       "samplingSettings": {

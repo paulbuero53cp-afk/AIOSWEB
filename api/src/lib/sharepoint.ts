@@ -9,6 +9,29 @@
 
 import { getGraphClient } from './graphClient';
 
+// ── SharePoint-Feldnamen-Übersetzung ──────────────────────────
+// SP kodiert Spaltennamen die mit zwei Großbuchstaben beginnen:
+// GT→_x0047_T, SB→_x0053_B, MC→_x004d_C
+const SP_FIELD_MAP: Record<string, string> = {
+  GT01: '_x0047_T01', GT02: '_x0047_T02', GT03: '_x0047_T03', GT04: '_x0047_T04',
+  SB01: '_x0053_B01', SB02: '_x0053_B02', SB03: '_x0053_B03', SB04: '_x0053_B04',
+  MC01: '_x004d_C01', MC02: '_x004d_C02', MC03: '_x004d_C03', MC04: '_x004d_C04',
+  MC05: '_x004d_C05', MC06: '_x004d_C06', MC07: '_x004d_C07',
+};
+const SP_FIELD_MAP_REV: Record<string, string> =
+  Object.fromEntries(Object.entries(SP_FIELD_MAP).map(([k, v]) => [v, k]));
+
+function toSp(fields: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(fields)) out[SP_FIELD_MAP[k] ?? k] = v;
+  return out;
+}
+function fromSp(fields: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(fields)) out[SP_FIELD_MAP_REV[k] ?? k] = v;
+  return out;
+}
+
 // ── Site-ID Cache ─────────────────────────────────────────────
 let _siteId: string | null = null;
 
@@ -79,7 +102,16 @@ export async function listItems(
   let nextUrl: string | undefined = url;
 
   while (nextUrl) {
-    const page = await client.api(nextUrl).get() as SpPageResult;
+    // Prefer-Header erlaubt Filtern auf nicht-indizierten Spalten (UCId, IncId, UCRef…)
+    // Risiko: kann bei sehr großen Listen langsam werden — akzeptabel für AIOS-Größe
+    const req = filter
+      ? client.api(nextUrl).header('Prefer', 'HonorNonIndexedQueriesWarningMayFailRandomly')
+      : client.api(nextUrl);
+    const page = await req.get() as SpPageResult;
+    // SP-kodierte Feldnamen zurückübersetzen (GT01 etc.)
+    for (const item of (page.value ?? [])) {
+      item.fields = fromSp(item.fields);
+    }
     allItems.push(...(page.value ?? []));
     nextUrl = page['@odata.nextLink'];
   }
@@ -94,20 +126,42 @@ export async function getItem(
 ): Promise<SpItem> {
   const client = getGraphClient();
   const base = await listBase(listKey);
-  return client.api(`${base}/${spId}?$expand=fields`).get() as Promise<SpItem>;
+  const item = await client.api(`${base}/${spId}?$expand=fields`).get() as SpItem;
+  item.fields = fromSp(item.fields);
+  return item;
 }
 
-/** Neues Item erstellen */
+// ── Feld-Fehler-Parser ────────────────────────────────────────
+// Extrahiert Feldname aus "Field 'GT01' is not recognized" o.ä.
+function extractUnknownField(err: unknown): string | null {
+  const msg = (err as { message?: string })?.message ?? String(err);
+  const m = msg.match(/Field\s+'?(\w+)'?\s+is not recognized/i)
+           ?? msg.match(/column\s+'?(\w+)'?\s+does not exist/i);
+  return m?.[1] ?? null;
+}
+
+/** Neues Item erstellen — überspringt unbekannte SP-Felder automatisch */
 export async function createItem(
   listKey: Parameters<typeof listName>[0],
   fields: Record<string, unknown>,
 ): Promise<SpItem> {
   const client = getGraphClient();
   const base = await listBase(listKey);
-  return client.api(base).post({ fields }) as Promise<SpItem>;
+  const safe = toSp({ ...fields }); // GT01 → _x0047_T01 etc.
+
+  for (let attempt = 0; attempt < 30; attempt++) {
+    try {
+      return await client.api(base).post({ fields: safe }) as SpItem;
+    } catch (err) {
+      const bad = extractUnknownField(err);
+      if (bad && bad in safe) { delete safe[bad]; continue; }
+      throw err;
+    }
+  }
+  throw new Error('createItem: zu viele unbekannte Felder, abgebrochen');
 }
 
-/** Item-Felder aktualisieren (PATCH) */
+/** Item-Felder aktualisieren (PATCH) — überspringt unbekannte SP-Felder automatisch */
 export async function updateItem(
   listKey: Parameters<typeof listName>[0],
   spId: string,
@@ -115,7 +169,19 @@ export async function updateItem(
 ): Promise<void> {
   const client = getGraphClient();
   const base = await listBase(listKey);
-  await client.api(`${base}/${spId}/fields`).patch(fields);
+  const safe = toSp({ ...fields }); // GT01 → _x0047_T01 etc.
+
+  for (let attempt = 0; attempt < 30; attempt++) {
+    try {
+      await client.api(`${base}/${spId}/fields`).patch(safe);
+      return;
+    } catch (err) {
+      const bad = extractUnknownField(err);
+      if (bad && bad in safe) { delete safe[bad]; continue; }
+      throw err;
+    }
+  }
+  throw new Error('updateItem: zu viele unbekannte Felder, abgebrochen');
 }
 
 /** Item löschen */
