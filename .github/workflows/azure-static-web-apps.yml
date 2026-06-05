@@ -35,6 +35,9 @@ jobs:
       - name: Remove frontend node_modules (not needed for deploy)
         run: rm -rf node_modules
 
+      - name: Copy staticwebapp.config.json to dist
+        run: cp staticwebapp.config.json dist/
+
       - name: Install API dependencies
         run: npm ci
         working-directory: api
