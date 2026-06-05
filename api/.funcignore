@@ -1,0 +1,11 @@
+# Lokale Dev-Tools — nicht in Azure Functions deployen
+node_modules/azure-functions-core-tools
+node_modules/better-sqlite3
+node_modules/@types
+
+# Lokale SQLite-Datenbank
+data/
+
+# TypeScript-Quellen (nur dist/ wird deployed)
+src/
+tsconfig.json
