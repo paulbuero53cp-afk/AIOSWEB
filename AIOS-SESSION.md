@@ -11,8 +11,8 @@
 - **Azure Subscription ID:** 92a27a24-7f01-4c83-93da-234a762fab7a
 - **Azure Resource Group:** AIOS_group
 - **Tenant ID:** 73971f7b-211f-4ac6-a4b9-e16c4f9fd920
-- **Client ID:** [ENTRA_CLIENT_ID]
-- **SharePoint Site:** [SP_SITE_URL]
+- **Client ID:** 21ccdf12-06e9-40f6-99e2-d77784a7a285
+- **SharePoint Site:** https://handsonaiowl771.sharepoint.com/sites/AIOS
 - **SharePoint Drive Item Path:** [DRIVE_ITEM_PATH]
 
 ## Projektstand
