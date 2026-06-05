@@ -1,19 +1,8 @@
 {
-  "auth": {
-    "identityProviders": {
-      "azureActiveDirectory": {
-        "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/73971f7b-211f-4ac6-a4b9-e16c4f9fd920/v2.0",
-          "clientIdSettingName": "AZURE_CLIENT_ID",
-          "clientSecretSettingName": "AZURE_CLIENT_SECRET"
-        }
-      }
-    }
-  },
   "routes": [
     {
       "route": "/api/*",
-      "allowedRoles": ["AIOS.Viewer", "AIOS.Editor", "AIOS.Approver", "AIOS.Admin"]
+      "allowedRoles": ["authenticated"]
     },
     {
       "route": "/*",
@@ -26,8 +15,8 @@
       "statusCode": 302
     },
     "403": {
-      "rewrite": "/403.html",
-      "statusCode": 403
+      "rewrite": "/index.html",
+      "statusCode": 200
     }
   },
   "globalHeaders": {

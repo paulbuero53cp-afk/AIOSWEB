@@ -5,10 +5,12 @@
 - **App:** AIOS — AI Management System (Web App, Option B)
 - **Stack:** React 18 + TypeScript + Vite + Azure Static Web Apps + Azure Functions + SharePoint Lists
 - **Repo:** https://github.com/paulbuero53cp-afk/AIOSWEB
-- **SWA URL:** [AZURE_SWA_URL]
+- **SWA URL:** https://gray-cliff-0220e3b10.7.azurestaticapps.net
 
 ## Konfiguration (ausfüllen wenn bekannt)
-- **Tenant ID:** [ENTRA_TENANT_ID]
+- **Azure Subscription ID:** 92a27a24-7f01-4c83-93da-234a762fab7a
+- **Azure Resource Group:** AIOS_group
+- **Tenant ID:** 73971f7b-211f-4ac6-a4b9-e16c4f9fd920
 - **Client ID:** [ENTRA_CLIENT_ID]
 - **SharePoint Site:** [SP_SITE_URL]
 - **SharePoint Drive Item Path:** [DRIVE_ITEM_PATH]
