@@ -32,6 +32,9 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Remove frontend node_modules (not needed for deploy)
+        run: rm -rf node_modules
+
       - name: Install API dependencies
         run: npm ci
         working-directory: api
@@ -40,7 +43,7 @@ jobs:
         run: npm run build
         working-directory: api
 
-      - name: Remove API devDependencies before deploy
+      - name: Replace API devDependencies with production-only
         run: npm ci --omit=dev
         working-directory: api
 
