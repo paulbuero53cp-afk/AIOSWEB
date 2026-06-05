@@ -50,7 +50,10 @@ export function requireAuth(req: HttpRequest): ClientPrincipal | HttpResponseIni
   if (!principal) {
     return { status: 401, jsonBody: { error: 'Nicht authentifiziert' } };
   }
-  if (!hasAnyRole(principal, ['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin'])) {
+  // Akzeptiere AIOS-Rollen (Standard SKU) ODER schlicht 'authenticated' (Free SKU)
+  const hasAios = hasAnyRole(principal, ['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+  const isAuthenticated = principal.userRoles?.includes('authenticated') ?? false;
+  if (!hasAios && !isAuthenticated) {
     return { status: 403, jsonBody: { error: 'Keine AIOS-Rolle zugewiesen' } };
   }
   return principal;
