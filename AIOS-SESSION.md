@@ -73,6 +73,23 @@
 - [x] `scripts/Provision-SharePointLists.ps1` — 5 RL-Spalten zu AIOS_UseCases + FailureMode zu AIOS_Incidents
 - [x] TypeScript: 0 Fehler (Frontend + API)
 
+### ✅ Abgeschlossen (Session #9 — KW 23/2026) — Azure Deployment
+- [x] Git Push auf github.com/paulbuero53cp-afk/AIOSWEB (main)
+- [x] Azure Static Web App erstellt (gray-cliff-0220e3b10.7.azurestaticapps.net)
+- [x] CI/CD Pipeline debuggt und stabilisiert (12 Runs → grün)
+- [x] Entra App-Registrierung AIOS-API konfiguriert (Client ID: 21ccdf12...)
+- [x] App-Rollen angelegt: AIOS.Viewer / Editor / Approver / Admin
+- [x] Graph API Berechtigungen erteilt: Sites.FullControl.All, Sites.ReadWrite.All
+- [x] GitHub Secrets: AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID, SHAREPOINT_SITE_URL
+- [x] Azure SWA Umgebungsvariablen konfiguriert
+- [x] App live mit echten SharePoint-Daten ✅
+
+### 📋 Offen / Nächste Schritte
+- [ ] Standard SKU upgraden → Custom Roles (AIOS.Viewer etc.) im Token aktivieren
+- [ ] Custom Domain (optional)
+- [ ] SharePoint Provisioning Script ausführen für RL-Spalten (Reliability Framework)
+- [ ] Nutzer in Entra → Enterprise App AIOS-API → Rollen zuweisen
+
 ### 🔄 In Arbeit / Offen
 
 ### ✅ Abgeschlossen (Session #3 — KW 22)
