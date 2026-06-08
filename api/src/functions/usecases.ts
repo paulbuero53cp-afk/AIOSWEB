@@ -86,7 +86,7 @@ async function handlePost(
     const now = new Date().toISOString();
     const d = new Date();
     const mockId = `UC-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(Date.now()).slice(-3)}`;
-    const defaults: UseCase = { id: mockId, title: '', act: true, cl: '', sys: '', legacy: '', own: '', cap: '', kiType: [], auto: '', lc: 'Idea', pd: 'Start', rt: 'Low', tier: '1', rev: 'yes', vs: 1, fs: 1, rs: 1, kpi: 'no', app: 'Not required', or: 'Not ready', hitl: 'yes', gt: [false,false,false,false], sb: [false,false,false,false], mc: [false,false,false,false,false,false,false], desc: '', link: '', createdAt: now, updatedAt: now, createdBy: principal.userDetails, updatedBy: principal.userDetails };
+    const defaults: UseCase = { id: mockId, title: '', act: true, cl: '', sys: '', legacy: '', own: '', cap: '', useCaseCategory: 'Sonstiges', kiType: [], auto: '', lc: 'Idea', pd: 'Start', rt: 'Low', tier: '1', rev: 'yes', vs: 1, fs: 1, rs: 1, kpi: 'no', app: 'Not required', or: 'Not ready', hitl: 'yes', gt: [false,false,false,false], sb: [false,false,false,false], mc: [false,false,false,false,false,false,false], desc: '', link: '', createdAt: now, updatedAt: now, createdBy: principal.userDetails, updatedBy: principal.userDetails };
     const result: UseCase = { ...defaults, ...body as UseCase };
     return { status: 201, jsonBody: result };
   }
