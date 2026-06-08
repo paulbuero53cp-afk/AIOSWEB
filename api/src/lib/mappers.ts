@@ -259,9 +259,11 @@ export function aiosUserToSp(u: Partial<AiosUser>): Record<string, unknown> {
   if (u.aadUserId   !== undefined) fields['AadUserId']   = u.aadUserId;
   if (u.role        !== undefined) fields['Role']        = u.role;
   if (u.active      !== undefined) fields['Active']      = u.active;
-  if (u.invitedAt   !== undefined) fields['InvitedAt']   = u.invitedAt;
   if (u.invitedBy   !== undefined) fields['InvitedBy']   = u.invitedBy;
-  if (u.lastLogin   !== undefined) fields['LastLogin']   = u.lastLogin;
+  // DateTime-Spalten: leere Strings NICHT senden — SharePoint lehnt ''
+  // mit "One of the provided arguments is not acceptable" ab (→ 500).
+  if (u.invitedAt) fields['InvitedAt'] = u.invitedAt;
+  if (u.lastLogin) fields['LastLogin'] = u.lastLogin;
   return fields;
 }
 

@@ -201,22 +201,11 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
   }
 
   // Title ist in SharePoint Pflichtfeld → explizit setzen, sonst 500.
-  const spFields = {
+  const created = await createItem('USERS', {
     Title: newUser.displayName || newUser.email,
     ...aiosUserToSp(newUser),
-  };
-  try {
-    const created = await createItem('USERS', spFields);
-    return { status: 201, jsonBody: spToAiosUser(created.id, created.fields as Record<string, unknown>) };
-  } catch (err) {
-    // TEMPORÄR (Diagnose User-Anlage 500): echte Graph-Meldung + gesendete Felder durchreichen
-    const msg = err instanceof Error ? err.message : String(err);
-    return { status: 500, jsonBody: {
-      error: 'createItem(USERS) fehlgeschlagen',
-      graphError: msg,
-      sentFields: Object.keys(spFields),
-    }};
-  }
+  });
+  return { status: 201, jsonBody: spToAiosUser(created.id, created.fields as Record<string, unknown>) };
 }
 
 // ── PATCH /api/users/{id} ─────────────────────────────────────
