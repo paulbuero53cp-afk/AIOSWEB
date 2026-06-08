@@ -63,9 +63,9 @@ async function debugHandler(
   return { status: 200, jsonBody: result };
 }
 
-app.http('debug', {
+app.http('diag', {
   methods: ['GET'],
   authLevel: 'anonymous',
-  route: 'debug',
+  route: 'diag',
   handler: debugHandler,
 });

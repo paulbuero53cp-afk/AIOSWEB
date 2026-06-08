@@ -48,12 +48,16 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
 
   // Gesamter SP-Block in try/catch — Graph-Fehler sollen nicht den Login blockieren
   try {
-    // Suche nach userId (primär) oder Email (Fallback, case-insensitive via tolower)
-    const byId    = await findItem('USERS', `fields/AadUserId eq '${principal.userId}'`);
-    const byEmail = byId
-      ? null
-      : await findItem('USERS', `fields/Email eq '${principal.userDetails}'`);
-    const spItem  = byId ?? byEmail;
+    // Alle User laden + in JS filtern (OData-Filter auf nicht-indizierten Spalten unzuverlässig)
+    const allItems = await listItems('USERS');
+    const emailLower = principal.userDetails.toLowerCase();
+    const spItem = allItems.find(item => {
+      const f = item.fields as Record<string, unknown>;
+      return (
+        (f['AadUserId'] && String(f['AadUserId']) === principal.userId) ||
+        (f['Email'] && String(f['Email']).toLowerCase() === emailLower)
+      );
+    }) ?? null;
 
     if (spItem) {
       const user = spToAiosUser(spItem.id, spItem.fields as Record<string, unknown>);
@@ -84,8 +88,7 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
     }
 
     // Fallback 2: Bootstrap — Liste hat wenige Einträge → Viewer gewähren
-    const allUsers = await listItems('USERS');
-    if (allUsers.length <= 5) {
+    if (allItems.length <= 5) {
       return { status: 200, jsonBody: {
         id: '', email: principal.userDetails, displayName: principal.userDetails,
         aadUserId: principal.userId, role: 'AIOS.Viewer',
