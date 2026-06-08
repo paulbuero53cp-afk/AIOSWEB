@@ -55,7 +55,7 @@ function EnsureField {
 # ════════════════════════════════════════════════════════════════
 # 1. AIOS_UseCases
 # ════════════════════════════════════════════════════════════════
-Write-Host "`n[1/5] AIOS_UseCases" -ForegroundColor Cyan
+Write-Host "`n[1/6] AIOS_UseCases" -ForegroundColor Cyan
 EnsureList -Title "AIOS_UseCases" -Description "KI Use Cases" | Out-Null
 
 $ucFields = @(
@@ -117,7 +117,7 @@ foreach ($f in $ucFields) {
 # ════════════════════════════════════════════════════════════════
 # 2. AIOS_Incidents
 # ════════════════════════════════════════════════════════════════
-Write-Host "`n[2/5] AIOS_Incidents" -ForegroundColor Cyan
+Write-Host "`n[2/6] AIOS_Incidents" -ForegroundColor Cyan
 EnsureList -Title "AIOS_Incidents" -Description "KI Incident Log" | Out-Null
 
 $incFields = @(
@@ -141,7 +141,7 @@ foreach ($f in $incFields) {
 # ════════════════════════════════════════════════════════════════
 # 3. AIOS_Artefakte (JSON-Blob Strategie)
 # ════════════════════════════════════════════════════════════════
-Write-Host "`n[3/5] AIOS_Artefakte" -ForegroundColor Cyan
+Write-Host "`n[3/6] AIOS_Artefakte" -ForegroundColor Cyan
 Write-Host "  Strategie: JSON-Blob pro Artefakt-Typ — vermeidet 100+ Spalten" -ForegroundColor DarkGray
 EnsureList -Title "AIOS_Artefakte" -Description "RA / GC / BC / DSFA als JSON-Blobs" | Out-Null
 
@@ -163,7 +163,7 @@ Write-Host "  → Index UCId+ArtType (manuell in SP-Admin empfohlen)" -Foregroun
 # ════════════════════════════════════════════════════════════════
 # 4. AIOS_AuditLog
 # ════════════════════════════════════════════════════════════════
-Write-Host "`n[4/5] AIOS_AuditLog" -ForegroundColor Cyan
+Write-Host "`n[4/6] AIOS_AuditLog" -ForegroundColor Cyan
 EnsureList -Title "AIOS_AuditLog" -Description "Unveränderliches Audit-Protokoll" | Out-Null
 
 $alFields = @(
@@ -187,7 +187,31 @@ Write-Host "    Site Settings → Permissions → Break Inheritance → Editor: 
 # ════════════════════════════════════════════════════════════════
 # 5. AIOS_Config
 # ════════════════════════════════════════════════════════════════
-Write-Host "`n[5/5] AIOS_Config" -ForegroundColor Cyan
+Write-Host "`n[5/6] AIOS_Users" -ForegroundColor Cyan
+EnsureList -Title "AIOS_Users" -Description "AIOS Benutzerverwaltung (Rollen + Zugriff)" | Out-Null
+
+$usrFields = @(
+    @{ N="Email";       D="E-Mail (AAD UPN)";   T="Text" },
+    @{ N="DisplayName"; D="Anzeigename";          T="Text" },
+    @{ N="AadUserId";   D="AAD User ID";          T="Text" },
+    @{ N="Role";        D="AIOS-Rolle";           T="Choice"; Extra=@{Choices=@("AIOS.Viewer","AIOS.Editor","AIOS.Approver","AIOS.Admin")} },
+    @{ N="Active";      D="Zugriff aktiv";        T="Boolean" },
+    @{ N="InvitedAt";   D="Eingeladen am";        T="DateTime" },
+    @{ N="InvitedBy";   D="Eingeladen von";       T="Text" },
+    @{ N="LastLogin";   D="Letzter Login";        T="DateTime" }
+)
+foreach ($f in $usrFields) {
+    $extra = if ($f.Extra) { $f.Extra } else { @{} }
+    EnsureField -ListTitle "AIOS_Users" -InternalName $f.N -DisplayName $f.D -Type $f.T -Extra $extra
+}
+
+Write-Host "  ⚠ Pflicht: Ersten Admin-Eintrag manuell anlegen (Bootstrap)" -ForegroundColor Yellow
+Write-Host "    → AIOS_Users → Neues Element: Email=deine@email.de, Role=AIOS.Admin, Active=Ja" -ForegroundColor DarkYellow
+
+# ════════════════════════════════════════════════════════════════
+# 6. AIOS_Config (vormals 5)
+# ════════════════════════════════════════════════════════════════
+Write-Host "`n[6/6] AIOS_Config" -ForegroundColor Cyan
 EnsureList -Title "AIOS_Config" -Description "COMPANY-Objekt und Tenant-Konfiguration" | Out-Null
 
 EnsureField -ListTitle "AIOS_Config" -InternalName "ConfigKey" -DisplayName "Schlüssel" -Type "Text"

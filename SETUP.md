@@ -95,7 +95,25 @@ Erstellt folgende Listen:
 - `AIOS_AuditLog` — unveränderliches Audit-Protokoll
 - `AIOS_Config` — Unternehmenskonfiguration (Name, Chatbot, etc.)
 
-**⚠ Pflicht nach Provisioning:**
+**⚠ Pflicht nach Provisioning (Bootstrap):**
+
+Die Liste `AIOS_Users` ist zunächst leer. Die App erlaubt keinen Zugriff, solange kein Admin-Eintrag existiert.
+
+1. SharePoint Admin Center → Site → `AIOS_Users` → **Neues Element**
+2. Folgende Felder ausfüllen:
+
+| Feld | Wert |
+|---|---|
+| `Email` | deine AAD-E-Mail-Adresse (z.B. admin@firma.de) |
+| `DisplayName` | Dein Name |
+| `Role` | `AIOS.Admin` |
+| `Active` | `Ja` |
+| `InvitedAt` | aktuelles Datum |
+| `InvitedBy` | `system` |
+
+3. Danach kannst du dich in der App anmelden → Admin-Bereich → **Benutzerverwaltung** → weitere Nutzer einladen.
+
+**⚠ Pflicht nach Provisioning (Konfiguration):**
 In der Liste `AIOS_Config` den Eintrag `COMPANY` mit den Kundendaten anpassen:
 ```json
 {
@@ -216,7 +234,8 @@ npm run dev
 [ ] Schritt 1: Repository erstellt
 [ ] Schritt 2: App Registration angelegt, Berechtigungen erteilt
 [ ] Schritt 3: SharePoint-Site erstellt
-[ ] Schritt 4: Provisioning-Skript ausgeführt (5 Listen vorhanden)
+[ ] Schritt 4: Provisioning-Skript ausgeführt (6 Listen vorhanden)
+[ ] Schritt 4: AIOS_Users → Ersten Admin-Eintrag manuell angelegt (Bootstrap)
 [ ] Schritt 4: AIOS_Config → COMPANY-Eintrag angepasst
 [ ] Schritt 5: Azure Static Web App erstellt
 [ ] Schritt 6: 4 GitHub Secrets gesetzt

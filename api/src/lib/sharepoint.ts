@@ -61,7 +61,8 @@ async function getSiteId(): Promise<string> {
 }
 
 // ── List-Namen aus ENV ────────────────────────────────────────
-function listName(key: 'USECASES' | 'INCIDENTS' | 'ARTEFAKTE' | 'AUDITLOG' | 'CONFIG'): string {
+function listName(key: 'USECASES' | 'INCIDENTS' | 'ARTEFAKTE' | 'AUDITLOG' | 'CONFIG' | 'USERS'): string {
+  if (key === 'USERS') return process.env['LIST_USERS'] ?? 'AIOS_Users';
   return process.env[`LIST_${key}`] ?? `AIOS_${key.charAt(0) + key.slice(1).toLowerCase()}`;
 }
 

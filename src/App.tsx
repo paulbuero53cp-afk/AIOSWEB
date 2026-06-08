@@ -19,6 +19,7 @@ import AuditLogScreen    from '@/components/screens/AuditLog';
 import InfoScreen        from '@/components/screens/Info';
 import AiStrategyScreen  from '@/components/screens/AiStrategy';
 import UcDashboard       from '@/components/screens/UcDashboard';
+import UsersScreen       from '@/components/screens/Users';
 import { swrFetcher } from '@/lib/api';
 import type { Screen, Language, UseCase, Incident, AppConfig } from '@/types';
 import '@/styles/global.css';
@@ -65,6 +66,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: 'Admin',
     items: [
+      { id: 'users',       label: 'Benutzerverwaltung', icon: '👥' },
       { id: 'auditlog',    label: 'Audit Log',          icon: '📋' },
       { id: 'info',        label: 'Info & Config',      icon: 'ℹ️' },
     ],
@@ -259,6 +261,7 @@ function AppShell() {
           {screen === 'bizcases'   && <BusinessCase      key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
           {screen === 'dsfa'       && <DsfaScreen        key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
           {screen === 'ucdashboard'&& <UcDashboard       key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
+          {screen === 'users'      && <UsersScreen />}
           {screen === 'auditlog'   && <AuditLogScreen />}
           {screen === 'info'       && <InfoScreen />}
           {screen === 'aistrategy' && <AiStrategyScreen onNav={(s) => setScreen(s as Screen)} />}

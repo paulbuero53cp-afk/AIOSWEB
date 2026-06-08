@@ -1,7 +1,7 @@
 // Mock data for local development (USE_MOCK_DATA=true)
 // Simulates SharePoint data without real Azure credentials
 
-import type { UseCase, Incident, AuditEntry } from './mappers';
+import type { UseCase, Incident, AuditEntry, AiosUser } from './mappers';
 
 const NOW = new Date().toISOString();
 const ADMIN = 'admin@demo.local';
@@ -197,6 +197,45 @@ export const MOCK_AUDIT: AuditEntry[] = [
     diff: {},
     comment: '',
     _spId: 'sp-aud-003',
+  },
+];
+
+export const MOCK_USERS: AiosUser[] = [
+  {
+    id: 'usr-001',
+    email: 'admin@demo.local',
+    displayName: 'Demo Admin',
+    aadUserId: 'dev-user',
+    role: 'AIOS.Admin',
+    active: true,
+    invitedAt: '2025-01-01T00:00:00Z',
+    invitedBy: 'system',
+    lastLogin: NOW,
+    _spId: 'usr-001',
+  },
+  {
+    id: 'usr-002',
+    email: 'editor@demo.local',
+    displayName: 'Demo Editor',
+    aadUserId: 'usr-aad-002',
+    role: 'AIOS.Editor',
+    active: true,
+    invitedAt: '2025-02-01T00:00:00Z',
+    invitedBy: 'admin@demo.local',
+    lastLogin: '2025-05-01T10:00:00Z',
+    _spId: 'usr-002',
+  },
+  {
+    id: 'usr-003',
+    email: 'viewer@demo.local',
+    displayName: 'Demo Viewer',
+    aadUserId: 'usr-aad-003',
+    role: 'AIOS.Viewer',
+    active: false,
+    invitedAt: '2025-03-15T00:00:00Z',
+    invitedBy: 'admin@demo.local',
+    lastLogin: '',
+    _spId: 'usr-003',
   },
 ];
 

@@ -222,6 +222,49 @@ export function artefaktToSp(art: Partial<Artefakt>): Record<string, unknown> {
   return fields;
 }
 
+// ── AiosUser ──────────────────────────────────────────────────
+
+export interface AiosUser {
+  id: string;
+  email: string;
+  displayName: string;
+  aadUserId: string;
+  role: string;
+  active: boolean;
+  invitedAt: string;
+  invitedBy: string;
+  lastLogin: string;
+  _spId?: string;
+}
+
+export function spToAiosUser(spId: string, f: Record<string, unknown>): AiosUser {
+  return {
+    _spId:       spId,
+    id:          spId,
+    email:       s(f['Email']),
+    displayName: s(f['DisplayName']),
+    aadUserId:   s(f['AadUserId']),
+    role:        s(f['Role'], 'AIOS.Viewer') as AiosUser['role'],
+    active:      f['Active'] !== false,
+    invitedAt:   s(f['InvitedAt']),
+    invitedBy:   s(f['InvitedBy']),
+    lastLogin:   s(f['LastLogin']),
+  };
+}
+
+export function aiosUserToSp(u: Partial<AiosUser>): Record<string, unknown> {
+  const fields: Record<string, unknown> = {};
+  if (u.email       !== undefined) fields['Email']       = u.email;
+  if (u.displayName !== undefined) fields['DisplayName'] = u.displayName;
+  if (u.aadUserId   !== undefined) fields['AadUserId']   = u.aadUserId;
+  if (u.role        !== undefined) fields['Role']        = u.role;
+  if (u.active      !== undefined) fields['Active']      = u.active;
+  if (u.invitedAt   !== undefined) fields['InvitedAt']   = u.invitedAt;
+  if (u.invitedBy   !== undefined) fields['InvitedBy']   = u.invitedBy;
+  if (u.lastLogin   !== undefined) fields['LastLogin']   = u.lastLogin;
+  return fields;
+}
+
 // ── Audit Log ─────────────────────────────────────────────────
 
 export interface AuditEntry {

@@ -321,11 +321,26 @@ export interface PaginatedResponse<T> {
 }
 
 // ── UI State ──────────────────────────────────────────────────
+// ── User Management ───────────────────────────────────────────
+export type AiosRoleValue = 'AIOS.Viewer' | 'AIOS.Editor' | 'AIOS.Approver' | 'AIOS.Admin';
+
+export interface AiosUser {
+  id: string;                   // SP-Listenitem-ID (String)
+  email: string;                // AAD UPN / E-Mail
+  displayName: string;          // Anzeigename
+  aadUserId: string;            // userId aus /.auth/me
+  role: AiosRoleValue;          // aktuelle Rolle
+  active: boolean;              // Zugriff aktiv
+  invitedAt: string;            // ISO-Date
+  invitedBy: string;            // E-Mail des Einladenden
+  lastLogin: string;            // ISO-Date, wird bei /api/users/me aktualisiert
+}
+
 export type Screen =
   | 'dashboard' | 'portfolio' | 'aistrategy' | 'usecases' | 'new'
   | 'governance' | 'incidents' | 'agenthub' | 'artefakthub'
   | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog' | 'info'
-  | 'ucdashboard';
+  | 'ucdashboard' | 'users';
 
 export type Language = 'de' | 'en';
 
