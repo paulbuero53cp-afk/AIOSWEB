@@ -18,6 +18,7 @@ const _b: Backend = process.env['USE_LOCAL_DB'] === 'true'
   : require('./sharepoint') as Backend;
 
 export type { SpItem, SpPageResult } from './sharepoint';
+export { odataEscape } from './sharepoint';
 
 export const listItems  = _b.listItems;
 export const getItem    = _b.getItem;

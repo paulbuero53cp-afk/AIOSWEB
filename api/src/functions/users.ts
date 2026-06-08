@@ -18,6 +18,7 @@ import { requireAuth, isAuthError, ClientPrincipal } from '../lib/auth';
 import { listItems, createItem, updateItem, deleteItem, getItem } from '../lib/storage';
 import { spToAiosUser, aiosUserToSp, AiosUser } from '../lib/mappers';
 import { MOCK_USERS } from '../lib/mockData';
+import { serverError } from '../lib/http';
 
 const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
@@ -243,7 +244,7 @@ async function handleDelete(req: HttpRequest, userId: string): Promise<HttpRespo
 // ── Router ────────────────────────────────────────────────────
 async function usersHandler(
   req: HttpRequest,
-  _ctx: InvocationContext,
+  context: InvocationContext,
 ): Promise<HttpResponseInit> {
   try {
     const pathParts = req.url.split('/api/users')[1]?.split('?')[0] ?? '';
@@ -258,8 +259,7 @@ async function usersHandler(
 
     return { status: 405, jsonBody: { error: 'Method Not Allowed' } };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unbekannter Fehler';
-    return { status: 500, jsonBody: { error: msg } };
+    return serverError(context, err);
   }
 }
 

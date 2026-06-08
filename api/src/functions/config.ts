@@ -8,6 +8,7 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
 import { listItems, createItem, updateItem } from '../lib/storage';
+import { serverError } from '../lib/http';
 
 // CONFIG-Liste hat < 10 Einträge → alle laden, in JS filtern (kein SP-Index nötig)
 async function findConfigItem(key: string) {
@@ -83,8 +84,7 @@ async function configHandler(
     if (req.method === 'POST') return await handlePost(req);
     return { status: 405 };
   } catch (err) {
-    context.error('config error:', err);
-    return { status: 500, jsonBody: { error: String(err) } };
+    return serverError(context, err);
   }
 }
 

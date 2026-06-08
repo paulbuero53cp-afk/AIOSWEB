@@ -8,7 +8,8 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
-import { listItems, findItem, createItem, updateItem } from '../lib/storage';
+import { listItems, findItem, createItem, updateItem, odataEscape } from '../lib/storage';
+import { serverError } from '../lib/http';
 import { spToIncident, incidentToSp, Incident } from '../lib/mappers';
 import { writeAuditLog, diffObjects } from '../lib/audit';
 import { MOCK_INCIDENTS } from '../lib/mockData';
@@ -71,7 +72,7 @@ async function handlePatch(req: HttpRequest, incId: string): Promise<HttpRespons
     return { status: 200, jsonBody: { ...inc, ...body, updatedAt: new Date().toISOString(), updatedBy: principal.userDetails } };
   }
 
-  const item = await findItem('INCIDENTS', `fields/IncId eq '${incId}'`);
+  const item = await findItem('INCIDENTS', `fields/IncId eq '${odataEscape(incId)}'`);
   if (!item) return { status: 404, jsonBody: { error: `Incident ${incId} nicht gefunden` } };
 
   const before = spToIncident(item.id, item.fields as Record<string, unknown>);
@@ -99,8 +100,7 @@ async function incidentsHandler(req: HttpRequest, context: InvocationContext): P
     if (req.method === 'PATCH') return incId ? await handlePatch(req, incId) : { status: 400 };
     return { status: 405 };
   } catch (err) {
-    context.error('incidents error:', err);
-    return { status: 500, jsonBody: { error: String(err) } };
+    return serverError(context, err);
   }
 }
 

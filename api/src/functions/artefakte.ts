@@ -9,7 +9,8 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
-import { listItems, findItem, createItem, updateItem } from '../lib/storage';
+import { listItems, findItem, createItem, updateItem, odataEscape } from '../lib/storage';
+import { serverError } from '../lib/http';
 import { spToArtefakt, artefaktToSp, Artefakt } from '../lib/mappers';
 import { writeAuditLog } from '../lib/audit';
 import { MOCK_ARTEFAKTE } from '../lib/mockData';
@@ -39,7 +40,7 @@ async function handleGet(
 
   const item = await findItem(
     'ARTEFAKTE',
-    `fields/UCId eq '${ucId}' and fields/ArtType eq '${type}'`,
+    `fields/UCId eq '${odataEscape(ucId)}' and fields/ArtType eq '${odataEscape(type)}'`,
   );
 
   if (!item) return { status: 200, jsonBody: {} }; // leer = noch nicht ausgefüllt
@@ -61,7 +62,7 @@ async function handleGetAll(
     return { status: 200, jsonBody: { ra: uc['ra'] ?? {}, gc: uc['gc'] ?? {}, bc: uc['bc'] ?? {}, dsfa: uc['dsfa'] ?? {} } };
   }
 
-  const items = await listItems('ARTEFAKTE', `fields/UCId eq '${ucId}'`);
+  const items = await listItems('ARTEFAKTE', `fields/UCId eq '${odataEscape(ucId)}'`);
   const result: Record<string, unknown> = { ra: {}, gc: {}, bc: {}, dsfa: {} };
 
   for (const item of items) {
@@ -138,7 +139,7 @@ async function handlePost(
   // Bestehendes Item suchen
   const existing = await findItem(
     'ARTEFAKTE',
-    `fields/UCId eq '${ucId}' and fields/ArtType eq '${type}'`,
+    `fields/UCId eq '${odataEscape(ucId)}' and fields/ArtType eq '${odataEscape(type)}'`,
   );
 
   const artData: Partial<Artefakt> = {
@@ -193,8 +194,7 @@ async function artefakteHandler(
 
     return { status: 405 };
   } catch (err) {
-    context.error('artefakte error:', err);
-    return { status: 500, jsonBody: { error: String(err) } };
+    return serverError(context, err);
   }
 }
 

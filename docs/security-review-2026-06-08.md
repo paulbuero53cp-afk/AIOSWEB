@@ -20,7 +20,7 @@
 | F1 | Client-Secret im Klartext in OneDrive-Ordner | 🔴 | Alle | ⬜ |
 | F2 | Auth-Backdoor über `NODE_ENV` | 🔴 | CISO / Hacker | ✅ |
 | F3 | Übermäßige Graph-Berechtigung `Sites.ReadWrite.All` | 🟠 | CISO | ⬜ |
-| F4 | Interne Fehlerdetails an den Client | 🟡 | CISO | ⬜ |
+| F4 | Interne Fehlerdetails an den Client | 🟡 | CISO | ✅ |
 | F5 | CSP erlaubt `'unsafe-inline'` für Scripts | 🟡 | CISO | ⬜ |
 | F6 | Keine Rate-/Payload-Limits | 🟡 | CISO | ⬜ |
 | F7 | Jeder Tenant-Nutzer wird Viewer (Bootstrap) | 🟡 | CISO / DSB | ⬜ |
@@ -31,7 +31,7 @@
 | F12 | Audit-Log nicht manipulationssicher | 🟠 | ISO 42001 | ⬜ |
 | F13 | Audit-Lücken (Rollen/Config/Export) | 🟠 | ISO 42001 | ⬜ |
 | F14 | Diff-Erfassung unvollständig | 🟢 | ISO 42001 | ⬜ |
-| F15 | OData-/SharePoint-Filter-Injection | 🟡 | Hacker | ⬜ |
+| F15 | OData-/SharePoint-Filter-Injection | 🟡 | Hacker | ✅ |
 | F16 | CSRF bei Cookie-Auth | 🟡 | Hacker | ⬜ |
 | F17 | `frame-ancestors *.sharepoint.com` (Clickjacking) | 🟢 | Hacker | ⬜ |
 
@@ -70,10 +70,10 @@ Ohne `x-ms-client-principal`-Header wurde ein Fake-Admin (`AIOS.Admin`) zurückg
 Die App-Registrierung hat tenant-weiten Lese-/Schreibzugriff auf **alle** SharePoint-Sites. Verstoß gegen Least Privilege; ein kompromittiertes Secret (F1) gefährdet den gesamten Tenant-SharePoint.
 **Mitigation:** Auf `Sites.Selected` umstellen, der App per `Grant-MgSitePermission` nur die AIOS-Site freigeben.
 
-### F4 — Interne Fehlerdetails an den Client 🟡 ⬜
-**Dateien:** `usecases.ts:218`, `incidents.ts:103`, `config.ts:87`, `artefakte.ts:197`
-`String(err)` wird an den Aufrufer zurückgegeben → leakt Graph-/Stacktrace-Interna (Site-IDs, Feldnamen, Pfade).
-**Mitigation:** Generische Client-Message + Correlation-ID; Details nur via `context.error(...)` ins Log.
+### F4 — Interne Fehlerdetails an den Client 🟡 ✅ (behoben 2026-06-08)
+**Dateien:** `usecases.ts`, `incidents.ts`, `config.ts`, `artefakte.ts`, `auditlog.ts`, `users.ts`
+`String(err)` wurde an den Aufrufer zurückgegeben → leakte Graph-/Stacktrace-Interna.
+**Umsetzung:** Zentraler Helfer `lib/http.ts → serverError(context, err)` — loggt Details via `context.error` mit `invocationId` und gibt dem Client nur `{ error: 'Interner Fehler', ref: <invocationId> }` zurück. In allen 6 Handler-Catches eingesetzt.
 
 ### F5 — CSP erlaubt `'unsafe-inline'` für Scripts 🟡 ⬜
 **Datei:** `staticwebapp.config.json:23`
@@ -135,10 +135,10 @@ Bei `create`/`delete` wird `{}` als Diff übergeben → Inhalt neuer/gelöschter
 
 ## 🥷 Friendly Hacker — Offensive
 
-### F15 — OData-/SharePoint-Filter-Injection 🟡 ⬜
-**Dateien:** `usecases.ts:51,148`; `artefakte.ts:42,64,141`; `auditlog.ts:35`; `users.ts:151`
-Pfad-/Query-Parameter (`ucId`, `entity`, `email`) werden ungeprüft in OData-Filter interpoliert; ein `'` bricht aus dem String aus. Impact durch ohnehin breiten Lesezugriff begrenzt (Filter-Bypass/Fehler/DoS), aber klassische Injection-Schwäche. `type` ist bereits gewhitelistet (gut).
-**Mitigation:** Single-Quotes verdoppeln (`v.replace(/'/g, "''")`) + Format-Whitelist für IDs (`/^UC-\d{4}-\d{2}-\d{3}$/` etc.).
+### F15 — OData-/SharePoint-Filter-Injection 🟡 ✅ (behoben 2026-06-08)
+**Dateien:** `usecases.ts`, `artefakte.ts`, `auditlog.ts`
+Pfad-/Query-Parameter (`ucId`, `entity`, `type`) wurden ungeprüft in OData-Filter interpoliert; ein `'` bricht aus dem String aus.
+**Umsetzung:** `lib/sharepoint.ts → odataEscape(v)` verdoppelt Single-Quotes; auf alle interpolierten Filterwerte angewandt. Der frühere `email`-Filter in `users.ts:151` entfiel bereits durch die In-Memory-Umstellung (Commit `2e83d3f`). `type` war zusätzlich schon via `isValidType` gewhitelistet.
 
 ### F16 — CSRF bei Cookie-basierter Auth 🟡 ⬜
 **Datei:** `src/lib/api.ts:14`

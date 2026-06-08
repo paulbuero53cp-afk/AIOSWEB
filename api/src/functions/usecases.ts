@@ -9,7 +9,8 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
-import { listItems, findItem, createItem, updateItem } from '../lib/storage';
+import { listItems, findItem, createItem, updateItem, odataEscape } from '../lib/storage';
+import { serverError } from '../lib/http';
 import { spToUC, ucToSp, UseCase } from '../lib/mappers';
 import { writeAuditLog, diffObjects } from '../lib/audit';
 import { MOCK_USECASES } from '../lib/mockData';
@@ -48,7 +49,7 @@ async function handleGetOne(
       : { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
   }
 
-  const item = await findItem('USECASES', `fields/UCId eq '${ucId}'`);
+  const item = await findItem('USECASES', `fields/UCId eq '${odataEscape(ucId)}'`);
   if (!item) return { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
 
   return { status: 200, jsonBody: spToUC(item.id, item.fields as Record<string, unknown>) };
@@ -145,7 +146,7 @@ async function handlePatch(
     return { status: 200, jsonBody: { ...uc, ...body, updatedAt: new Date().toISOString(), updatedBy: principal.userDetails } };
   }
 
-  const item = await findItem('USECASES', `fields/UCId eq '${ucId}'`);
+  const item = await findItem('USECASES', `fields/UCId eq '${odataEscape(ucId)}'`);
   if (!item) return { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
 
   const before = spToUC(item.id, item.fields as Record<string, unknown>);
@@ -185,7 +186,7 @@ async function handleDelete(
 
   if (MOCK) return { status: 204 };
 
-  const item = await findItem('USECASES', `fields/UCId eq '${ucId}'`);
+  const item = await findItem('USECASES', `fields/UCId eq '${odataEscape(ucId)}'`);
   if (!item) return { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
 
   await updateItem('USECASES', item.id, {
@@ -214,8 +215,7 @@ async function usecasesHandler(
 
     return { status: 405, jsonBody: { error: 'Method not allowed' } };
   } catch (err) {
-    context.error('usecases error:', err);
-    return { status: 500, jsonBody: { error: 'Interner Fehler', detail: String(err) } };
+    return serverError(context, err);
   }
 }
 

@@ -6,7 +6,8 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireRole, isAuthError } from '../lib/auth';
-import { listItems } from '../lib/storage';
+import { listItems, odataEscape } from '../lib/storage';
+import { serverError } from '../lib/http';
 import { spToAudit } from '../lib/mappers';
 import { MOCK_AUDIT } from '../lib/mockData';
 
@@ -32,7 +33,7 @@ async function auditlogHandler(
 
   try {
     const filter = entityParam
-      ? `fields/Entity eq '${entityParam}'`
+      ? `fields/Entity eq '${odataEscape(entityParam)}'`
       : undefined;
 
     const items = await listItems('AUDITLOG', filter, undefined, limit);
@@ -42,8 +43,7 @@ async function auditlogHandler(
 
     return { status: 200, jsonBody: entries };
   } catch (err) {
-    context.error('auditlog error:', err);
-    return { status: 500, jsonBody: { error: String(err) } };
+    return serverError(context, err);
   }
 }
 

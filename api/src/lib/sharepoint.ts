@@ -9,6 +9,15 @@
 
 import { getGraphClient } from './graphClient';
 
+/**
+ * Escaped einen Wert für die Verwendung in einem OData-String-Literal
+ * (`fields/X eq '<wert>'`). Single-Quotes werden verdoppelt — verhindert
+ * Filter-Injection über Pfad-/Query-Parameter (F15).
+ */
+export function odataEscape(v: string): string {
+  return v.replace(/'/g, "''");
+}
+
 // ── SharePoint-Feldnamen-Übersetzung ──────────────────────────
 // SP kodiert Spaltennamen die mit zwei Großbuchstaben beginnen:
 // GT→_x0047_T, SB→_x0053_B, MC→_x004d_C
