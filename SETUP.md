@@ -257,3 +257,83 @@ npm run dev
 | SharePoint-Fehler | App hat keine `Sites.ReadWrite.All` Berechtigung | Entra ID → Admin Consent erteilen |
 | Leere App nach Login | Provisioning nicht ausgeführt | Schritt 4 wiederholen |
 | Keine Admin-Rechte im UI | Rolle nicht zugewiesen | Schritt 8 wiederholen |
+
+---
+
+## Manuelles Deployment (ohne CI/CD)
+
+### Wann sinnvoll?
+
+- Kein GitHub-Repository vorhanden (lokale Entwicklung / Whitelabel-Übergabe)
+- GitHub Actions sind deaktiviert oder nicht konfiguriert
+- Schneller Hotfix ohne Git-Push
+- Einmalige Demo-Instanz ohne dauerhaften CI/CD-Aufwand
+
+---
+
+### Schritt-für-Schritt
+
+#### 1. Deploy-Script ausführen
+
+```powershell
+# Im Projektverzeichnis (aios/)
+.\scripts\Deploy-Manual.ps1
+```
+
+Das Script führt automatisch aus:
+- `npm ci && npm run build` (Frontend, Vite/TypeScript)
+- `staticwebapp.config.json` wird nach `dist/` kopiert
+- `cd api && npm ci && npm run build && npm ci --omit=dev` (Azure Functions v4)
+- Alles wird als ZIP auf dem Desktop abgelegt: `aios-deploy-YYYY-MM-DD.zip`
+
+Nur packen ohne neu zu bauen (wenn `dist/` und `api/dist/` aktuell sind):
+
+```powershell
+.\scripts\Deploy-Manual.ps1 -SkipBuild
+```
+
+---
+
+#### 2. Deployment-Token aus Azure Portal holen
+
+Azure Portal → **Static Web Apps** → `[Deine App]` → **Übersicht**  
+→ "Deployment-Token anzeigen" → kopieren
+
+---
+
+#### 3a. Deployen via `swa deploy` (empfohlen)
+
+```powershell
+npx swa deploy ./dist --api-location ./api --deployment-token <TOKEN>
+```
+
+Der SWA CLI (`@azure/static-web-apps-cli`) ist bereits als devDependency installiert.  
+Alternativ global: `npm install -g @azure/static-web-apps-cli`
+
+---
+
+#### 3b. Alternativ: Azure Portal ZIP-Upload
+
+Azure Portal → **Static Web Apps** → `[Deine App]` → Übersicht  
+→ "ZIP-Datei hochladen" (Preview-Feature, nicht immer sichtbar)
+
+> **Hinweis:** Option A (`swa deploy`) ist zuverlässiger und unterstützt auch die API-Location korrekt.
+
+---
+
+### Umgebungsvariablen (einmalig setzen)
+
+Die folgenden Werte müssen **einmalig** in Azure konfiguriert werden — sie werden nicht im ZIP mitgeliefert:
+
+Azure Portal → **Static Web Apps** → `[Deine App]` → **Konfiguration** → Anwendungseinstellungen:
+
+| Variable | Wert |
+|---|---|
+| `AZURE_TENANT_ID` | Verzeichnis-ID aus Entra ID (Schritt 2) |
+| `AZURE_CLIENT_ID` | Anwendungs-ID aus Entra ID (Schritt 2) |
+| `AZURE_CLIENT_SECRET` | Geheimer Clientschlüssel (Schritt 2) |
+| `SHAREPOINT_SITE_URL` | `https://[TENANT].sharepoint.com/sites/AIOS` |
+
+→ **Speichern** → App wird automatisch neu gestartet.
+
+> Diese Einstellungen bleiben bei jedem Deployment erhalten — nur einmalig nötig.
