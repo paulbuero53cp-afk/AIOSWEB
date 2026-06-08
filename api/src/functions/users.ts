@@ -46,75 +46,72 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
     return { status: 200, jsonBody: me };
   }
 
-  // Suche in AIOS_Users nach userId (primär) oder Email (Fallback)
-  const byId    = await findItem('USERS', `fields/AadUserId eq '${principal.userId}'`);
-  const byEmail = byId
-    ? null
-    : await findItem('USERS', `fields/Email eq '${principal.userDetails}'`);
-  const spItem  = byId ?? byEmail;
-
-  if (spItem) {
-    const user = spToAiosUser(spItem.id, spItem.fields as Record<string, unknown>);
-
-    // LastLogin + AadUserId aktualisieren (fire & forget)
-    const patch: Record<string, unknown> = { LastLogin: new Date().toISOString() };
-    if (!user.aadUserId && principal.userId) {
-      patch['AadUserId'] = principal.userId;
-      user.aadUserId = principal.userId;
-    }
-    updateItem('USERS', spItem.id, patch).catch(() => {/* ignorieren */});
-
-    if (!user.active) {
-      return { status: 403, jsonBody: { error: 'Zugriff gesperrt. Bitte Admin kontaktieren.' } };
-    }
-    return { status: 200, jsonBody: user };
-  }
-
-  // Fallback 1: SWA userRoles (für bestehende Instanzen vor SP-Listenmigration)
-  const swaRoles = (principal.userRoles ?? []).filter(r => r.startsWith('AIOS.'));
-  if (swaRoles.length > 0) {
-    const fallbackUser: AiosUser = {
-      id: '',
-      email:       principal.userDetails,
-      displayName: principal.userDetails,
-      aadUserId:   principal.userId,
-      role:        swaRoles[0] as AiosUser['role'],
-      active:      true,
-      invitedAt:   '',
-      invitedBy:   'SWA-Fallback',
-      lastLogin:   new Date().toISOString(),
-    };
-    return { status: 200, jsonBody: { ...fallbackUser, _fallback: true } };
-  }
-
-  // Fallback 2: Bootstrap — wenn AIOS_Users noch leer/minimal ist,
-  // bekommt jeder Azure-AD-authentifizierte User AIOS.Viewer
-  // (Sicherheitsnetz für Erstinbetriebnahme; Admin sieht alle im Users-Screen)
+  // Gesamter SP-Block in try/catch — Graph-Fehler sollen nicht den Login blockieren
   try {
-    const allUsers = await listItems('USERS');
-    if (allUsers.length <= 3) {
-      const bootstrapUser: AiosUser = {
-        id: '',
-        email:       principal.userDetails,
-        displayName: principal.userDetails,
-        aadUserId:   principal.userId,
-        role:        'AIOS.Viewer',
-        active:      true,
-        invitedAt:   '',
-        invitedBy:   'Bootstrap-Fallback',
-        lastLogin:   new Date().toISOString(),
-      };
-      return { status: 200, jsonBody: { ...bootstrapUser, _bootstrap: true } };
-    }
-  } catch { /* Lese-Fehler ignorieren */ }
+    // Suche nach userId (primär) oder Email (Fallback, case-insensitive via tolower)
+    const byId    = await findItem('USERS', `fields/AadUserId eq '${principal.userId}'`);
+    const byEmail = byId
+      ? null
+      : await findItem('USERS', `fields/Email eq '${principal.userDetails}'`);
+    const spItem  = byId ?? byEmail;
 
-  // Kein Eintrag, keine Rolle → Zugriff verweigert
+    if (spItem) {
+      const user = spToAiosUser(spItem.id, spItem.fields as Record<string, unknown>);
+
+      // LastLogin + AadUserId aktualisieren (fire & forget)
+      const patch: Record<string, unknown> = { LastLogin: new Date().toISOString() };
+      if (!user.aadUserId && principal.userId) {
+        patch['AadUserId'] = principal.userId;
+        user.aadUserId = principal.userId;
+      }
+      updateItem('USERS', spItem.id, patch).catch(() => {/* ignorieren */});
+
+      if (!user.active) {
+        return { status: 403, jsonBody: { error: 'Zugriff gesperrt. Bitte Admin kontaktieren.' } };
+      }
+      return { status: 200, jsonBody: user };
+    }
+
+    // Fallback 1: SWA userRoles
+    const swaRoles = (principal.userRoles ?? []).filter(r => r.startsWith('AIOS.'));
+    if (swaRoles.length > 0) {
+      return { status: 200, jsonBody: {
+        id: '', email: principal.userDetails, displayName: principal.userDetails,
+        aadUserId: principal.userId, role: swaRoles[0],
+        active: true, invitedAt: '', invitedBy: 'SWA-Fallback',
+        lastLogin: new Date().toISOString(), _fallback: true,
+      }};
+    }
+
+    // Fallback 2: Bootstrap — Liste hat wenige Einträge → Viewer gewähren
+    const allUsers = await listItems('USERS');
+    if (allUsers.length <= 5) {
+      return { status: 200, jsonBody: {
+        id: '', email: principal.userDetails, displayName: principal.userDetails,
+        aadUserId: principal.userId, role: 'AIOS.Viewer',
+        active: true, invitedAt: '', invitedBy: 'Bootstrap',
+        lastLogin: new Date().toISOString(), _bootstrap: true,
+      }};
+    }
+
+  } catch (graphErr) {
+    // Graph-Fehler → Viewer-Fallback damit Login nicht blockiert wird
+    // Admin sieht dies als _graphError Flag und kann debuggen
+    const errMsg = graphErr instanceof Error ? graphErr.message : String(graphErr);
+    return { status: 200, jsonBody: {
+      id: '', email: principal.userDetails, displayName: principal.userDetails,
+      aadUserId: principal.userId, role: 'AIOS.Viewer',
+      active: true, invitedAt: '', invitedBy: 'Error-Fallback',
+      lastLogin: new Date().toISOString(), _graphError: errMsg,
+    }};
+  }
+
+  // Kein Eintrag, keine Rolle, Liste hat viele User → wirklich kein Zugriff
   return {
     status: 403,
     jsonBody: {
       error: 'Kein AIOS-Benutzereintrag gefunden.',
       email: principal.userDetails,
-      hint:  'Bitte Administrator kontaktieren oder eigenen Eintrag in AIOS_Users anlegen.',
     },
   };
 }

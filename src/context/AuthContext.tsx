@@ -61,17 +61,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const user = (await res.json()) as AiosUser;
             setAiosUser(user);
           } else if (res.status === 403) {
-            // Kein Eintrag und kein SWA-Fallback → kein Zugriff
-            setAiosUser(null);
+            // Explizit gesperrter Account (active=false)
+            const body = await res.json().catch(() => ({}) as Record<string, string>);
+            if (String(body.error ?? '').includes('gesperrt')) {
+              setAiosUser(null); // bleibt null → "Kein Zugriff"-Screen
+            } else {
+              // "Nicht gefunden" — Viewer-Fallback damit Login funktioniert
+              setAiosUser(_buildFallbackUser(cp, 'AIOS.Viewer'));
+            }
           } else {
-            // API-Fehler → SWA-Rollen-Fallback
+            // API-Fehler (5xx etc.) → SWA-Rolle oder Viewer-Fallback
             const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.'));
-            setAiosUser(swaRole ? _buildFallbackUser(cp, swaRole) : null);
+            setAiosUser(_buildFallbackUser(cp, swaRole ?? 'AIOS.Viewer'));
           }
         } catch {
-          // Netzwerkfehler → SWA-Fallback
+          // Netzwerkfehler → Viewer-Fallback
           const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.'));
-          setAiosUser(swaRole ? _buildFallbackUser(cp, swaRole) : null);
+          setAiosUser(_buildFallbackUser(cp, swaRole ?? 'AIOS.Viewer'));
         } finally {
           if (!cancelled) setLoading(false);
         }
