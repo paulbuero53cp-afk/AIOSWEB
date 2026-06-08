@@ -15,7 +15,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, isAuthError, ClientPrincipal } from '../lib/auth';
-import { listItems, findItem, createItem, updateItem, deleteItem, getItem } from '../lib/storage';
+import { listItems, createItem, updateItem, deleteItem, getItem } from '../lib/storage';
 import { spToAiosUser, aiosUserToSp, AiosUser } from '../lib/mappers';
 import { MOCK_USERS } from '../lib/mockData';
 
@@ -188,13 +188,22 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
     return { status: 201, jsonBody: created };
   }
 
-  // Doppelten Eintrag verhindern
-  const existing = await findItem('USERS', `fields/Email eq '${newUser.email}'`);
-  if (existing) {
+  // Doppelten Eintrag verhindern — In-Memory-Filter (OData auf nicht-
+  // indizierten Spalten ist hier unzuverlässig, vgl. /api/users/me).
+  const allItems = await listItems('USERS');
+  const exists = allItems.some(item => {
+    const f = item.fields as Record<string, unknown>;
+    return f['Email'] && String(f['Email']).toLowerCase() === newUser.email;
+  });
+  if (exists) {
     return { status: 409, jsonBody: { error: `Benutzer mit E-Mail ${newUser.email} existiert bereits` } };
   }
 
-  const created = await createItem('USERS', aiosUserToSp(newUser));
+  // Title ist in SharePoint Pflichtfeld → explizit setzen, sonst 500.
+  const created = await createItem('USERS', {
+    Title: newUser.displayName || newUser.email,
+    ...aiosUserToSp(newUser),
+  });
   return { status: 201, jsonBody: spToAiosUser(created.id, created.fields as Record<string, unknown>) };
 }
 

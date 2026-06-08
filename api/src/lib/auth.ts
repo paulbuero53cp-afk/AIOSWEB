@@ -19,8 +19,10 @@ export interface ClientPrincipal {
 export function getClientPrincipal(req: HttpRequest): ClientPrincipal | null {
   const header = req.headers.get('x-ms-client-principal');
   if (!header) {
-    // Lokal (swa-cli) sendet ggf. keinen Header — Entwicklungsmodus
-    if (process.env.FUNCTIONS_WORKER_RUNTIME && process.env.NODE_ENV !== 'production') {
+    // Lokaler Dev-Modus: NUR bei explizitem Opt-in (AIOS_DEV_AUTH=true).
+    // Früher an (NODE_ENV !== 'production') gekoppelt — unsicher, da Azure
+    // NODE_ENV nicht zwingend auf 'production' setzt → Admin-Backdoor (F2).
+    if (process.env['AIOS_DEV_AUTH'] === 'true') {
       return {
         identityProvider: 'aad',
         userId: 'dev-user',

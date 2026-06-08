@@ -18,7 +18,7 @@
 | ID | Finding | Schwere | Rolle | Status |
 |----|---------|---------|-------|--------|
 | F1 | Client-Secret im Klartext in OneDrive-Ordner | 🔴 | Alle | ⬜ |
-| F2 | Auth-Backdoor über `NODE_ENV` | 🔴 | CISO / Hacker | ⬜ |
+| F2 | Auth-Backdoor über `NODE_ENV` | 🔴 | CISO / Hacker | ✅ |
 | F3 | Übermäßige Graph-Berechtigung `Sites.ReadWrite.All` | 🟠 | CISO | ⬜ |
 | F4 | Interne Fehlerdetails an den Client | 🟡 | CISO | ⬜ |
 | F5 | CSP erlaubt `'unsafe-inline'` für Scripts | 🟡 | CISO | ⬜ |
@@ -54,13 +54,12 @@
 2. Projekt/`local.settings.json` aus dem OneDrive-Sync-Pfad herausnehmen.
 3. Produktion auf **System-Assigned Managed Identity** umstellen — `graphClient.ts` nutzt bereits `DefaultAzureCredential`, wenn kein Secret gesetzt ist. In Azure also **kein** `AZURE_CLIENT_SECRET` als App-Setting hinterlegen.
 
-### F2 — Auth-Backdoor über `NODE_ENV` 🔴 ⬜
-**Datei:** `api/src/lib/auth.ts:23-30`
-Ohne `x-ms-client-principal`-Header wird ein Fake-Admin (`AIOS.Admin`) zurückgegeben, sofern `NODE_ENV !== 'production'`. Azure Functions setzt `NODE_ENV` **nicht** automatisch auf `production` → in Produktion ist die Bedingung wahr, falls die Variable nicht explizit gesetzt ist. Aktuell durch SWA-erzwungenen Login abgeschirmt (Managed Functions); bei Wechsel auf BYO/Linked Functions (eigene `*.azurewebsites.net`-URL) wird daraus **Admin ohne Login**.
+### F2 — Auth-Backdoor über `NODE_ENV` 🔴 ✅ (behoben 2026-06-08, Commit folgt)
+**Datei:** `api/src/lib/auth.ts:19-33`
+Ohne `x-ms-client-principal`-Header wurde ein Fake-Admin (`AIOS.Admin`) zurückgegeben, sofern `NODE_ENV !== 'production'`. Azure Functions setzt `NODE_ENV` **nicht** automatisch auf `production` → in Produktion war die Bedingung wahr, falls die Variable nicht explizit gesetzt ist.
 
-**Mitigation:**
-- Dev-Fallback an explizites Opt-in koppeln (z.B. `process.env['AIOS_DEV_AUTH'] === 'true'`), nicht an die Abwesenheit von `NODE_ENV=production`.
-- `NODE_ENV=production` zusätzlich als Function-App-Setting hart setzen.
+**Umsetzung:** Dev-Fallback jetzt an explizites Opt-in `AIOS_DEV_AUTH === 'true'` gekoppelt. Lokal in `local.settings.json` gesetzt (gitignored), im `.example` dokumentiert mit Warnung „In Azure NIEMALS setzen".
+**⚠️ Verbleibende Aufgabe:** Sicherstellen, dass `AIOS_DEV_AUTH` in den Azure Function-App-Settings **nicht** existiert (Default: nicht gesetzt → sicher).
 
 ---
 

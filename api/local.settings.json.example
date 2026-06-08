@@ -7,6 +7,10 @@
     "USE_MOCK_DATA": "true",
     "USE_LOCAL_DB": "false",
 
+    "_comment_AIOS_DEV_AUTH": "NUR lokal! Gewaehrt ohne SWA-Header einen Dev-Admin. In Azure NIEMALS setzen.",
+    "AIOS_DEV_AUTH": "true",
+
+
     "AZURE_TENANT_ID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "AZURE_CLIENT_ID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "AZURE_CLIENT_SECRET": "your-client-secret-here",
