@@ -56,14 +56,13 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
   if (spItem) {
     const user = spToAiosUser(spItem.id, spItem.fields as Record<string, unknown>);
 
-    // LastLogin aktualisieren (fire & forget — kein await nötig)
-    updateItem('USERS', spItem.id, { LastLogin: new Date().toISOString() }).catch(() => {/* ignorieren */});
-
-    // AadUserId nachtragen falls fehlend (erste Anmeldung via Email-Lookup)
+    // LastLogin + AadUserId aktualisieren (fire & forget)
+    const patch: Record<string, unknown> = { LastLogin: new Date().toISOString() };
     if (!user.aadUserId && principal.userId) {
-      updateItem('USERS', spItem.id, { AadUserId: principal.userId }).catch(() => {/* ignorieren */});
+      patch['AadUserId'] = principal.userId;
       user.aadUserId = principal.userId;
     }
+    updateItem('USERS', spItem.id, patch).catch(() => {/* ignorieren */});
 
     if (!user.active) {
       return { status: 403, jsonBody: { error: 'Zugriff gesperrt. Bitte Admin kontaktieren.' } };
@@ -71,7 +70,7 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
     return { status: 200, jsonBody: user };
   }
 
-  // Fallback: SWA userRoles (für bestehende Instanzen vor SP-Listenmigration)
+  // Fallback 1: SWA userRoles (für bestehende Instanzen vor SP-Listenmigration)
   const swaRoles = (principal.userRoles ?? []).filter(r => r.startsWith('AIOS.'));
   if (swaRoles.length > 0) {
     const fallbackUser: AiosUser = {
@@ -88,10 +87,35 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
     return { status: 200, jsonBody: { ...fallbackUser, _fallback: true } };
   }
 
-  // Kein Eintrag, keine SWA-Rolle → kein Zugriff
+  // Fallback 2: Bootstrap — wenn AIOS_Users noch leer/minimal ist,
+  // bekommt jeder Azure-AD-authentifizierte User AIOS.Viewer
+  // (Sicherheitsnetz für Erstinbetriebnahme; Admin sieht alle im Users-Screen)
+  try {
+    const allUsers = await listItems('USERS');
+    if (allUsers.length <= 3) {
+      const bootstrapUser: AiosUser = {
+        id: '',
+        email:       principal.userDetails,
+        displayName: principal.userDetails,
+        aadUserId:   principal.userId,
+        role:        'AIOS.Viewer',
+        active:      true,
+        invitedAt:   '',
+        invitedBy:   'Bootstrap-Fallback',
+        lastLogin:   new Date().toISOString(),
+      };
+      return { status: 200, jsonBody: { ...bootstrapUser, _bootstrap: true } };
+    }
+  } catch { /* Lese-Fehler ignorieren */ }
+
+  // Kein Eintrag, keine Rolle → Zugriff verweigert
   return {
     status: 403,
-    jsonBody: { error: 'Kein AIOS-Benutzereintrag gefunden. Bitte Administrator kontaktieren.' },
+    jsonBody: {
+      error: 'Kein AIOS-Benutzereintrag gefunden.',
+      email: principal.userDetails,
+      hint:  'Bitte Administrator kontaktieren oder eigenen Eintrag in AIOS_Users anlegen.',
+    },
   };
 }
 

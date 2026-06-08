@@ -156,7 +156,7 @@ function Sidebar({
 
 // ── AppShell ──────────────────────────────────────────────────
 function AppShell() {
-  const { loading, principal, isAuthenticated } = useAuth();
+  const { loading, principal, isAuthenticated, aiosUser } = useAuth();
   const config = useAppConfig();
   const [screen, setScreen] = useState<Screen>('dashboard');
   const [selectedUcId, setSelectedUcId] = useState<string | undefined>(undefined);
@@ -187,6 +187,25 @@ function AppShell() {
     return (
       <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
         <a href="/.auth/login/aad" className="btn btn-primary">Mit Microsoft anmelden</a>
+      </div>
+    );
+  }
+
+  // Eingeloggt aber kein AIOS-Benutzereintrag → klare Fehlermeldung
+  if (!aiosUser) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', fontFamily: 'DM Sans,sans-serif' }}>
+        <div style={{ textAlign: 'center', maxWidth: 420, padding: 32 }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
+          <h2 style={{ margin: '0 0 8px', fontSize: 20, color: 'var(--petrol)' }}>Kein Zugriff</h2>
+          <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6 }}>
+            Dein Konto (<strong>{principal?.userDetails}</strong>) ist noch nicht für AIOS freigeschaltet.
+            <br />Bitte wende dich an den Administrator.
+          </p>
+          <a href="/.auth/logout" className="btn btn-outline btn-sm" style={{ marginTop: 20, display: 'inline-block' }}>
+            Abmelden
+          </a>
+        </div>
       </div>
     );
   }

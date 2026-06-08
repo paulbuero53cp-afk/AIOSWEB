@@ -98,7 +98,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     principal,
     aiosUser,
     loading,
-    isAuthenticated: aiosUser !== null,
+    // isAuthenticated = bei Azure AD eingeloggt (principal != null)
+    // isAuthorized    = hat AIOS-Eintrag/Rolle (aiosUser != null)
+    isAuthenticated: principal !== null,
     hasRole,
     hasAnyRole,
     isViewer:   hasAnyRole(['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']),
