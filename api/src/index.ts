@@ -8,3 +8,5 @@ import './functions/incidents';
 import './functions/artefakte';
 import './functions/auditlog';
 import './functions/config';
+import './functions/users';
+import './functions/debug';   // TEMPORÄR — /api/diag; nach Verifikation entfernen
