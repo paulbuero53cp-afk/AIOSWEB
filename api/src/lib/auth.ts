@@ -6,7 +6,8 @@
 
 import { HttpRequest, HttpResponseInit } from '@azure/functions';
 
-export type AiosRole = 'AIOS.Viewer' | 'AIOS.Editor' | 'AIOS.Approver' | 'AIOS.Admin';
+export type AiosRole = 'AIOS.Viewer' | 'AIOS.Editor' | 'AIOS.Approver' | 'AIOS.Admin'
+                    | 'AIOS_Viewer' | 'AIOS_Editor' | 'AIOS_Approver' | 'AIOS_Admin';
 
 export interface ClientPrincipal {
   identityProvider: string;
@@ -51,7 +52,8 @@ export function requireAuth(req: HttpRequest): ClientPrincipal | HttpResponseIni
     return { status: 401, jsonBody: { error: 'Nicht authentifiziert' } };
   }
   // Akzeptiere AIOS-Rollen (Standard SKU) ODER schlicht 'authenticated' (Free SKU)
-  const hasAios = hasAnyRole(principal, ['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+  const hasAios = hasAnyRole(principal, ['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin',
+                                          'AIOS_Viewer', 'AIOS_Editor', 'AIOS_Approver', 'AIOS_Admin']);
   const isAuthenticated = principal.userRoles?.includes('authenticated') ?? false;
   if (!hasAios && !isAuthenticated) {
     return { status: 403, jsonBody: { error: 'Keine AIOS-Rolle zugewiesen' } };

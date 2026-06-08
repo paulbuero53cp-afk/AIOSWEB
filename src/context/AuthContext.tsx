@@ -73,13 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
           } else {
             // Jeder API-Fehler (403, 500, …) → Viewer-Fallback
-            const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.'));
-            setAiosUser(_buildFallbackUser(cp, swaRole ?? 'AIOS.Viewer'));
+            const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.') || r.startsWith('AIOS_'));
+            setAiosUser(_buildFallbackUser(cp, _normalizeSwaRole(swaRole ?? 'AIOS.Viewer')));
           }
         } catch {
           // Netzwerkfehler / Timeout → Viewer-Fallback
-          const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.'));
-          setAiosUser(_buildFallbackUser(cp, swaRole ?? 'AIOS.Viewer'));
+          const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.') || r.startsWith('AIOS_'));
+          setAiosUser(_buildFallbackUser(cp, _normalizeSwaRole(swaRole ?? 'AIOS.Viewer')));
         } finally {
           if (!cancelled) setLoading(false);
         }
@@ -119,6 +119,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+/** SWA-Rollen (Unterstrich) auf interne Punkt-Notation mappen */
+function _normalizeSwaRole(role: string): string {
+  return role.replace(/_/g, '.');   // AIOS_Admin → AIOS.Admin
 }
 
 function _buildFallbackUser(cp: ClientPrincipal, role: string): AiosUser {

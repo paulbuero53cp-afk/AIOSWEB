@@ -76,12 +76,13 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
       return { status: 200, jsonBody: user };
     }
 
-    // Fallback 1: SWA userRoles
-    const swaRoles = (principal.userRoles ?? []).filter(r => r.startsWith('AIOS.'));
+    // Fallback 1: SWA userRoles (AIOS_Admin → AIOS.Admin normalisieren)
+    const swaRoles = (principal.userRoles ?? []).filter(r => r.startsWith('AIOS.') || r.startsWith('AIOS_'));
     if (swaRoles.length > 0) {
+      const normalizedRole = swaRoles[0].replace(/_/g, '.');
       return { status: 200, jsonBody: {
         id: '', email: principal.userDetails, displayName: principal.userDetails,
-        aadUserId: principal.userId, role: swaRoles[0],
+        aadUserId: principal.userId, role: normalizedRole,
         active: true, invitedAt: '', invitedBy: 'SWA-Fallback',
         lastLogin: new Date().toISOString(), _fallback: true,
       }};
