@@ -31,7 +31,7 @@ async function handleGet(
   ucId: string,
 ): Promise<HttpResponseInit> {
   // F10: Artefakt-Inhalte (inkl. DSFA) nur für Editor+ — nicht für Viewer.
-  const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) {
@@ -56,7 +56,7 @@ async function handleGetAll(
   ucId: string,
 ): Promise<HttpResponseInit> {
   // F10: Artefakt-Inhalte (inkl. DSFA) nur für Editor+ — nicht für Viewer.
-  const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) {
@@ -104,7 +104,7 @@ async function handleStatus(req: HttpRequest): Promise<HttpResponseInit> {
 
 // ── GET vollständiger Export (Admin) ─────────────────────────
 async function handleExport(req: HttpRequest): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) return { status: 200, jsonBody: MOCK_ARTEFAKTE };
@@ -133,7 +133,7 @@ async function handlePost(
   type: ArtType,
   ucId: string,
 ): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   const payload = await req.json() as Record<string, unknown>;

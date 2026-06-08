@@ -14,7 +14,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { requireAuth, isAuthError, ClientPrincipal } from '../lib/auth';
+import { requireAuth, isAuthError, ClientPrincipal, resolveEffectiveRole } from '../lib/auth';
 import { listItems, createItem, updateItem, deleteItem, getItem } from '../lib/storage';
 import { spToAiosUser, aiosUserToSp, AiosUser } from '../lib/mappers';
 import { MOCK_USERS } from '../lib/mockData';
@@ -26,34 +26,8 @@ const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 // explizitem Opt-in. Default aus → "kein Eintrag = kein Zugriff".
 const BOOTSTRAP = process.env['AIOS_BOOTSTRAP'] === 'true';
 
-// ── Rollen-Auflösung ──────────────────────────────────────────
-// Die SP-Liste AIOS_Users ist die Autorität für Rollen — NICHT die
-// SWA-userRoles. Bei Free SKU liefert SWA nur 'authenticated', nie
-// AIOS.Admin. Frontend (isAdmin via /me) und Backend-Gates müssen
-// dieselbe Quelle nutzen, sonst sieht ein SP-Admin zwar den Screen,
-// bekommt aber 403 auf /api/users (→ "0 Benutzer" trotz Einträgen).
-async function resolveEffectiveRole(principal: ClientPrincipal): Promise<string | null> {
-  try {
-    const allItems = await listItems('USERS');
-    const emailLower = principal.userDetails.toLowerCase();
-    const spItem = allItems.find(item => {
-      const f = item.fields as Record<string, unknown>;
-      return (
-        (f['AadUserId'] && String(f['AadUserId']) === principal.userId) ||
-        (f['Email'] && String(f['Email']).toLowerCase() === emailLower)
-      );
-    });
-    if (spItem) {
-      const u = spToAiosUser(spItem.id, spItem.fields as Record<string, unknown>);
-      return u.active ? u.role : null;
-    }
-  } catch {
-    /* Graph-Fehler → SWA-Fallback unten */
-  }
-  // Fallback: SWA-Rolle (falls Standard SKU mit Role-Management konfiguriert)
-  const swaRole = (principal.userRoles ?? []).find(r => r.startsWith('AIOS.') || r.startsWith('AIOS_'));
-  return swaRole ? swaRole.replace(/_/g, '.') : null;
-}
+// resolveEffectiveRole lebt jetzt zentral in ../lib/auth (dieselbe Quelle
+// AIOS_Users wird dort auch von requireRole genutzt).
 
 // Admin-Gate auf Basis der SP-aufgelösten Rolle (statt SWA userRoles).
 async function requireAdmin(req: HttpRequest): Promise<ClientPrincipal | HttpResponseInit> {

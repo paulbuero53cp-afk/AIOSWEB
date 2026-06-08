@@ -5,6 +5,10 @@
 // ─────────────────────────────────────────────────────────────
 
 import { HttpRequest, HttpResponseInit } from '@azure/functions';
+import { listItems } from './storage';
+import { spToAiosUser } from './mappers';
+
+const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
 export type AiosRole = 'AIOS.Viewer' | 'AIOS.Editor' | 'AIOS.Approver' | 'AIOS.Admin'
                     | 'AIOS_Viewer' | 'AIOS_Editor' | 'AIOS_Approver' | 'AIOS_Admin';
@@ -72,14 +76,55 @@ export function requireAuth(req: HttpRequest): ClientPrincipal | HttpResponseIni
   return principal;
 }
 
-export function requireRole(
+// ── Effektive Rolle auflösen ──────────────────────────────────
+// Die SP-Liste AIOS_Users ist die Autorität für Rollen — NICHT die
+// SWA-userRoles. Ohne Role-Management/rolesSource liefert SWA nur
+// 'authenticated', nie AIOS.Admin/Editor. Diese Auflösung macht die
+// App tenant-portabel: Rollen werden allein über AIOS_Users gepflegt.
+export async function resolveEffectiveRole(
+  principal: ClientPrincipal,
+): Promise<string | null> {
+  try {
+    const allItems = await listItems('USERS');
+    const emailLower = principal.userDetails.toLowerCase();
+    const spItem = allItems.find(item => {
+      const f = item.fields as Record<string, unknown>;
+      return (
+        (f['AadUserId'] && String(f['AadUserId']) === principal.userId) ||
+        (f['Email'] && String(f['Email']).toLowerCase() === emailLower)
+      );
+    });
+    if (spItem) {
+      const u = spToAiosUser(spItem.id, spItem.fields as Record<string, unknown>);
+      return u.active ? u.role : null;
+    }
+  } catch {
+    /* Graph-Fehler → SWA-Fallback unten */
+  }
+  // Fallback: echte SWA-AIOS-Rolle (falls Standard SKU mit Role-Management)
+  const swaRole = (principal.userRoles ?? []).find(r => r.startsWith('AIOS.') || r.startsWith('AIOS_'));
+  return swaRole ? swaRole.replace(/_/g, '.') : null;
+}
+
+export async function requireRole(
   req: HttpRequest,
   roles: AiosRole[],
-): ClientPrincipal | HttpResponseInit {
+): Promise<ClientPrincipal | HttpResponseInit> {
   const result = requireAuth(req);
   if ('status' in result) return result;   // Auth-Fehler durchreichen
   const principal = result as ClientPrincipal;
-  if (!hasAnyRole(principal, roles)) {
+
+  // Lokaler Mock/Dev: keine SP-Liste verfügbar → SWA-userRoles direkt prüfen
+  // (AIOS_DEV_AUTH liefert AIOS.Admin).
+  if (MOCK) {
+    if (!hasAnyRole(principal, roles)) {
+      return { status: 403, jsonBody: { error: `Erforderliche Rolle: ${roles.join(' oder ')}` } };
+    }
+    return principal;
+  }
+
+  const role = await resolveEffectiveRole(principal);
+  if (!role || !roles.some(r => r === role)) {
     return {
       status: 403,
       jsonBody: { error: `Erforderliche Rolle: ${roles.join(' oder ')}` },

@@ -27,8 +27,9 @@ interface AppConfig {
   chatbot: { enabled: boolean; label: string; url: string; hint: string };
 }
 
+// Tenant-neutraler Fallback — greift nur, solange kein COMPANY-Eintrag in AIOS_Config existiert.
 const DEFAULT_CONFIG: AppConfig = {
-  name:    'STOCKMEIER',
+  name:    'AIOS',
   short:   'AIOS',
   tag:     'AI Management System',
   iso:     'ISO 42001 aligned',
@@ -54,7 +55,7 @@ async function handleGet(req: HttpRequest): Promise<HttpResponseInit> {
 }
 
 async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   const body = await req.json() as Partial<AppConfig>;

@@ -30,7 +30,7 @@ async function handleGet(req: HttpRequest): Promise<HttpResponseInit> {
 }
 
 async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   const body = await req.json() as Partial<Incident>;
@@ -63,7 +63,7 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
 }
 
 async function handlePatch(req: HttpRequest, incId: string): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) {

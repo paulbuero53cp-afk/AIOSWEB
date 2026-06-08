@@ -78,7 +78,7 @@ async function generateUcId(): Promise<string> {
 async function handlePost(
   req: HttpRequest,
 ): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   const body = await req.json() as Partial<UseCase>;
@@ -133,7 +133,7 @@ async function handlePatch(
   // Approve/Reject: nur Approver+; alles andere: Editor+
   const body = await req.json() as Partial<UseCase>;
   const needsApprover = 'app' in body;
-  const principal = requireRole(
+  const principal = await requireRole(
     req,
     needsApprover
       ? ['AIOS.Approver', 'AIOS.Admin']
@@ -182,7 +182,7 @@ async function handleDelete(
   req: HttpRequest,
   ucId: string,
 ): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) return { status: 204 };

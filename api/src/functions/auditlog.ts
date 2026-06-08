@@ -17,7 +17,7 @@ async function auditlogHandler(
   req: HttpRequest,
   context: InvocationContext,
 ): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Admin']);
+  const principal = await requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   const limitParam  = req.query.get('limit');
