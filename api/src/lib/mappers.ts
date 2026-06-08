@@ -8,7 +8,7 @@
 
 export interface UseCase {
   id: string; title: string; cl: string; sys: string; legacy: string;
-  own: string; cap: string; kiType: string[]; auto: string;
+  own: string; cap: string; useCaseCategory: string; kiType: string[]; auto: string;
   lc: string; pd: string; rt: string; tier: string; rev: string;
   vs: number; fs: number; rs: number;
   kpi: string; app: string; or: string; hitl: string;
@@ -61,7 +61,8 @@ export function spToUC(spId: string, f: Record<string, unknown>): UseCase {
     sys:      s(f['System']),
     legacy:   s(f['Legacy']),
     own:      s(f['Owner'], 'N/A'),
-    cap:      s(f['Capability'], 'Generative KI'),
+    cap:             s(f['Capability'], 'Generative KI'),
+    useCaseCategory: s(f['UCCategory'], 'Sonstiges'),
     kiType,
     auto:     s(f['Autonomy']),
     lc:       s(f['Lifecycle'], 'Idea') as UseCase['lc'],
@@ -112,7 +113,7 @@ export function ucToSp(uc: Partial<UseCase>): Record<string, unknown> {
   const map: [keyof UseCase, string][] = [
     ['id', 'UCId'], ['title', 'Title'], ['cl', 'Cluster'],
     ['sys', 'System'], ['legacy', 'Legacy'], ['own', 'Owner'],
-    ['cap', 'Capability'], ['auto', 'Autonomy'],
+    ['cap', 'Capability'], ['useCaseCategory', 'UCCategory'], ['auto', 'Autonomy'],
     ['lc', 'Lifecycle'], ['pd', 'Portfolio'], ['rt', 'RiskTier'],
     ['tier', 'GovTier'], ['rev', 'Reversible'],
     ['vs', 'ValueScore'], ['fs', 'FeasScore'], ['rs', 'RiskScore'],

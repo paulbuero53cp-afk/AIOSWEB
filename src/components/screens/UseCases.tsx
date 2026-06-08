@@ -7,6 +7,7 @@ import { swrFetcher } from '@/lib/api';
 import {
   RiskBadge, LifecycleBadge, KiTypeBadges, ReliabilityBadge,
 } from '@/components/common/Badge';
+import { UC_CATEGORY_OPTIONS } from '@/lib/constants';
 import EditModal from './EditModal';
 import type { UseCase } from '@/types';
 
@@ -19,6 +20,7 @@ interface Filters {
   lc: string;
   app: string;
   kpi: string;
+  cat: string;
 }
 
 // ── Inline-Select ─────────────────────────────────────────────
@@ -55,7 +57,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
   );
 
   const [filters, setFilters] = useState<Filters>({
-    search: '', rt: '', lc: '', app: '', kpi: '',
+    search: '', rt: '', lc: '', app: '', kpi: '', cat: '',
   });
   const [sortField, setSortField] = useState<keyof UseCase>('id');
   const [sortDir,   setSortDir]   = useState<'asc' | 'desc'>('asc');
@@ -73,6 +75,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
       if (filters.lc  && uc.lc  !== filters.lc)  return false;
       if (filters.app && uc.app !== filters.app)  return false;
       if (filters.kpi && uc.kpi !== filters.kpi)  return false;
+      if (filters.cat && uc.useCaseCategory !== filters.cat) return false;
       return true;
     });
   }, [useCases, filters]);
@@ -145,6 +148,10 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
           <option value="yes">KPI: Ja</option>
           <option value="no">KPI: Nein</option>
         </select>
+        <select value={filters.cat} onChange={e => setFilter('cat', e.target.value)} style={{ width: 170 }}>
+          <option value="">Alle Kategorien</option>
+          {UC_CATEGORY_OPTIONS.map(o => <option key={o}>{o}</option>)}
+        </select>
         <button className="btn btn-primary btn-sm" onClick={() => onNav('new')}>
           ➕ Neu
         </button>
@@ -167,6 +174,9 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
                 Titel <SortIcon field="title" />
               </th>
               <th>Cluster</th>
+              <th className="sortable" onClick={() => toggleSort('useCaseCategory' as keyof UseCase)}>
+                Kategorie <SortIcon field={'useCaseCategory' as keyof UseCase} />
+              </th>
               <th className="sortable" onClick={() => toggleSort('rt')}>
                 Risk Tier <SortIcon field="rt" />
               </th>
@@ -186,7 +196,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
           <tbody>
             {paged.length === 0 ? (
               <tr>
-                <td colSpan={11} className="empty">Keine Use Cases gefunden.</td>
+                <td colSpan={12} className="empty">Keine Use Cases gefunden.</td>
               </tr>
             ) : (
               paged.map(uc => (
@@ -209,6 +219,11 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
                     )}
                   </td>
                   <td>{uc.cl}</td>
+                  <td>
+                    <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+                      {uc.useCaseCategory || '—'}
+                    </span>
+                  </td>
                   <td><RiskBadge tier={uc.rt} /></td>
                   <td><ReliabilityBadge tier={uc.rl} /></td>
                   <td><LifecycleBadge lc={uc.lc} /></td>

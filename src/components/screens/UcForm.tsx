@@ -8,12 +8,13 @@ import type { UseCase } from '@/types';
 import {
   CLUSTERS, CAP_OPTIONS, AUTO_OPTIONS,
   LIFECYCLE_OPTIONS, PD_OPTIONS, RISK_TIER_OPTIONS,
+  UC_CATEGORY_OPTIONS,
 } from '@/lib/constants';
 
 // ── Formular-Felder (flaches Modell für RHF) ─────────────────
 export interface UcFormValues {
   title: string; cl: string; sys: string; legacy: string;
-  own: string; cap: string; auto: string; lc: string; desc: string; link: string;
+  own: string; cap: string; useCaseCategory: string; auto: string; lc: string; desc: string; link: string;
   kiEinsatz: boolean; kiErstellung: boolean;
   vs: number; fs: number; rs: number;
   pd: string; rt: string; tier: string; rev: string; kpi: string; hitl: string;
@@ -45,6 +46,7 @@ function ucToFormValues(uc?: Partial<UseCase>): UcFormValues {
     legacy:       uc?.legacy ?? '',
     own:          uc?.own ?? '',
     cap:          uc?.cap ?? 'Generative KI',
+    useCaseCategory: uc?.useCaseCategory ?? 'Sonstiges',
     auto:         uc?.auto ?? 'Empfehlung (Mensch entscheidet)',
     lc:           uc?.lc ?? 'Idea',
     desc:         uc?.desc ?? '',
@@ -85,6 +87,7 @@ export function formValuesToUcPatch(v: UcFormValues): Partial<UseCase> {
     legacy: v.legacy,
     own:    v.own,
     cap:    v.cap,
+    useCaseCategory: v.useCaseCategory,
     auto:   v.auto,
     lc:     v.lc as UseCase['lc'],
     desc:   v.desc,
@@ -257,6 +260,12 @@ export default function UcForm({
           <Field label="KI-Technologie">
             <select {...register('cap')}>
               {CAP_OPTIONS.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </Field>
+
+          <Field label="Use Case Kategorie">
+            <select {...register('useCaseCategory')}>
+              {UC_CATEGORY_OPTIONS.map(c => <option key={c}>{c}</option>)}
             </select>
           </Field>
 

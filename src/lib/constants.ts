@@ -173,6 +173,16 @@ export const DSFA_RISK_ITEMS = [
 ] as const;
 
 // ── Dropdown-Optionen ─────────────────────────────────────────
+export const UC_CATEGORY_OPTIONS = [
+  'Copilot Agents',
+  'AI bei der Erstellung',
+  'Predictive AI',
+  'Externe Tools',
+  'AI in Legacy Systemen',
+  'Content Creation',
+  'Sonstiges',
+];
+
 export const CLUSTERS = [
   'Vertrieb', 'Marketing', 'Produktion', 'Logistik', 'Finance',
   'HR', 'IT', 'Einkauf', 'Qualität', 'F&E', 'Sonstiges',

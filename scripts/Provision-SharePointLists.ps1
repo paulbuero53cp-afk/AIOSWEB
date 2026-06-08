@@ -65,6 +65,7 @@ $ucFields = @(
     @{ N="Legacy";       D="Betroffenes Legacy-System";   T="Text" },
     @{ N="Owner";        D="Business Owner";              T="Text" },
     @{ N="Capability";   D="KI-Technologie";              T="Text" },
+    @{ N="UCCategory";   D="Use Case Kategorie";          T="Choice"; Extra=@{Choices=@("Copilot Agents","AI bei der Erstellung","Predictive AI","Externe Tools","AI in Legacy Systemen","Content Creation","Sonstiges")} },
     @{ N="Autonomy";     D="Autonomiegrad";               T="Text" },
     @{ N="Lifecycle";    D="Lifecycle";                   T="Choice"; Extra=@{Choices=@("Idea","Build","Run","Retire")} },
     @{ N="Portfolio";    D="Portfolio Decision";          T="Choice"; Extra=@{Choices=@("Start","Scale","Stop","Hold","Backlog")} },

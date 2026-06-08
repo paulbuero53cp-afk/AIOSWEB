@@ -120,6 +120,25 @@ function Sidebar({
           </div>
         ))}
       </nav>
+      {config.chatbot.enabled && config.chatbot.url && (
+        <a
+          href={config.chatbot.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={config.chatbot.hint || config.chatbot.label}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '9px 20px', color: 'rgba(255,255,255,.75)',
+            fontSize: 13.5, textDecoration: 'none',
+            borderLeft: '3px solid transparent',
+            transition: 'all .15s',
+          }}
+          onMouseOver={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; }}
+          onMouseOut={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.75)'; (e.currentTarget as HTMLElement).style.background = ''; }}
+        >
+          🤖 {config.chatbot.label || 'KI-Assistent'}
+        </a>
+      )}
       <div className="sfooter">
         <div style={{ marginBottom: 6 }}>{config.iso}</div>
         <button
@@ -213,6 +232,13 @@ function AppShell() {
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>
               👤 {principal?.userDetails ?? '—'}
             </span>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => { setScreen('info'); setSidebarOpen(false); }}
+              title="Info & Konfiguration"
+            >
+              ⚙ Konfig
+            </button>
             <a href="/.auth/logout" className="btn btn-outline btn-sm">
               Abmelden
             </a>

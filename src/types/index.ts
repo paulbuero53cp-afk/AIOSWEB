@@ -49,6 +49,7 @@ export interface UseCase {
   legacy: string;                      // NEU: Betroffenes Legacy-System
   own: string;                         // Business Owner
   cap: string;                         // KI-Technologie (Generative KI / ML / ...)
+  useCaseCategory: string;             // Kategorie: Copilot Agents, Predictive AI, …
   kiType: KiTypeDimension[];           // NEU: ['einsatz', 'erstellung']
   auto: string;                        // Autonomiegrad
   lc: Lifecycle;

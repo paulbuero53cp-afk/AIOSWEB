@@ -2,6 +2,7 @@ import useSWR from 'swr';
 import { swrFetcher } from '@/lib/api';
 import { useUseCases, useIncidents } from '@/hooks/useUseCases';
 import { useAuth } from '@/context/AuthContext';
+import { useAppConfig } from '@/context/AppConfigContext';
 import { RiskBadge, ApprovalBadge, LifecycleBadge } from '@/components/common/Badge';
 import type { AuditEntry, UseCase } from '@/types';
 
@@ -184,6 +185,7 @@ function CriticalItems({
 export default function Dashboard({ onNav }: { onNav: (screen: string) => void }) {
   const { useCases, loading } = useUseCases();
   const { incidents } = useIncidents();
+  const config = useAppConfig();
 
   const total    = useCases.length;
   const active   = useCases.filter(u => u.lc === 'Run').length;
@@ -216,6 +218,29 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
           color={openInc > 0 ? 'red' : 'green'}
         />
       </div>
+
+      {/* Chatbot-Banner */}
+      {config.chatbot.enabled && config.chatbot.url && (
+        <div style={{
+          marginBottom: 18, padding: '12px 18px',
+          background: 'var(--accent-pale)', border: '1px solid #b8d8d8',
+          borderRadius: 8, display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', gap: 16,
+        }}>
+          <span style={{ fontSize: 13, color: 'var(--petrol)' }}>
+            🤖 <strong>{config.chatbot.label || 'KI-Assistent'}</strong>
+            {config.chatbot.hint && <span style={{ color: 'var(--muted)', marginLeft: 8 }}>{config.chatbot.hint}</span>}
+          </span>
+          <a
+            href={config.chatbot.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent)', whiteSpace: 'nowrap', textDecoration: 'none' }}
+          >
+            {config.chatbot.label || 'Öffnen'} →
+          </a>
+        </div>
+      )}
 
       {/* Hauptgrid */}
       <div className="dash-grid">

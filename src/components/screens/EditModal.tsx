@@ -262,6 +262,9 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
             <button className="btn btn-outline btn-sm" onClick={() => openEditTab(2)}>
               ✎ Governance
             </button>
+            <button className="btn btn-outline btn-sm" onClick={() => openEditTab(3)}>
+              ✎ Reliabilität
+            </button>
             {isApprover && uc.app === 'Pending' && (
               <button className="btn btn-primary" style={{ marginLeft: 'auto' }} onClick={handleApprove}>
                 Freigeben
