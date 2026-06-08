@@ -17,7 +17,7 @@
 
 | ID | Finding | Schwere | Rolle | Status |
 |----|---------|---------|-------|--------|
-| F1 | Client-Secret im Klartext in OneDrive-Ordner | 🔴 | Alle | ⬜ |
+| F1 | Client-Secret im Klartext in OneDrive-Ordner | 🔴 | Alle | ✅¹ |
 | F2 | Auth-Backdoor über `NODE_ENV` | 🔴 | CISO / Hacker | ✅ |
 | F3 | Übermäßige Graph-Berechtigung `Sites.ReadWrite.All` | 🟠 | CISO | ⬜ |
 | F4 | Interne Fehlerdetails an den Client | 🟡 | CISO | ✅ |
@@ -45,14 +45,14 @@
 
 ## 🔴 Sofortmaßnahmen
 
-### F1 — Client-Secret im Klartext in OneDrive-synchronisiertem Ordner 🔴 ⬜
+### F1 — Client-Secret im Klartext in OneDrive-synchronisiertem Ordner 🔴 ✅¹ (Secret rotiert 2026-06-08)
 **Datei:** `api/local.settings.json`
-`AZURE_CLIENT_SECRET` liegt im Klartext vor. Die Datei ist korrekt gitignored (verifiziert: **nicht** im Repo / keiner Historie), liegt aber unter `C:\Users\…\OneDrive\…` → wird in die Microsoft-Cloud synchronisiert und ist gegenüber jedem mit OneDrive-/Gerätezugriff exponiert. Der Wert wurde zudem während des Reviews in einer Assistenz-Session sichtbar → **als kompromittiert behandeln**.
+**Umsetzung:** Das kompromittierte Secret wurde **rotiert** (neues erzeugt, in SWA-Settings + GitHub-Secret eingetragen, altes in Entra widerrufen). Der zuvor exponierte Wert ist damit wertlos → akute Gefährdung geschlossen.
 
-**Mitigation:**
-1. Secret rotieren (Entra → App-Registrierung `21ccdf12-06e9-40f6-99e2-d77784a7a285` → Zertifikate & Geheimnisse → altes widerrufen, neues erzeugen). *(Manuell im Portal — nicht automatisierbar.)*
-2. Projekt/`local.settings.json` aus dem OneDrive-Sync-Pfad herausnehmen.
-3. Produktion auf **System-Assigned Managed Identity** umstellen — `graphClient.ts` nutzt bereits `DefaultAzureCredential`, wenn kein Secret gesetzt ist. In Azure also **kein** `AZURE_CLIENT_SECRET` als App-Setting hinterlegen.
+**¹ Verbleibende Resthärtung (empfohlen, nicht dringend):**
+1. **OneDrive:** Die lokale `local.settings.json` liegt weiterhin im OneDrive-Sync-Pfad → auch das *neue* Secret wird synchronisiert. Projekt nach `C:\dev\…` verschieben oder Ordner vom Sync ausschließen.
+2. **Key Vault:** Secret in Key Vault auslagern, SWA-Setting auf `@Microsoft.KeyVault(SecretUri=…)` umstellen (kein Klartext mehr in den App-Settings) — Free-SKU-tauglich.
+3. **Managed Identity (langfristig):** ganz ohne Secret nur mit SWA **Standard SKU** + verlinkter Function App; `graphClient.ts` fällt dann automatisch auf `DefaultAzureCredential` zurück.
 
 ### F2 — Auth-Backdoor über `NODE_ENV` 🔴 ✅ (behoben 2026-06-08, Commit folgt)
 **Datei:** `api/src/lib/auth.ts:19-33`
@@ -162,3 +162,4 @@ Pfad-/Query-Parameter (`ucId`, `entity`, `type`) wurden ungeprüft in OData-Filt
 | 2026-06-08 | Security-Review (4-Rollen) | Erstfassung, 17 Findings |
 | 2026-06-08 | Fix-Durchlauf | F2, F4, F15 behoben |
 | 2026-06-08 | Fix-Durchlauf | F5, F7, F10, F13, F14, F16, F17 behoben — verbleibend: F1, F3, F6, F8, F9, F11, F12 |
+| 2026-06-08 | F1 | Secret rotiert (alt widerrufen) — Resthärtung OneDrive/Key Vault offen. Verbleibend: F3, F6, F8, F9, F11, F12 |
