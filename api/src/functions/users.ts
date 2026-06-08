@@ -14,16 +14,57 @@
 // ─────────────────────────────────────────────────────────────
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { requireAuth, requireRole, isAuthError } from '../lib/auth';
+import { requireAuth, isAuthError, ClientPrincipal } from '../lib/auth';
 import { listItems, findItem, createItem, updateItem, deleteItem, getItem } from '../lib/storage';
 import { spToAiosUser, aiosUserToSp, AiosUser } from '../lib/mappers';
 import { MOCK_USERS } from '../lib/mockData';
 
 const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
+// ── Rollen-Auflösung ──────────────────────────────────────────
+// Die SP-Liste AIOS_Users ist die Autorität für Rollen — NICHT die
+// SWA-userRoles. Bei Free SKU liefert SWA nur 'authenticated', nie
+// AIOS.Admin. Frontend (isAdmin via /me) und Backend-Gates müssen
+// dieselbe Quelle nutzen, sonst sieht ein SP-Admin zwar den Screen,
+// bekommt aber 403 auf /api/users (→ "0 Benutzer" trotz Einträgen).
+async function resolveEffectiveRole(principal: ClientPrincipal): Promise<string | null> {
+  try {
+    const allItems = await listItems('USERS');
+    const emailLower = principal.userDetails.toLowerCase();
+    const spItem = allItems.find(item => {
+      const f = item.fields as Record<string, unknown>;
+      return (
+        (f['AadUserId'] && String(f['AadUserId']) === principal.userId) ||
+        (f['Email'] && String(f['Email']).toLowerCase() === emailLower)
+      );
+    });
+    if (spItem) {
+      const u = spToAiosUser(spItem.id, spItem.fields as Record<string, unknown>);
+      return u.active ? u.role : null;
+    }
+  } catch {
+    /* Graph-Fehler → SWA-Fallback unten */
+  }
+  // Fallback: SWA-Rolle (falls Standard SKU mit Role-Management konfiguriert)
+  const swaRole = (principal.userRoles ?? []).find(r => r.startsWith('AIOS.') || r.startsWith('AIOS_'));
+  return swaRole ? swaRole.replace(/_/g, '.') : null;
+}
+
+// Admin-Gate auf Basis der SP-aufgelösten Rolle (statt SWA userRoles).
+async function requireAdmin(req: HttpRequest): Promise<ClientPrincipal | HttpResponseInit> {
+  const principal = requireAuth(req);
+  if (isAuthError(principal)) return principal;
+  if (MOCK) return principal as ClientPrincipal;   // lokal: Mock-Admin
+  const role = await resolveEffectiveRole(principal as ClientPrincipal);
+  if (role !== 'AIOS.Admin') {
+    return { status: 403, jsonBody: { error: 'Erforderliche Rolle: AIOS.Admin' } };
+  }
+  return principal as ClientPrincipal;
+}
+
 // ── GET /api/users ────────────────────────────────────────────
 async function handleGetAll(req: HttpRequest): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Admin']);
+  const principal = await requireAdmin(req);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) return { status: 200, jsonBody: MOCK_USERS };
@@ -122,7 +163,7 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
 
 // ── POST /api/users ───────────────────────────────────────────
 async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Admin']);
+  const principal = await requireAdmin(req);
   if (isAuthError(principal)) return principal;
 
   const body = (await req.json()) as Partial<AiosUser>;
@@ -159,7 +200,7 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
 
 // ── PATCH /api/users/{id} ─────────────────────────────────────
 async function handlePatch(req: HttpRequest, userId: string): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Admin']);
+  const principal = await requireAdmin(req);
   if (isAuthError(principal)) return principal;
 
   const body = (await req.json()) as Partial<AiosUser>;
@@ -181,7 +222,7 @@ async function handlePatch(req: HttpRequest, userId: string): Promise<HttpRespon
 
 // ── DELETE /api/users/{id} ────────────────────────────────────
 async function handleDelete(req: HttpRequest, userId: string): Promise<HttpResponseInit> {
-  const principal = requireRole(req, ['AIOS.Admin']);
+  const principal = await requireAdmin(req);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) return { status: 204 };
