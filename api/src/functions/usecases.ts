@@ -9,7 +9,7 @@
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
-import { listItems, findItem, createItem, updateItem, odataEscape } from '../lib/storage';
+import { listItems, findItem, createItem, updateItem, deleteItem, odataEscape } from '../lib/storage';
 import { serverError } from '../lib/http';
 import { spToUC, ucToSp, UseCase } from '../lib/mappers';
 import { writeAuditLog, diffObjects } from '../lib/audit';
@@ -118,8 +118,9 @@ async function handlePost(
   const created = await createItem('USECASES', { Title: body.title, ...fields });
   const result  = spToUC(created.id, { ...fields, Created: now, Modified: now });
 
-  // Audit
-  await writeAuditLog(principal, 'create', 'UseCase', ucId, {}, '');
+  // Audit — F14: neue Werte als Diff erfassen
+  await writeAuditLog(principal, 'create', 'UseCase', ucId,
+    diffObjects({}, newUC as unknown as Record<string, unknown>), '');
 
   return { status: 201, jsonBody: result };
 }
@@ -189,12 +190,27 @@ async function handleDelete(
   const item = await findItem('USECASES', `fields/UCId eq '${odataEscape(ucId)}'`);
   if (!item) return { status: 404, jsonBody: { error: `Use Case ${ucId} nicht gefunden` } };
 
+  const before = spToUC(item.id, item.fields as Record<string, unknown>);
+  const hard = req.query.get('hard') === 'true';
+
+  if (hard) {
+    // F10: echte Löschung (DSGVO Art. 17) — Admin-only, irreversibel
+    await deleteItem('USECASES', item.id);
+    await writeAuditLog(principal, 'delete', 'UseCase', ucId,
+      diffObjects(before as unknown as Record<string, unknown>, {}), `Hard-Delete: ${before.title}`);
+    return { status: 204 };
+  }
+
   await updateItem('USECASES', item.id, {
     Active: false,
     UpdatedBy_x: principal.userDetails,
   });
 
-  await writeAuditLog(principal, 'delete', 'UseCase', ucId, {}, 'Soft-Delete');
+  // F14: Vorher/Nachher im Audit erfassen
+  await writeAuditLog(principal, 'delete', 'UseCase', ucId,
+    diffObjects(before as unknown as Record<string, unknown>,
+                { ...before, act: false } as unknown as Record<string, unknown>),
+    `Soft-Delete: ${before.title}`);
 
   return { status: 204 };
 }

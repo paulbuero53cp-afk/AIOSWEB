@@ -12,8 +12,9 @@ export async function apiFetch<T>(
   options?: RequestInit,
 ): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    // X-Requested-With: CSRF-Schutz (F16) — wird vom Backend bei Writes verlangt.
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'AIOS', ...options?.headers },
   });
 
   if (!res.ok) {

@@ -19,8 +19,12 @@ import { listItems, createItem, updateItem, deleteItem, getItem } from '../lib/s
 import { spToAiosUser, aiosUserToSp, AiosUser } from '../lib/mappers';
 import { MOCK_USERS } from '../lib/mockData';
 import { serverError } from '../lib/http';
+import { writeAuditLog, diffObjects } from '../lib/audit';
 
 const MOCK = process.env['USE_MOCK_DATA'] === 'true';
+// F7: Bootstrap-Fallback (jeder nicht-gelistete Nutzer → Viewer) NUR bei
+// explizitem Opt-in. Default aus → "kein Eintrag = kein Zugriff".
+const BOOTSTRAP = process.env['AIOS_BOOTSTRAP'] === 'true';
 
 // ── Rollen-Auflösung ──────────────────────────────────────────
 // Die SP-Liste AIOS_Users ist die Autorität für Rollen — NICHT die
@@ -130,8 +134,8 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
       }};
     }
 
-    // Fallback 2: Bootstrap — Liste hat wenige Einträge → Viewer gewähren
-    if (allItems.length <= 5) {
+    // Fallback 2: Bootstrap — nur bei explizitem Opt-in (F7).
+    if (BOOTSTRAP && allItems.length <= 5) {
       return { status: 200, jsonBody: {
         id: '', email: principal.userDetails, displayName: principal.userDetails,
         aadUserId: principal.userId, role: 'AIOS.Viewer',
@@ -205,6 +209,11 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
     Title: newUser.displayName || newUser.email,
     ...aiosUserToSp(newUser),
   });
+
+  await writeAuditLog(principal, 'create', 'User', created.id,
+    diffObjects({}, { email: newUser.email, role: newUser.role, active: newUser.active }),
+    `Benutzer angelegt: ${newUser.email}`);
+
   return { status: 201, jsonBody: spToAiosUser(created.id, created.fields as Record<string, unknown>) };
 }
 
@@ -219,6 +228,9 @@ async function handlePatch(req: HttpRequest, userId: string): Promise<HttpRespon
     return { status: 200, jsonBody: { id: userId, ...body } };
   }
 
+  const beforeItem = await getItem('USERS', userId);
+  const before = spToAiosUser(beforeItem.id, beforeItem.fields as Record<string, unknown>);
+
   const patch: Record<string, unknown> = {};
   if (body.role    !== undefined) patch['Role']   = body.role;
   if (body.active  !== undefined) patch['Active'] = body.active;
@@ -227,7 +239,15 @@ async function handlePatch(req: HttpRequest, userId: string): Promise<HttpRespon
   await updateItem('USERS', userId, patch);
   // Aktuellen Stand zurücklesen
   const refreshed = await getItem('USERS', userId);
-  return { status: 200, jsonBody: spToAiosUser(refreshed.id, refreshed.fields as Record<string, unknown>) };
+  const after = spToAiosUser(refreshed.id, refreshed.fields as Record<string, unknown>);
+
+  // F13: Rollenänderungen/User-Edits protokollieren
+  const action = body.role !== undefined && body.role !== before.role ? 'role-change' : 'edit';
+  await writeAuditLog(principal, action, 'User', userId,
+    diffObjects(before as unknown as Record<string, unknown>, after as unknown as Record<string, unknown>),
+    before.email);
+
+  return { status: 200, jsonBody: after };
 }
 
 // ── DELETE /api/users/{id} ────────────────────────────────────
@@ -237,7 +257,10 @@ async function handleDelete(req: HttpRequest, userId: string): Promise<HttpRespo
 
   if (MOCK) return { status: 204 };
 
+  const beforeItem = await getItem('USERS', userId);
+  const before = spToAiosUser(beforeItem.id, beforeItem.fields as Record<string, unknown>);
   await deleteItem('USERS', userId);
+  await writeAuditLog(principal, 'delete', 'User', userId, {}, `Benutzer gelöscht: ${before.email}`);
   return { status: 204 };
 }
 

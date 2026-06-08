@@ -10,6 +10,8 @@
     "_comment_AIOS_DEV_AUTH": "NUR lokal! Gewaehrt ohne SWA-Header einen Dev-Admin. In Azure NIEMALS setzen.",
     "AIOS_DEV_AUTH": "true",
 
+    "_comment_AIOS_BOOTSTRAP": "Optional. true = nicht-gelistete Nutzer erhalten Viewer (nur fuer Ersteinrichtung). Default/leer = kein Zugriff ohne AIOS_Users-Eintrag (F7).",
+
 
     "AZURE_TENANT_ID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "AZURE_CLIENT_ID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",

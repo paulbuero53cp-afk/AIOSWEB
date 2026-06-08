@@ -72,14 +72,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setAiosUser(_buildFallbackUser(cp, 'AIOS.Viewer'));
             }
           } else {
-            // Jeder API-Fehler (403, 500, …) → Viewer-Fallback
+            // /me verweigert (403) oder Fehler: NUR eine echte SWA-AIOS-Rolle
+            // gewährt noch Zugang (Standard SKU). Sonst kein Zugriff — kein
+            // automatischer Viewer mehr (F7: "kein Eintrag = kein Zugriff").
             const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.') || r.startsWith('AIOS_'));
-            setAiosUser(_buildFallbackUser(cp, _normalizeSwaRole(swaRole ?? 'AIOS.Viewer')));
+            setAiosUser(swaRole ? _buildFallbackUser(cp, _normalizeSwaRole(swaRole)) : null);
           }
         } catch {
-          // Netzwerkfehler / Timeout → Viewer-Fallback
+          // Netzwerkfehler / Timeout: ebenfalls nur echte SWA-Rolle, sonst kein Zugriff.
           const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.') || r.startsWith('AIOS_'));
-          setAiosUser(_buildFallbackUser(cp, _normalizeSwaRole(swaRole ?? 'AIOS.Viewer')));
+          setAiosUser(swaRole ? _buildFallbackUser(cp, _normalizeSwaRole(swaRole)) : null);
         } finally {
           if (!cancelled) setLoading(false);
         }

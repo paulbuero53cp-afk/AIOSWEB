@@ -9,12 +9,16 @@ import type { ClientPrincipal } from './auth';
 
 export type AuditAction =
   | 'create' | 'edit' | 'approve' | 'reject'
-  | 'delete' | 'save-artefakt' | 'inline-edit';
+  | 'delete' | 'save-artefakt' | 'inline-edit'
+  | 'role-change' | 'config-change' | 'export';
+
+export type AuditEntity =
+  | 'UseCase' | 'Incident' | 'Artefakt' | 'User' | 'Config';
 
 export async function writeAuditLog(
   actor: ClientPrincipal,
   action: AuditAction,
-  entity: 'UseCase' | 'Incident' | 'Artefakt',
+  entity: AuditEntity,
   entityId: string,
   diff: Record<string, { von: unknown; auf: unknown }> = {},
   comment = '',

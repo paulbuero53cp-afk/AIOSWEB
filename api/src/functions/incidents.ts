@@ -56,7 +56,8 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
   const created = await createItem('INCIDENTS', { Title: id, ...fields });
   const result  = spToIncident(created.id, { ...fields, Created: now });
 
-  await writeAuditLog(principal, 'create', 'Incident', id, {}, '');
+  await writeAuditLog(principal, 'create', 'Incident', id,
+    diffObjects({}, newInc as unknown as Record<string, unknown>), '');
 
   return { status: 201, jsonBody: result };
 }

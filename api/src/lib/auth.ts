@@ -53,6 +53,15 @@ export function requireAuth(req: HttpRequest): ClientPrincipal | HttpResponseIni
   if (!principal) {
     return { status: 401, jsonBody: { error: 'Nicht authentifiziert' } };
   }
+  // CSRF-Schutz (F16): schreibende Requests müssen den Custom-Header
+  // X-Requested-With tragen. Cross-Site-Requests können ohne CORS-Freigabe
+  // keinen Custom-Header setzen → ein fremder Origin kann keine Writes auslösen.
+  const method = req.method.toUpperCase();
+  if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+    if (!req.headers.get('x-requested-with')) {
+      return { status: 403, jsonBody: { error: 'CSRF-Schutz: X-Requested-With-Header fehlt' } };
+    }
+  }
   // Akzeptiere AIOS-Rollen (Standard SKU) ODER schlicht 'authenticated' (Free SKU)
   const hasAios = hasAnyRole(principal, ['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin',
                                           'AIOS_Viewer', 'AIOS_Editor', 'AIOS_Approver', 'AIOS_Admin']);

@@ -9,6 +9,7 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/fu
 import { requireAuth, requireRole, isAuthError } from '../lib/auth';
 import { listItems, createItem, updateItem } from '../lib/storage';
 import { serverError } from '../lib/http';
+import { writeAuditLog, diffObjects } from '../lib/audit';
 
 // CONFIG-Liste hat < 10 Einträge → alle laden, in JS filtern (kein SP-Index nötig)
 async function findConfigItem(key: string) {
@@ -70,6 +71,10 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
       ConfigValue: configJson,
     });
   }
+
+  // F13: Config-Änderungen protokollieren
+  await writeAuditLog(principal, 'config-change', 'Config', 'COMPANY',
+    diffObjects({}, body as Record<string, unknown>), 'App-Konfiguration geändert');
 
   return { status: 200, jsonBody: { ...DEFAULT_CONFIG, ...body } };
 }

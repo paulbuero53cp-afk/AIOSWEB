@@ -30,7 +30,8 @@ async function handleGet(
   type: ArtType,
   ucId: string,
 ): Promise<HttpResponseInit> {
-  const principal = requireAuth(req);
+  // F10: Artefakt-Inhalte (inkl. DSFA) nur für Editor+ — nicht für Viewer.
+  const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) {
@@ -54,7 +55,8 @@ async function handleGetAll(
   req: HttpRequest,
   ucId: string,
 ): Promise<HttpResponseInit> {
-  const principal = requireAuth(req);
+  // F10: Artefakt-Inhalte (inkl. DSFA) nur für Editor+ — nicht für Viewer.
+  const principal = requireRole(req, ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) {
@@ -118,6 +120,9 @@ async function handleExport(req: HttpRequest): Promise<HttpResponseInit> {
       artDB[art.type][art.ucId] = art.payload;
     }
   }
+
+  // F13: Massendatenexport protokollieren
+  await writeAuditLog(principal, 'export', 'Artefakt', 'ALL', {}, 'Vollexport aller Artefakte');
 
   return { status: 200, jsonBody: artDB };
 }

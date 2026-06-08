@@ -21,19 +21,19 @@
 | F2 | Auth-Backdoor über `NODE_ENV` | 🔴 | CISO / Hacker | ✅ |
 | F3 | Übermäßige Graph-Berechtigung `Sites.ReadWrite.All` | 🟠 | CISO | ⬜ |
 | F4 | Interne Fehlerdetails an den Client | 🟡 | CISO | ✅ |
-| F5 | CSP erlaubt `'unsafe-inline'` für Scripts | 🟡 | CISO | ⬜ |
+| F5 | CSP erlaubt `'unsafe-inline'` für Scripts | 🟡 | CISO | ✅ |
 | F6 | Keine Rate-/Payload-Limits | 🟡 | CISO | ⬜ |
-| F7 | Jeder Tenant-Nutzer wird Viewer (Bootstrap) | 🟡 | CISO / DSB | ⬜ |
+| F7 | Jeder Tenant-Nutzer wird Viewer (Bootstrap) | 🟡 | CISO / DSB | ✅ |
 | F8 | PbD-Verarbeitung ohne dokumentierte Grundlage | 🟠 | DSB | ⬜ |
 | F9 | Keine Aufbewahrungs-/Löschfristen | 🟡 | DSB | ⬜ |
-| F10 | DSFA-Artefakte breit lesbar; Soft-Delete | 🟡 | DSB | ⬜ |
+| F10 | DSFA-Artefakte breit lesbar; Soft-Delete | 🟡 | DSB | ✅ |
 | F11 | Datenfluss/AVV Microsoft dokumentieren | 🟢 | DSB | ⬜ |
 | F12 | Audit-Log nicht manipulationssicher | 🟠 | ISO 42001 | ⬜ |
-| F13 | Audit-Lücken (Rollen/Config/Export) | 🟠 | ISO 42001 | ⬜ |
-| F14 | Diff-Erfassung unvollständig | 🟢 | ISO 42001 | ⬜ |
+| F13 | Audit-Lücken (Rollen/Config/Export) | 🟠 | ISO 42001 | ✅ |
+| F14 | Diff-Erfassung unvollständig | 🟢 | ISO 42001 | ✅ |
 | F15 | OData-/SharePoint-Filter-Injection | 🟡 | Hacker | ✅ |
-| F16 | CSRF bei Cookie-Auth | 🟡 | Hacker | ⬜ |
-| F17 | `frame-ancestors *.sharepoint.com` (Clickjacking) | 🟢 | Hacker | ⬜ |
+| F16 | CSRF bei Cookie-Auth | 🟡 | Hacker | ✅ |
+| F17 | `frame-ancestors *.sharepoint.com` (Clickjacking) | 🟢 | Hacker | ✅ |
 
 **Priorisierung:**
 - **Sofort:** F1, F2
@@ -75,20 +75,19 @@ Die App-Registrierung hat tenant-weiten Lese-/Schreibzugriff auf **alle** ShareP
 `String(err)` wurde an den Aufrufer zurückgegeben → leakte Graph-/Stacktrace-Interna.
 **Umsetzung:** Zentraler Helfer `lib/http.ts → serverError(context, err)` — loggt Details via `context.error` mit `invocationId` und gibt dem Client nur `{ error: 'Interner Fehler', ref: <invocationId> }` zurück. In allen 6 Handler-Catches eingesetzt.
 
-### F5 — CSP erlaubt `'unsafe-inline'` für Scripts 🟡 ⬜
-**Datei:** `staticwebapp.config.json:23`
-`script-src 'self' 'unsafe-inline'` entwertet den CSP-XSS-Schutz. Aktuell kein XSS-Sink gefunden (React escaped), aber Schutzschicht offen. `X-XSS-Protection` (Z.25) ist deprecated.
-**Mitigation:** `'unsafe-inline'` aus `script-src` entfernen; `Strict-Transport-Security` und `Referrer-Policy` ergänzen; `X-XSS-Protection` auf `0` setzen/entfernen.
+### F5 — CSP erlaubt `'unsafe-inline'` für Scripts 🟡 ✅ (behoben 2026-06-08)
+**Datei:** `staticwebapp.config.json`
+**Umsetzung:** `script-src` auf `'self'` reduziert (kein `'unsafe-inline'`); `connect-src` auf `'self'` verengt (Frontend ruft Graph nicht direkt); `Strict-Transport-Security` + `Referrer-Policy: strict-origin-when-cross-origin` ergänzt; deprecated `X-XSS-Protection` entfernt. `index.html` nutzt nur externes Modul-Script → kein Bruch.
 
 ### F6 — Keine Rate-/Payload-Limits 🟡 ⬜
 **Dateien:** `artefakte.ts:133` (Payload), `auditlog.ts:24` (`parseInt` ohne NaN-Guard)
 Kein Throttling; Artefakt-Payloads ungeprüft in Größe/Tiefe → DoS-/Kosten-/Storage-Abuse durch authentifizierte Nutzer.
 **Mitigation:** Payload-Größe begrenzen (z.B. 256 KB), Limit-Param robust parsen, ggf. Front Door / APIM-Rate-Limiting.
 
-### F7 — Jeder Tenant-Nutzer wird Viewer 🟡 ⬜
-**Dateien:** `auth.ts:55-61`, `users.ts:92-99`
-`'authenticated'` genügt als Zugang; Bootstrap-Fallback gewährt jedem nicht-gelisteten Nutzer `AIOS.Viewer`, solange die Liste ≤5 Einträge hat → jedes Tenant-Mitglied kann alle Use Cases, Incidents und DSFA lesen.
-**Mitigation:** Bootstrap-Fallback nach Ersteinrichtung per Flag deaktivieren; danach „kein Eintrag = kein Zugriff".
+### F7 — Jeder Tenant-Nutzer wird Viewer 🟡 ✅ (behoben 2026-06-08)
+**Dateien:** `users.ts`, `AuthContext.tsx`
+**Umsetzung:** Bootstrap-Fallback jetzt hinter `AIOS_BOOTSTRAP=true` (Default aus → „kein Eintrag = kein Zugriff"). Frontend gewährt bei `/me`-Fehler/403 keinen automatischen Viewer mehr — nur eine echte SWA-AIOS-Rolle oder `null` (kein Zugriff). Die 2 gelisteten Admins unberührt.
+**Hinweis (Residual):** `requireAuth` akzeptiert für Lese-Endpoints weiter `'authenticated'` (Free-SKU-Kompromiss); die Autorisierung greift nun aber über die fehlende Rolle clientseitig + Bootstrap-Aus.
 
 ---
 
@@ -104,10 +103,10 @@ Verarbeitet werden UPN/E-Mail, `AadUserId`, `DisplayName`, `LastLogin`, `Invited
 Audit-Log und `LastLogin` wachsen unbegrenzt (faktische Profilbildung). Kein Retention/Pruning.
 **Mitigation:** Aufbewahrungsfrist definieren (z.B. 12 Monate, abgestimmt auf ISO-42001-Nachweispflicht), automatisiertes Pruning. Hard-Delete für Stammdaten existiert bereits (`users.ts:183-191`).
 
-### F10 — DSFA-Artefakte breit lesbar; Soft-Delete 🟡 ⬜
-**Dateien:** `artefakte.ts` (Leserollen), `usecases.ts:191` (Soft-Delete)
-DSFA/Risikoanalysen für alle Auth-Nutzer lesbar (siehe F7). Soft-Delete bewahrt „gelöschte" Daten dauerhaft → Spannung zu Art. 17.
-**Mitigation:** Lesezugriff auf DSFA/Artefakte auf Editor+ einschränken; Hard-Delete-Pfad für echte Löschungen.
+### F10 — DSFA-Artefakte breit lesbar; Soft-Delete 🟡 ✅ (behoben 2026-06-08)
+**Dateien:** `artefakte.ts`, `usecases.ts`
+**Umsetzung:** Artefakt-Inhalte (`handleGet`, `handleGetAll`, inkl. DSFA) jetzt nur für **Editor+** (vorher jeder Auth-Nutzer); `handleStatus` (nur Existenz-Badges) bleibt Viewer. Hard-Delete-Pfad für Use Cases ergänzt: `DELETE /api/usecases/{id}?hard=true` (Admin, irreversibel, Art. 17), Default bleibt Soft-Delete.
+**Hinweis UX:** Nav zeigt Doc-Screens weiter allen; Viewer erhalten beim Öffnen jetzt 403 (konsistent mit bestehendem „Screen blockt"-Muster). Client-seitiges Gate optional nachrüstbar.
 
 ### F11 — Datenfluss/AVV Microsoft dokumentieren 🟢 ⬜
 Daten in SharePoint/Graph im Tenant — Region/AVV abhängig von M365-Konfiguration. Im Datenschutzkonzept benennen (i.d.R. durch MS-AVV abgedeckt). Chatbot-Default-URL `https://claude.ai` (`config.ts:33`) beachten, falls produktiv aktiviert.
@@ -121,15 +120,13 @@ Daten in SharePoint/Graph im Tenant — Region/AVV abhängig von M365-Konfigurat
 `AIOS_Auditlog` ist eine normale SharePoint-Liste; App-Identität (`Sites.ReadWrite.All`) und SP-Admins können Einträge ändern/löschen. Für ISO 42001 (Clause 9 / Nachweisführung) kritisch.
 **Mitigation:** SP-Versionierung + „nur Anhängen"-Berechtigung; Audit zusätzlich in Append-only-Store spiegeln (Storage mit Immutability-Policy / Log Analytics).
 
-### F13 — Audit-Lücken bei governance-kritischen Aktionen 🟠 ⬜
-**Dateien:** `users.ts`, `config.ts`, `artefakte.ts:103` (Export)
-Nicht geloggt: Rollenänderungen, User-Anlage/-Löschung, Config-Änderungen, Voll-Export aller Artefakte — also gerade die audit-relevantesten Vorgänge.
-**Mitigation:** `writeAuditLog` in alle Admin-Mutationen + in `handleExport` einbauen (Entitätstypen `User`, `Config`, `Export` ergänzen).
+### F13 — Audit-Lücken bei governance-kritischen Aktionen 🟠 ✅ (behoben 2026-06-08)
+**Dateien:** `audit.ts`, `users.ts`, `config.ts`, `artefakte.ts`
+**Umsetzung:** `AuditAction`/`AuditEntity` um `role-change`/`config-change`/`export` bzw. `User`/`Config` erweitert. `writeAuditLog` ergänzt in: User-Anlage/-Edit/-Rollenwechsel/-Löschung, Config-Änderung und Artefakt-Vollexport (mit Vorher/Nachher-Diff wo sinnvoll).
 
-### F14 — Diff-Erfassung unvollständig 🟢 ⬜
-**Datei:** `usecases.ts:121,196`
-Bei `create`/`delete` wird `{}` als Diff übergeben → Inhalt neuer/gelöschter Datensätze nicht nachvollziehbar. Audit-Write `await`ed nach Daten-Write → 500 trotz erfolgter Änderung möglich (Inkonsistenz Daten↔Audit).
-**Mitigation:** Bei Create Initialzustand, bei Delete letzten Zustand in den Diff schreiben; Audit-Fehler robust behandeln.
+### F14 — Diff-Erfassung unvollständig 🟢 ✅ (behoben 2026-06-08)
+**Dateien:** `usecases.ts`, `incidents.ts`
+**Umsetzung:** Create-Audits erfassen jetzt die neuen Werte (`diffObjects({}, newObj)`); Use-Case-Delete erfasst den Vorher-Zustand. **Offen (Residual):** Audit-Write läuft weiterhin `await` nach dem Daten-Write — bei Audit-Fehler 500 trotz erfolgter Änderung möglich (geringes Risiko; transaktionale Behandlung später).
 
 ---
 
@@ -140,14 +137,13 @@ Bei `create`/`delete` wird `{}` als Diff übergeben → Inhalt neuer/gelöschter
 Pfad-/Query-Parameter (`ucId`, `entity`, `type`) wurden ungeprüft in OData-Filter interpoliert; ein `'` bricht aus dem String aus.
 **Umsetzung:** `lib/sharepoint.ts → odataEscape(v)` verdoppelt Single-Quotes; auf alle interpolierten Filterwerte angewandt. Der frühere `email`-Filter in `users.ts:151` entfiel bereits durch die In-Memory-Umstellung (Commit `2e83d3f`). `type` war zusätzlich schon via `isValidType` gewhitelistet.
 
-### F16 — CSRF bei Cookie-basierter Auth 🟡 ⬜
-**Datei:** `src/lib/api.ts:14`
-SWA-Session-Cookie ohne CSRF-Token/Origin-Bindung bei schreibenden Requests → potenzielle CSRF, falls Cookie nicht strikt `SameSite`.
-**Mitigation:** `SameSite` des SWA-Auth-Cookies verifizieren; Origin/Referer-Check oder Custom-Header-Pflicht in schreibenden Handlern.
+### F16 — CSRF bei Cookie-basierter Auth 🟡 ✅ (behoben 2026-06-08)
+**Dateien:** `auth.ts`, `src/lib/api.ts`
+**Umsetzung:** Custom-Header-Pflicht: `requireAuth` lehnt schreibende Requests (POST/PATCH/DELETE) ohne `X-Requested-With` mit 403 ab. Das Frontend sendet den Header bei allen `apiFetch`-Calls. Cross-Site-Requests können ohne CORS-Freigabe keinen Custom-Header setzen → proxy-sicher, unabhängig vom `SameSite`-Verhalten.
 
-### F17 — `frame-ancestors *.sharepoint.com` 🟢 ⬜
-**Datei:** `staticwebapp.config.json:23`
-Einbettung durch jede SharePoint-Subdomain → Clickjacking-Fläche. Bewusst gesetzt (SP-Einbettung), aber so eng wie möglich fassen (konkrete Site).
+### F17 — `frame-ancestors *.sharepoint.com` 🟢 ✅ (behoben 2026-06-08)
+**Datei:** `staticwebapp.config.json`
+**Umsetzung:** `frame-ancestors` von `https://*.sharepoint.com` auf die konkrete Site `https://handsonaiowl771.sharepoint.com` verengt.
 
 ---
 
@@ -164,3 +160,5 @@ Einbettung durch jede SharePoint-Subdomain → Clickjacking-Fläche. Bewusst ges
 | Datum | Autor | Änderung |
 |-------|-------|----------|
 | 2026-06-08 | Security-Review (4-Rollen) | Erstfassung, 17 Findings |
+| 2026-06-08 | Fix-Durchlauf | F2, F4, F15 behoben |
+| 2026-06-08 | Fix-Durchlauf | F5, F7, F10, F13, F14, F16, F17 behoben — verbleibend: F1, F3, F6, F8, F9, F11, F12 |
