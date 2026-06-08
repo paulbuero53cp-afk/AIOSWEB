@@ -54,28 +54,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Schritt 2: Rolle aus AIOS_Users SP-Liste (via API)
+        // Strategie: API-Fehler blockieren NIE den Login
+        // Fallback-Kette: SP-Eintrag → SWA-Rolle → AIOS.Viewer (immer Zugang)
         try {
           const res = await fetch('/api/users/me');
           if (cancelled) return;
           if (res.ok) {
-            const user = (await res.json()) as AiosUser;
-            setAiosUser(user);
-          } else if (res.status === 403) {
-            // Explizit gesperrter Account (active=false)
-            const body = await res.json().catch(() => ({}) as Record<string, string>);
-            if (String(body.error ?? '').includes('gesperrt')) {
-              setAiosUser(null); // bleibt null → "Kein Zugriff"-Screen
-            } else {
-              // "Nicht gefunden" — Viewer-Fallback damit Login funktioniert
+            try {
+              const user = (await res.json()) as AiosUser;
+              // Nur explizit gesperrte Accounts blockieren
+              if (user.active === false) {
+                setAiosUser(null);
+              } else {
+                setAiosUser(user);
+              }
+            } catch {
               setAiosUser(_buildFallbackUser(cp, 'AIOS.Viewer'));
             }
           } else {
-            // API-Fehler (5xx etc.) → SWA-Rolle oder Viewer-Fallback
+            // Jeder API-Fehler (403, 500, …) → Viewer-Fallback
             const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.'));
             setAiosUser(_buildFallbackUser(cp, swaRole ?? 'AIOS.Viewer'));
           }
         } catch {
-          // Netzwerkfehler → Viewer-Fallback
+          // Netzwerkfehler / Timeout → Viewer-Fallback
           const swaRole = cp.userRoles?.find(r => r.startsWith('AIOS.'));
           setAiosUser(_buildFallbackUser(cp, swaRole ?? 'AIOS.Viewer'));
         } finally {
