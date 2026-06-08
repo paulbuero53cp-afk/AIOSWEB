@@ -54,7 +54,14 @@ async function debugHandler(
     try {
       const all = await listItems('USERS');
       result['sp_allUsers_count'] = all.length;
-      result['sp_allUsers_emails'] = all.map(u => u.fields['Email']);
+      // Erste Item: ALLE Feldnamen zeigen (um interne SP-Spaltenbezeichner zu prüfen)
+      if (all.length > 0) {
+        result['sp_first_item_keys'] = Object.keys(all[0].fields as Record<string, unknown>);
+        result['sp_first_item_fields'] = all[0].fields;
+      }
+      result['sp_allUsers_emails_Email']  = all.map(u => (u.fields as Record<string, unknown>)['Email']);
+      result['sp_allUsers_emails_Email0'] = all.map(u => (u.fields as Record<string, unknown>)['Email0']);
+      result['sp_allUsers_roles']         = all.map(u => (u.fields as Record<string, unknown>)['Role']);
     } catch (e) {
       result['sp_allUsers'] = { error: String(e) };
     }
