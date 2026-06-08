@@ -8,7 +8,10 @@ const settings = JSON.parse(
   readFileSync(join(__dir, '../api/local.settings.json'), 'utf8')
 ).Values;
 
-const { AZURE_TENANT_ID: tid, AZURE_CLIENT_ID: cid, AZURE_CLIENT_SECRET: secret } = settings;
+const { AZURE_TENANT_ID: tid, AZURE_CLIENT_ID: cid, AZURE_CLIENT_SECRET: secret, SHAREPOINT_SITE_URL: siteUrl } = settings;
+
+if (!siteUrl) { console.log('SHAREPOINT_SITE_URL fehlt in local.settings.json'); process.exit(1); }
+const { hostname: spHost, pathname: spPath } = new URL(siteUrl);  // z.B. tenant.sharepoint.com + /sites/AIOS
 
 const tokenRes = await fetch(`https://login.microsoftonline.com/${tid}/oauth2/v2.0/token`, {
   method: 'POST',
@@ -16,7 +19,7 @@ const tokenRes = await fetch(`https://login.microsoftonline.com/${tid}/oauth2/v2
 });
 const { access_token: token } = await tokenRes.json();
 
-const siteRes = await fetch('https://graph.microsoft.com/v1.0/sites/handsonaiowl771.sharepoint.com:/sites/AIOS?$select=id', { headers: { Authorization: `Bearer ${token}` } });
+const siteRes = await fetch(`https://graph.microsoft.com/v1.0/sites/${spHost}:${spPath}?$select=id`, { headers: { Authorization: `Bearer ${token}` } });
 const { id: siteId } = await siteRes.json();
 
 // Alle Listen holen

@@ -9,7 +9,8 @@
 # ─────────────────────────────────────────────────────────────
 
 param(
-    [string]$SiteUrl = "https://TENANT.sharepoint.com/sites/AIOS"
+    [string]$SiteUrl = "https://TENANT.sharepoint.com/sites/AIOS",
+    [string]$CompanyName = "AIOS"   # Anzeigename des Kunden — pro Tenant überschreiben
 )
 
 # ── Verbindung prüfen ─────────────────────────────────────────
@@ -221,7 +222,7 @@ EnsureField -ListTitle "AIOS_Config" -InternalName "ConfigValue" -DisplayName "W
 $existing = Get-PnPListItem -List "AIOS_Config" -Query "<View><Query><Where><Eq><FieldRef Name='ConfigKey'/><Value Type='Text'>COMPANY</Value></Eq></Where></Query></View>"
 if ($existing.Count -eq 0) {
     $companyConfig = @{
-        name    = "STOCKMEIER"
+        name    = $CompanyName
         short   = "AIOS"
         tag     = "AI Management System"
         iso     = "ISO 42001 aligned"
