@@ -59,6 +59,12 @@ async function handlePost(req: HttpRequest): Promise<HttpResponseInit> {
   if (isAuthError(principal)) return principal;
 
   const body = await req.json() as Partial<AppConfig>;
+
+  // chatbot.url muss https:// sein (verhindert javascript:-URLs als Chatbot-Link)
+  if (body.chatbot?.url && !/^https?:\/\//i.test(body.chatbot.url)) {
+    return { status: 400, jsonBody: { error: 'chatbot.url muss mit https:// beginnen' } };
+  }
+
   if (MOCK) return { status: 200, jsonBody: { ...DEFAULT_CONFIG, ...body } };
   const configJson = JSON.stringify(body);
 

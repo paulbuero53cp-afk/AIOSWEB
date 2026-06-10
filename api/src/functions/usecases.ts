@@ -101,8 +101,8 @@ async function handlePost(
   }
 
   const now  = new Date().toISOString();
-  // ID generieren: UC-YYYY-MM-NNN (fortlaufend pro Monat)
-  const ucId = body.id?.trim() || await generateUcId();
+  // ID immer serverseitig generieren — kein client-seitiges ID-Spoofing.
+  const ucId = await generateUcId();
 
   const newUC: Partial<UseCase> = {
     ...body,
@@ -140,6 +140,11 @@ async function handlePatch(
       : ['AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin'],
   );
   if (isAuthError(principal)) return principal;
+
+  // Link-Validierung konsistent mit POST
+  if (body.link !== undefined && body.link !== '' && !/^https?:\/\//i.test(body.link)) {
+    return { status: 400, jsonBody: { error: 'link muss mit https:// beginnen' } };
+  }
 
   if (MOCK) {
     const uc = MOCK_USECASES.find(u => u.id === ucId);

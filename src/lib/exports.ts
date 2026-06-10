@@ -3,12 +3,18 @@
 //  Identisches Schema zur HTML v4 — UTF-8 BOM für Excel
 // ─────────────────────────────────────────────────────────────
 import type { UseCase, Incident } from '@/types';
+import * as XLSX from 'xlsx';
 
 // ── Hilfsfunktionen ───────────────────────────────────────────
 const BOM = '\uFEFF';
 
+// CSV-Injection (OWASP): Zellen die mit =+-@|\t\r beginnen mit Tab prefixen,
+// damit Excel/Sheets den Inhalt nie als Formel interpretiert.
+const CSV_INJECT_RE = /^[=+\-@|\t\r]/;
+
 function csvCell(v: unknown): string {
-  const s = String(v === null || v === undefined ? '' : v);
+  let s = String(v === null || v === undefined ? '' : v);
+  if (CSV_INJECT_RE.test(s)) s = '\t' + s;
   return s.includes(',') || s.includes('"') || s.includes('\n')
     ? `"${s.replace(/"/g, '""')}"` : s;
 }
@@ -153,36 +159,8 @@ export function exportAuditLogCSV(entries: import('@/types').AuditEntry[]) {
   downloadBlob(BOM + rows.join('\n'), 'auditlog.csv');
 }
 
-// ── Excel-Export via SheetJS (on-demand) ─────────────────────
-declare global {
-  interface Window {
-    XLSX?: {
-      utils: {
-        book_new: () => unknown;
-        json_to_sheet: (data: unknown[]) => unknown;
-        book_append_sheet: (wb: unknown, ws: unknown, name: string) => void;
-      };
-      writeFile: (wb: unknown, name: string) => void;
-    };
-  }
-}
-
-async function loadSheetJS(): Promise<typeof window.XLSX> {
-  if (window.XLSX) return window.XLSX;
-  await new Promise<void>((res, rej) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    s.onload = () => res();
-    s.onerror = () => rej(new Error('SheetJS laden fehlgeschlagen'));
-    document.head.appendChild(s);
-  });
-  return window.XLSX;
-}
-
+// ── Excel-Export via SheetJS (gebundelt, kein CDN) ───────────
 export async function exportExcel(useCases: UseCase[], incidents: Incident[]) {
-  const XLSX = await loadSheetJS();
-  if (!XLSX) throw new Error('SheetJS nicht verfügbar');
-
   const ucRows = useCases.filter(u => u.act).map(uc => {
     const row: Record<string, unknown> = {};
     UC_FIELDS.forEach((f, i) => { row[f] = ucToRow(uc)[i]; });

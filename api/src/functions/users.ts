@@ -56,7 +56,7 @@ async function handleGetAll(req: HttpRequest): Promise<HttpResponseInit> {
 }
 
 // ── GET /api/users/me ─────────────────────────────────────────
-async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
+async function handleGetMe(req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   const principal = requireAuth(req);
   if (isAuthError(principal)) return principal;
 
@@ -119,15 +119,10 @@ async function handleGetMe(req: HttpRequest): Promise<HttpResponseInit> {
     }
 
   } catch (graphErr) {
-    // Graph-Fehler → Viewer-Fallback damit Login nicht blockiert wird
-    // Admin sieht dies als _graphError Flag und kann debuggen
-    const errMsg = graphErr instanceof Error ? graphErr.message : String(graphErr);
-    return { status: 200, jsonBody: {
-      id: '', email: principal.userDetails, displayName: principal.userDetails,
-      aadUserId: principal.userId, role: 'AIOS.Viewer',
-      active: true, invitedAt: '', invitedBy: 'Error-Fallback',
-      lastLogin: new Date().toISOString(), _graphError: errMsg,
-    }};
+    // Graph-Fehler → 503 zurückgeben, kein Viewer-Fallback (würde jeden
+    // AAD-Nutzer einlassen). Fehlerdetails nur im Server-Log (F4).
+    context.error('[users/me graph-error]', graphErr);
+    return { status: 503, jsonBody: { error: 'Dienst temporär nicht verfügbar. Bitte erneut versuchen.' } };
   }
 
   // Kein Eintrag, keine Rolle, Liste hat viele User → wirklich kein Zugriff
@@ -248,7 +243,7 @@ async function usersHandler(
     const segment   = pathParts.replace(/^\//, '');   // '' | 'me' | '{id}'
     const method    = req.method.toUpperCase();
 
-    if (segment === 'me' && method === 'GET')  return handleGetMe(req);
+    if (segment === 'me' && method === 'GET')  return handleGetMe(req, context);
     if (segment === ''   && method === 'GET')  return handleGetAll(req);
     if (segment === ''   && method === 'POST') return handlePost(req);
     if (segment && segment !== 'me' && method === 'PATCH')  return handlePatch(req, segment);
