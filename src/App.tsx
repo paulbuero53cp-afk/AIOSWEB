@@ -156,16 +156,16 @@ function Sidebar({
 
 // ── AppShell ──────────────────────────────────────────────────
 function AppShell() {
-  const { loading, principal, isAuthenticated } = useAuth();
+  const { loading, principal, isAuthenticated, aiosUser } = useAuth();
   const config = useAppConfig();
   const [screen, setScreen] = useState<Screen>('dashboard');
   const [selectedUcId, setSelectedUcId] = useState<string | undefined>(undefined);
   const [lang, setLang] = useState<Language>('de');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Live-Badges
-  const { data: ucData }  = useSWR<UseCase[]>('/api/usecases', swrFetcher);
-  const { data: incData } = useSWR<Incident[]>('/api/incidents', swrFetcher);
+  // Live-Badges — nur für autorisierte Nutzer laden (sonst 403-Rauschen)
+  const { data: ucData }  = useSWR<UseCase[]>(aiosUser ? '/api/usecases' : null, swrFetcher);
+  const { data: incData } = useSWR<Incident[]>(aiosUser ? '/api/incidents' : null, swrFetcher);
   const govBadge = (ucData ?? [])
     .filter(u => u.act && (u.app === 'Pending' || u.rt === 'High')).length;
   const incBadge = (incData ?? []).filter(i => i.st === 'Open').length;
@@ -191,6 +191,30 @@ function AppShell() {
     );
   }
 
+  // Eingeloggt, aber NICHT in AIOS_Users (oder gesperrt) → kein Zugriff.
+  // Backend liefert für diese Nutzer ohnehin nur 403 — hier die Fehlermeldung.
+  if (!aiosUser) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', fontFamily: 'DM Sans,sans-serif', padding: 24 }}>
+        <div style={{ textAlign: 'center', maxWidth: 460 }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--petrol)', marginBottom: 10 }}>
+            Kein Zugriff
+          </div>
+          <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 8 }}>
+            Dieses Konto ist nicht für AIOS freigeschaltet.
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 24 }}>
+            Angemeldet als <strong>{principal?.userDetails ?? '—'}</strong>.<br />
+            Bitte wenden Sie sich an Ihren AIOS-Administrator, um eingeladen zu werden.
+          </div>
+          <a href="/.auth/logout" className="btn btn-outline btn-sm">
+            Abmelden / Konto wechseln
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   const screenTitle = NAV_ITEMS.find(n => n.id === screen)?.label ?? screen;
 

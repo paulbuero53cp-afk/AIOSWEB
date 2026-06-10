@@ -8,7 +8,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { requireAuth, requireRole, isAuthError } from '../lib/auth';
+import { requireUser, requireRole, isAuthError } from '../lib/auth';
 import { listItems, findItem, createItem, updateItem, deleteItem, odataEscape } from '../lib/storage';
 import { serverError } from '../lib/http';
 import { spToUC, ucToSp, UseCase } from '../lib/mappers';
@@ -21,7 +21,7 @@ const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 async function handleGet(
   req: HttpRequest,
 ): Promise<HttpResponseInit> {
-  const principal = requireAuth(req);
+  const principal = await requireUser(req);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) return { status: 200, jsonBody: MOCK_USECASES.filter(uc => uc.act) };
@@ -39,7 +39,7 @@ async function handleGetOne(
   req: HttpRequest,
   ucId: string,
 ): Promise<HttpResponseInit> {
-  const principal = requireAuth(req);
+  const principal = await requireUser(req);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) {

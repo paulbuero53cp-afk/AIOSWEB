@@ -8,7 +8,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { requireAuth, requireRole, isAuthError } from '../lib/auth';
+import { requireUser, requireRole, isAuthError } from '../lib/auth';
 import { listItems, findItem, createItem, updateItem, odataEscape } from '../lib/storage';
 import { serverError } from '../lib/http';
 import { spToArtefakt, artefaktToSp, Artefakt } from '../lib/mappers';
@@ -78,7 +78,7 @@ async function handleGetAll(
 // ── GET Status-Map (alle Rollen) ─────────────────────────────
 // Gibt { [ucId]: ['ra', 'gc', ...] } zurück — welche Typen existieren
 async function handleStatus(req: HttpRequest): Promise<HttpResponseInit> {
-  const principal = requireAuth(req);
+  const principal = await requireUser(req);
   if (isAuthError(principal)) return principal;
 
   if (MOCK) {

@@ -133,6 +133,17 @@ export async function requireRole(
   return principal;
 }
 
+// ── Mindest-Autorisierung: eingeladener Nutzer ────────────────
+// Verlangt einen aktiven Eintrag in AIOS_Users (irgendeine AIOS-Rolle).
+// Schließt bloß 'authenticated' aus — also jeden eingeloggten AAD-Nutzer
+// ohne Einladung. Für ALLE lesenden Endpunkte verwenden, damit ein
+// Nicht-Eingeladener keinerlei Daten erhält (nur 403).
+export async function requireUser(
+  req: HttpRequest,
+): Promise<ClientPrincipal | HttpResponseInit> {
+  return requireRole(req, ['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin']);
+}
+
 // Hilfsfunktion: Ist es eine Auth-Fehler-Response?
 export function isAuthError(v: ClientPrincipal | HttpResponseInit): v is HttpResponseInit {
   return 'status' in v;
