@@ -172,7 +172,7 @@ function AppShell() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--petrol)', fontFamily: 'DM Sans,sans-serif' }}>
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--petrol)', fontFamily: 'var(--font)' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>🤖</div>
           <div style={{ fontSize: 14, color: 'var(--muted)' }}>AIOS wird geladen…</div>
@@ -195,7 +195,7 @@ function AppShell() {
   // Backend liefert für diese Nutzer ohnehin nur 403 — hier die Fehlermeldung.
   if (!aiosUser) {
     return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', fontFamily: 'DM Sans,sans-serif', padding: 24 }}>
+      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', fontFamily: 'var(--font)', padding: 24 }}>
         <div style={{ textAlign: 'center', maxWidth: 460 }}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
           <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--petrol)', marginBottom: 10 }}>

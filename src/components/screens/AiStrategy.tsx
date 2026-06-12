@@ -113,7 +113,7 @@ export default function AiStrategy({ onNav }: { onNav?: (s: string) => void }) {
             background: 'none', border: 'none', cursor: 'pointer',
             color: 'rgba(255,255,255,.55)', fontSize: 12, padding: '14px 16px',
             textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,.08)',
-            display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'DM Sans, sans-serif',
+            display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font)',
           }}>
             ← AIOS
           </button>
@@ -144,7 +144,7 @@ export default function AiStrategy({ onNav }: { onNav?: (s: string) => void }) {
               borderRadius: 5, cursor: 'pointer', fontSize: 11, fontWeight: 700,
               background: lang === l ? 'var(--accent)' : 'transparent',
               color: lang === l ? '#fff' : 'rgba(255,255,255,.45)',
-              fontFamily: 'DM Sans, sans-serif', textTransform: 'uppercase', letterSpacing: '.06em',
+              fontFamily: 'var(--font)', textTransform: 'uppercase', letterSpacing: '.06em',
             }}>
               {l.toUpperCase()}
             </button>
