@@ -1,0 +1,58 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  NODE_VERSION: '20.x'
+
+stages:
+  - stage: BuildDeploy
+    displayName: 'Build & Deploy'
+    jobs:
+      - job: BuildDeploy
+        displayName: 'Build Frontend + API, Deploy SWA'
+        steps:
+
+          - task: NodeTool@0
+            displayName: 'Install Node.js $(NODE_VERSION)'
+            inputs:
+              versionSpec: $(NODE_VERSION)
+
+          - script: npm install --no-package-lock
+            displayName: 'Frontend: npm install'
+
+          - script: npm run build
+            displayName: 'Frontend: npm run build'
+
+          - script: cp staticwebapp.config.json dist/
+            displayName: 'Copy staticwebapp.config.json → dist'
+
+          - script: npm install --no-package-lock
+            workingDirectory: api
+            displayName: 'API: npm install'
+
+          - script: npm run build
+            workingDirectory: api
+            displayName: 'API: npm run build'
+
+          - script: npm install --no-package-lock --omit=dev
+            workingDirectory: api
+            displayName: 'API: prod-only deps (Größenlimit)'
+
+          - task: AzureStaticWebApp@0
+            displayName: 'Deploy to Azure Static Web Apps'
+            inputs:
+              app_location: 'dist'
+              api_location: 'api'
+              skip_app_build: true
+              skip_api_build: true
+              azure_static_web_apps_api_token: $(DEPLOYMENT_TOKEN)
+            env:
+              AZURE_TENANT_ID: $(AZURE_TENANT_ID)
+              AZURE_CLIENT_ID: $(AZURE_CLIENT_ID)
+              AZURE_CLIENT_SECRET: $(AZURE_CLIENT_SECRET)
+              SHAREPOINT_SITE_URL: $(SHAREPOINT_SITE_URL)
