@@ -50,6 +50,16 @@ function EnsureField {
         foreach ($k in $Extra.Keys) { $params[$k] = $Extra[$k] }
         Add-PnPField @params | Out-Null
         Write-Host "    + Feld '$DisplayName' ($Type)" -ForegroundColor DarkCyan
+    } elseif (($Type -eq "Choice" -or $Type -eq "MultiChoice") -and $Extra.ContainsKey("Choices")) {
+        # Choice-Spalten: fehlende Werte nachträglich ergänzen (verhindert SP-Ablehnungen
+        # wenn neue Werte zur App hinzugefügt werden ohne Reprovisioning).
+        $existingChoices = $field.Choices
+        $newChoices = $Extra["Choices"] | Where-Object { $existingChoices -notcontains $_ }
+        if ($newChoices.Count -gt 0) {
+            $merged = $existingChoices + $newChoices
+            Set-PnPField -List $ListTitle -Identity $InternalName -Values @{ Choices = $merged } | Out-Null
+            Write-Host "    ~ Feld '$DisplayName': Choices ergänzt ($($newChoices -join ', '))" -ForegroundColor Yellow
+        }
     }
 }
 

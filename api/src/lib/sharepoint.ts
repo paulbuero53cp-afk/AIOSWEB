@@ -150,6 +150,16 @@ function extractUnknownField(err: unknown): string | null {
   return m?.[1] ?? null;
 }
 
+// Erkennt Choice-Validierungsfehler (ungültiger Wert in einer Choice-Spalte).
+// SP gibt "The value '...' is not valid for the field '...'" zurück.
+function extractChoiceError(err: unknown): string | null {
+  const msg = (err as { message?: string })?.message ?? String(err);
+  const m = msg.match(/value\s+'?([^']+)'?\s+is not valid for (the )?field\s+'?(\w+)'?/i)
+           ?? msg.match(/Ungültiger Wert/i);
+  if (m) return msg;
+  return null;
+}
+
 /** Neues Item erstellen — überspringt unbekannte SP-Felder automatisch */
 export async function createItem(
   listKey: Parameters<typeof listName>[0],
@@ -165,6 +175,8 @@ export async function createItem(
     } catch (err) {
       const bad = extractUnknownField(err);
       if (bad && bad in safe) { delete safe[bad]; continue; }
+      const choiceErr = extractChoiceError(err);
+      if (choiceErr) throw new Error(`SharePoint Choice-Validierung fehlgeschlagen: ${choiceErr}. Bitte Provisioning-Skript erneut ausführen.`);
       throw err;
     }
   }
@@ -188,6 +200,8 @@ export async function updateItem(
     } catch (err) {
       const bad = extractUnknownField(err);
       if (bad && bad in safe) { delete safe[bad]; continue; }
+      const choiceErr = extractChoiceError(err);
+      if (choiceErr) throw new Error(`SharePoint Choice-Validierung fehlgeschlagen: ${choiceErr}. Bitte Provisioning-Skript erneut ausführen.`);
       throw err;
     }
   }
