@@ -864,3 +864,129 @@ export function translate(
   }
   return s;
 }
+
+// ─────────────────────────────────────────────────────────────
+//  Quelltext-basierte Übersetzung (für Screens mit vielen inline-
+//  Strings, z.B. DSFA-Fragebogen). tx(de) → EN-Override oder DE.
+//  EN = Erstvorschlag, fachliche (DPO-)Durchsicht empfohlen.
+// ─────────────────────────────────────────────────────────────
+const byTextEn: Record<string, string> = {
+  // Tabs / Abschnitte
+  'Teil I — Hintergrund': 'Part I — Background',
+  'Teil II — Risiken': 'Part II — Risks',
+  'Teil III — Ausnahmen': 'Part III — Exceptions',
+  'Trigger-Prüfung': 'Trigger check',
+  'Schritt 2': 'Step 2',
+  'Schritt 3': 'Step 3',
+  'Schritt 4': 'Step 4',
+  '1A — Hintergrundinformationen': '1A — Background information',
+  '1B — Art der Verarbeitung (Frage 4)': '1B — Type of processing (question 4)',
+  '1C — Quelle, Zugang & Rechtsgrundlage': '1C — Source, access & legal basis',
+  '2A — Sensible Datenkategorien (Frage 9 / Art. 9 DSGVO)': '2A — Sensitive data categories (question 9 / Art. 9 GDPR)',
+  '2B — Ja / Nein Fragen (10–15)': '2B — Yes / no questions (10–15)',
+  '2C — Schutzbedürftige Personengruppen (Frage 16)': '2C — Vulnerable groups (question 16)',
+  '2D — Weitere Fragen (17–20)': '2D — Further questions (17–20)',
+  '3A — Ausnahmen (Fragen 21–24)': '3A — Exceptions (questions 21–24)',
+  'DSFA-Trigger nach Art. 35 DSGVO': 'DPIA triggers under Art. 35 GDPR',
+  'Beschreibung der Verarbeitung': 'Description of the processing',
+  'Risikobewertung — Wahrscheinlichkeit × Schwere': 'Risk assessment — likelihood × severity',
+  'Technische und organisatorische Maßnahmen (TOMs)': 'Technical and organisational measures (TOMs)',
+  'DSB-Konsultation & Status': 'DPO consultation & status',
+  // Teil I Felder
+  'Projektinhaber (Name, Funktion)': 'Project owner (name, role)',
+  'Datum': 'Date',
+  'Projektbeschreibung und Ziele': 'Project description and objectives',
+  'Welche Daten sind betroffen?': 'Which data is affected?',
+  'Quelle der Daten (Frage 5)': 'Source of the data (question 5)',
+  'Sind Daten öffentlich zugänglich? (Frage 6)': 'Is the data publicly accessible? (question 6)',
+  'Wer hat Zugriff auf die personenbezogenen Daten? (Frage 7)': 'Who has access to the personal data? (question 7)',
+  'Rechtsgrundlage der Verarbeitung (Frage 8)': 'Legal basis of the processing (question 8)',
+  // 1B Verarbeitungsarten
+  'Erheben': 'Collect', 'Erfassen': 'Record', 'Organisieren': 'Organise', 'Speichern': 'Store',
+  'Anpassen oder ändern': 'Adapt or alter', 'Bereitstellung': 'Make available',
+  'Abgleichen oder verknüpfen': 'Match or combine', 'Einschränken': 'Restrict',
+  'Löschen': 'Erase', 'Vernichten': 'Destroy', 'Auslesen': 'Read out', 'Abfragen': 'Query',
+  'Verwenden': 'Use', 'Offenlegen': 'Disclose', 'Verbreiten': 'Disseminate',
+  // 2A sensible Kategorien
+  'Rassische / ethnische Herkunft': 'Racial / ethnic origin',
+  'Politische Meinungen': 'Political opinions',
+  'Religiöse / weltanschauliche Überzeugungen': 'Religious / philosophical beliefs',
+  'Gewerkschaftszugehörigkeit': 'Trade union membership',
+  'Genetische Daten': 'Genetic data', 'Biometrische Daten': 'Biometric data',
+  'Gesundheitsdaten': 'Health data',
+  'Sexualleben / Sexuelle Orientierung': 'Sex life / sexual orientation',
+  'Strafrechtliche Verurteilungen': 'Criminal convictions',
+  'Finanzdaten (Bank-/Kontodaten)': 'Financial data (bank / account data)',
+  'Nicht zutreffend': 'Not applicable',
+  // 2B Fragen
+  'Frage 10 — Automatisierte Entscheidungsfindung (inkl. Profiling)?': 'Question 10 — Automated decision-making (incl. profiling)?',
+  'Frage 11 — Systematische Überwachung öffentlich zugänglicher Bereiche?': 'Question 11 — Systematic monitoring of publicly accessible areas?',
+  'Frage 12 — Leistungs- und Verhaltenskontrolle geeignet?': 'Question 12 — Suitable for performance and behaviour monitoring?',
+  'Frage 13 — Umfangreiche Verarbeitung von Daten?': 'Question 13 — Large-scale processing of data?',
+  'Frage 14 — Datensätze abgeglichen oder kombiniert?': 'Question 14 — Datasets matched or combined?',
+  'Frage 15 — Betroffene Personen bewertet (Profiling)?': 'Question 15 — Data subjects evaluated (profiling)?',
+  // 2C schutzbedürftig
+  'Mitarbeitende': 'Employees', 'Asylsuchende': 'Asylum seekers', 'Patienten': 'Patients',
+  'Menschen mit geistiger Behinderung': 'People with intellectual disabilities',
+  'Senioren': 'Elderly people', 'Kinder unter 16 Jahren': 'Children under 16',
+  // 2D Fragen
+  'Frage 17 — Neue oder innovative Technologie?': 'Question 17 — New or innovative technology?',
+  'Frage 18 — Übermittlung außerhalb EU/EWR?': 'Question 18 — Transfer outside the EU/EEA?',
+  'Drittland — welche Länder?': 'Third country — which countries?',
+  'Frage 19 — Aufsichtsbehörde hat DSFA-Pflicht erklärt?': 'Question 19 — Supervisory authority has declared a DPIA mandatory?',
+  'Frage 20 — Hohes Risiko ohne obige Kategorien?': 'Question 20 — High risk without the above categories?',
+  // Teil III
+  'Frage 21 — Ähnliche abgeschlossene DSFA vorhanden?': 'Question 21 — Similar completed DPIA available?',
+  'Falls ja — Referenz und Unterschiede (Frage 21/22)': 'If yes — reference and differences (question 21/22)',
+  'Frage 23 — Aufsichtsbehörde hat geprüft und bestätigt?': 'Question 23 — Supervisory authority has reviewed and confirmed?',
+  'Frage 24 — Projekt auf White List der Aufsichtsbehörde?': "Question 24 — Project on the supervisory authority's white list?",
+  'Frage 23/24 — Zusätzliche Informationen / Referenz': 'Question 23/24 — Additional information / reference',
+  // Radio-Optionen
+  'Ja': 'Yes', 'Nein': 'No', 'Nicht sicher': 'Not sure',
+  // Trigger
+  'Mindestens ein aktiver Trigger begründet die Pflicht zur Durchführung einer vollständigen DSFA gemäß Art. 35 DSGVO. Bitte anschließend die Schritte 2–4 ausfüllen.':
+    'At least one active trigger establishes the obligation to carry out a full DPIA under Art. 35 GDPR. Please then complete steps 2–4.',
+  'Trigger aktiv → DSFA verpflichtend (Art. 35 DSGVO)': 'trigger(s) active → DPIA mandatory (Art. 35 GDPR)',
+  'Kein Trigger aktiv — DSFA aktuell nicht zwingend erforderlich': 'No trigger active — DPIA currently not strictly required',
+  'Systematische und umfangreiche Bewertung persönlicher Aspekte (Profiling)': 'Systematic and extensive evaluation of personal aspects (profiling)',
+  'Verarbeitung besonderer Datenkategorien (Art. 9 DSGVO) in großem Umfang': 'Large-scale processing of special categories of data (Art. 9 GDPR)',
+  'Systematische Überwachung öffentlich zugänglicher Bereiche': 'Systematic monitoring of publicly accessible areas',
+  'Neue Technologie mit hohem Risiko für Betroffene': 'New technology with high risk to data subjects',
+  'Automatisierte Entscheidungsfindung mit erheblicher Wirkung auf Personen (Art. 22)': 'Automated decision-making with significant effect on individuals (Art. 22)',
+  'Verarbeitung von Daten schutzbedürftiger Personengruppen (Kinder, Patienten)': 'Processing of data of vulnerable groups (children, patients)',
+  // Schritt 2
+  'Zweck der Verarbeitung': 'Purpose of the processing',
+  'Rechtsgrundlage (Art. 6 / Art. 9 DSGVO)': 'Legal basis (Art. 6 / Art. 9 GDPR)',
+  'Kategorien betroffener Daten': 'Categories of data concerned',
+  'Kategorien betroffener Personen': 'Categories of data subjects',
+  'Empfänger / Übermittlungen': 'Recipients / transfers',
+  'Löschfristen': 'Retention periods',
+  // Schritt 3
+  'Risiko': 'Risk', 'Wahrscheinlichkeit': 'Likelihood', 'Schwere': 'Severity', 'Score': 'Score',
+  '1 — Niedrig': '1 — Low', '2 — Mittel': '2 — Medium', '3 — Hoch': '3 — High',
+  'Score = Wahrscheinlichkeit × Schwere: 1–2 = Niedrig · 3–5 = Mittel · 6–9 = Hoch':
+    'Score = likelihood × severity: 1–2 = Low · 3–5 = Medium · 6–9 = High',
+  'Vertraulichkeit': 'Confidentiality', 'Integrität': 'Integrity', 'Verfügbarkeit': 'Availability',
+  'Fairness': 'Fairness', 'Transparenz': 'Transparency', 'Rechtmäßigkeit': 'Lawfulness',
+  'Unbefugter Zugriff auf personenbezogene Daten': 'Unauthorised access to personal data',
+  'Unbeabsichtigte Veränderung von Personendaten': 'Unintended alteration of personal data',
+  'Datenverlust / Nichtverfügbarkeit': 'Data loss / unavailability',
+  'Diskriminierung durch Modellergebnisse (Bias)': 'Discrimination through model results (bias)',
+  'Mangelnde Transparenz / fehlende Erklärung für Betroffene': 'Lack of transparency / no explanation for data subjects',
+  'Weitergabe an Dritte / internationale Übermittlung ohne Rechtsgrundlage': 'Disclosure to third parties / international transfer without legal basis',
+  // Schritt 4
+  'TOMs — Beschreibung der Schutzmaßnahmen': 'TOMs — description of safeguards',
+  'DSB-Konsultationsdatum': 'DPO consultation date',
+  'DSFA-Status': 'DPIA status',
+  'Ausstehend': 'Pending', 'In Bearbeitung': 'In progress', 'Abgeschlossen': 'Completed', 'Nicht erforderlich': 'Not required',
+  'Status': 'Status', 'DSB konsultiert am': 'DPO consulted on',
+  // DSFA Titel / Toast
+  'Datenschutz-Folgenabschätzung (DSFA)': 'Data Protection Impact Assessment (DPIA)',
+  '✓ DSFA gespeichert': '✓ DPIA saved',
+  'Fehler beim Speichern': 'Error while saving',
+};
+
+export function translateText(lang: Language, source: string): string {
+  if (lang === 'de') return source;
+  return byTextEn[source] ?? source;
+}

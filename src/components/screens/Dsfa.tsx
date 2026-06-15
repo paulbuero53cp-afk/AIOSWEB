@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useArtefakt } from '@/hooks/useArtefakt';
 import { useToast } from '@/context/ToastContext';
+import { useLang } from '@/context/LanguageContext';
 import { ArtHeader } from '@/components/common/ArtHeader';
 import { DSFA_TRIGGER, DSFA_RISK_ITEMS } from '@/lib/constants';
 import type { DsfaData } from '@/types';
@@ -13,6 +14,7 @@ function b(d: LocalData, k: string): boolean { return Boolean(d[k]); }
 
 // ── Eingabe-Komponenten ───────────────────────────────────────
 function SectionTitle({ children }: { children: React.ReactNode }) {
+  const { tx } = useLang();
   return (
     <div style={{
       fontSize: 13, fontWeight: 700, color: 'var(--petrol)',
@@ -20,7 +22,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
       margin: '20px 0 10px', paddingBottom: 6,
       borderBottom: '2px solid var(--accent-pale)',
     }}>
-      {children}
+      {typeof children === 'string' ? tx(children) : children}
     </div>
   );
 }
@@ -31,9 +33,10 @@ function TextField({
   label: string; fieldKey: string; data: LocalData;
   onChange: (k: string, v: unknown) => void; big?: boolean; type?: string;
 }) {
+  const { tx } = useLang();
   return (
     <div className="fgroup" style={{ marginBottom: 10 }}>
-      <label className="fl">{label}</label>
+      <label className="fl">{tx(label)}</label>
       {big ? (
         <textarea
           rows={3} value={s(data, fieldKey)}
@@ -55,10 +58,11 @@ function RadioGroup({
   label: string; fieldKey: string; data: LocalData;
   onChange: (k: string, v: unknown) => void;
 }) {
+  const { tx } = useLang();
   const val = s(data, fieldKey) || 'nein';
   return (
     <div style={{ marginBottom: 10 }}>
-      <label className="fl" style={{ display: 'block', marginBottom: 4 }}>{label}</label>
+      <label className="fl" style={{ display: 'block', marginBottom: 4 }}>{tx(label)}</label>
       <div style={{ display: 'flex', gap: 16 }}>
         {[['ja', 'Ja'], ['nein', 'Nein'], ['unsicher', 'Nicht sicher']].map(([v, l]) => (
           <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, cursor: 'pointer' }}>
@@ -66,7 +70,7 @@ function RadioGroup({
               type="radio" name={fieldKey} value={v}
               checked={val === v} onChange={() => onChange(fieldKey, v)}
             />
-            {l}
+            {tx(l)}
           </label>
         ))}
       </div>
@@ -80,6 +84,7 @@ function CheckItem({
   label: string; fieldKey: string; data: LocalData;
   onChange: (k: string, v: unknown) => void;
 }) {
+  const { tx } = useLang();
   return (
     <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8, fontSize: 13, cursor: 'pointer' }}>
       <input
@@ -87,7 +92,7 @@ function CheckItem({
         onChange={e => onChange(fieldKey, e.target.checked)}
         style={{ marginTop: 2, flexShrink: 0 }}
       />
-      <span>{label}</span>
+      <span>{tx(label)}</span>
     </label>
   );
 }
@@ -108,6 +113,7 @@ function CheckGrid({ items, data, onChange }: {
 
 // ── Trigger-Ampel ─────────────────────────────────────────────
 function TriggerAmpel({ data }: { data: LocalData }) {
+  const { tx } = useLang();
   const active = DSFA_TRIGGER.filter(t => b(data, t.key)).length;
   const color  = active > 0 ? 'var(--red)' : 'var(--green)';
   const bg     = active > 0 ? 'var(--red-bg)' : 'var(--green-bg)';
@@ -119,8 +125,8 @@ function TriggerAmpel({ data }: { data: LocalData }) {
     }}>
       <span style={{ fontSize: 20 }}>{active > 0 ? '🔴' : '🟢'}</span>
       {active > 0
-        ? `${active} Trigger aktiv → DSFA verpflichtend (Art. 35 DSGVO)`
-        : 'Kein Trigger aktiv — DSFA aktuell nicht zwingend erforderlich'}
+        ? `${active} ${tx('Trigger aktiv → DSFA verpflichtend (Art. 35 DSGVO)')}`
+        : tx('Kein Trigger aktiv — DSFA aktuell nicht zwingend erforderlich')}
     </div>
   );
 }
@@ -133,6 +139,7 @@ function RisikoRow({ item, data, onChange }: {
   data: LocalData;
   onChange: (k: string, v: unknown) => void;
 }) {
+  const { tx } = useLang();
   const wKey = `${item.key}_w`, sKey = `${item.key}_s`;
   const w = parseInt(s(data, wKey) || '1');
   const sv = parseInt(s(data, sKey) || '1');
@@ -142,17 +149,17 @@ function RisikoRow({ item, data, onChange }: {
   return (
     <tr>
       <td style={{ padding: '8px 12px', fontSize: 13 }}>
-        <div style={{ fontWeight: 600 }}>{item.dim}</div>
-        <div style={{ fontSize: 11, color: 'var(--muted)' }}>{item.label}</div>
+        <div style={{ fontWeight: 600 }}>{tx(item.dim)}</div>
+        <div style={{ fontSize: 11, color: 'var(--muted)' }}>{tx(item.label)}</div>
       </td>
       <td style={{ padding: '8px 12px' }}>
         <select value={s(data, wKey) || '1'} onChange={e => onChange(wKey, e.target.value)} style={{ fontSize: 12 }}>
-          {SCORE_OPT.map((o, i) => <option key={i} value={i + 1}>{o}</option>)}
+          {SCORE_OPT.map((o, i) => <option key={i} value={i + 1}>{tx(o)}</option>)}
         </select>
       </td>
       <td style={{ padding: '8px 12px' }}>
         <select value={s(data, sKey) || '1'} onChange={e => onChange(sKey, e.target.value)} style={{ fontSize: 12 }}>
-          {SCORE_OPT.map((o, i) => <option key={i} value={i + 1}>{o}</option>)}
+          {SCORE_OPT.map((o, i) => <option key={i} value={i + 1}>{tx(o)}</option>)}
         </select>
       </td>
       <td style={{ padding: '8px 12px', textAlign: 'center' }}>
@@ -179,6 +186,7 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
   const [dirty,  setDirty]  = useState(false);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
+  const { t, tx, lang } = useLang();
 
   const { data, loading, save } = useArtefakt<Partial<DsfaData>>('dsfa', ucId || null);
   const [local, setLocal] = useState<LocalData>({});
@@ -198,9 +206,9 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
     try {
       await save(local as Partial<DsfaData>);
       setDirty(false);
-      showToast('✓ DSFA gespeichert', 'success');
+      showToast(tx('✓ DSFA gespeichert'), 'success');
     } catch {
-      showToast('Fehler beim Speichern', 'error');
+      showToast(tx('Fehler beim Speichern'), 'error');
     } finally {
       setSaving(false);
     }
@@ -209,7 +217,7 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
   return (
     <div>
       <ArtHeader
-        title="Datenschutz-Folgenabschätzung (DSFA)"
+        title={tx('Datenschutz-Folgenabschätzung (DSFA)')}
         icon="🔒"
         ucId={ucId}
         onUcChange={id => { setUcId(id); setDirty(false); setTab(0); }}
@@ -219,16 +227,16 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
       />
 
       {!ucId ? (
-        <div className="empty">Bitte Use Case auswählen.</div>
+        <div className="empty">{t('common.pickUc')}</div>
       ) : loading ? (
-        <div className="empty">Lade…</div>
+        <div className="empty">{t('common.loadingShort')}</div>
       ) : (
         <>
           {/* Tab-Bar */}
           <div className="tabs" style={{ flexWrap: 'wrap' }}>
-            {TABS.map((t, i) => (
-              <div key={t} className={`tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>
-                {i < 3 ? t : t.split(' — ')[0]}
+            {TABS.map((tabLabel, i) => (
+              <div key={tabLabel} className={`tab${tab === i ? ' active' : ''}`} onClick={() => setTab(i)}>
+                {tx(i < 3 ? tabLabel : tabLabel.split(' — ')[0])}
               </div>
             ))}
           </div>
@@ -353,7 +361,7 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
                     <CheckItem key={t.key} label={t.label} fieldKey={t.key} data={local} onChange={set} />
                   ))}
                   <div style={{ marginTop: 20, padding: 14, background: 'var(--surface2)', borderRadius: 8, fontSize: 12, color: 'var(--muted)' }}>
-                    Mindestens ein aktiver Trigger begründet die Pflicht zur Durchführung einer vollständigen DSFA gemäß Art. 35 DSGVO. Bitte anschließend die Schritte 2–4 ausfüllen.
+                    {tx('Mindestens ein aktiver Trigger begründet die Pflicht zur Durchführung einer vollständigen DSFA gemäß Art. 35 DSGVO. Bitte anschließend die Schritte 2–4 ausfüllen.')}
                   </div>
                 </div>
               )}
@@ -379,10 +387,10 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                       <thead>
                         <tr style={{ background: 'var(--surface2)' }}>
-                          <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, color: 'var(--muted)' }}>Risiko</th>
-                          <th style={{ padding: '8px 12px', fontSize: 12, color: 'var(--muted)', minWidth: 170 }}>Wahrscheinlichkeit</th>
-                          <th style={{ padding: '8px 12px', fontSize: 12, color: 'var(--muted)', minWidth: 170 }}>Schwere</th>
-                          <th style={{ padding: '8px 12px', fontSize: 12, color: 'var(--muted)', textAlign: 'center' }}>Score</th>
+                          <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, color: 'var(--muted)' }}>{tx('Risiko')}</th>
+                          <th style={{ padding: '8px 12px', fontSize: 12, color: 'var(--muted)', minWidth: 170 }}>{tx('Wahrscheinlichkeit')}</th>
+                          <th style={{ padding: '8px 12px', fontSize: 12, color: 'var(--muted)', minWidth: 170 }}>{tx('Schwere')}</th>
+                          <th style={{ padding: '8px 12px', fontSize: 12, color: 'var(--muted)', textAlign: 'center' }}>{tx('Score')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -393,7 +401,7 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
                     </table>
                   </div>
                   <div style={{ marginTop: 12, fontSize: 12, color: 'var(--muted)' }}>
-                    Score = Wahrscheinlichkeit × Schwere: 1–2 = Niedrig · 3–5 = Mittel · 6–9 = Hoch
+                    {tx('Score = Wahrscheinlichkeit × Schwere: 1–2 = Niedrig · 3–5 = Mittel · 6–9 = Hoch')}
                   </div>
                 </div>
               )}
@@ -407,17 +415,17 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
                   <SectionTitle>DSB-Konsultation & Status</SectionTitle>
                   <div className="fg">
                     <div className="fgroup">
-                      <label className="fl">DSB-Konsultationsdatum</label>
+                      <label className="fl">{tx('DSB-Konsultationsdatum')}</label>
                       <input
                         type="date" value={s(local, 'ds_dsbdate')}
                         onChange={e => set('ds_dsbdate', e.target.value)}
                       />
                     </div>
                     <div className="fgroup">
-                      <label className="fl">DSFA-Status</label>
+                      <label className="fl">{tx('DSFA-Status')}</label>
                       <select value={s(local, 'ds_status') || 'Ausstehend'} onChange={e => set('ds_status', e.target.value)}>
                         {['Ausstehend', 'In Bearbeitung', 'Abgeschlossen', 'Nicht erforderlich'].map(o => (
-                          <option key={o}>{o}</option>
+                          <option key={o} value={o}>{tx(o)}</option>
                         ))}
                       </select>
                     </div>
@@ -430,11 +438,11 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
                     return (
                       <div style={{ background: 'var(--surface2)', borderRadius: 8, padding: 14, marginTop: 16 }}>
                         <div style={{ fontSize: 13, fontWeight: 600, color, marginBottom: 4 }}>
-                          Status: {st}
+                          {tx('Status')}: {tx(st)}
                         </div>
                         {s(local, 'ds_dsbdate') && (
                           <div style={{ fontSize: 12, color: 'var(--muted)' }}>
-                            DSB konsultiert am: {new Date(s(local, 'ds_dsbdate')).toLocaleDateString('de-DE')}
+                            {tx('DSB konsultiert am')}: {new Date(s(local, 'ds_dsbdate')).toLocaleDateString(lang === 'en' ? 'en-GB' : 'de-DE')}
                           </div>
                         )}
                       </div>
@@ -448,14 +456,14 @@ export default function DsfaScreen({ initialUcId }: { initialUcId?: string } = {
 
           {/* Navigations-Buttons */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
-            <button className="btn btn-outline" onClick={() => setTab(t => Math.max(0, t - 1))} disabled={tab === 0}>
-              ← Zurück
+            <button className="btn btn-outline" onClick={() => setTab(n => Math.max(0, n - 1))} disabled={tab === 0}>
+              ← {t('common.back')}
             </button>
             <button className="btn btn-primary" onClick={handleSave} disabled={saving || !dirty}>
-              {saving ? '⏳ Speichert…' : '💾 Speichern'}
+              {saving ? `⏳ ${t('common.saving')}` : `💾 ${t('common.save')}`}
             </button>
-            <button className="btn btn-outline" onClick={() => setTab(t => Math.min(TABS.length - 1, t + 1))} disabled={tab === TABS.length - 1}>
-              Weiter →
+            <button className="btn btn-outline" onClick={() => setTab(n => Math.min(TABS.length - 1, n + 1))} disabled={tab === TABS.length - 1}>
+              {t('common.next')} →
             </button>
           </div>
         </>
