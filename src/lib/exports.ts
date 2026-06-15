@@ -178,6 +178,39 @@ export function exportAiToolsCSV(tools: import('@/types').AiTool[]) {
   downloadBlob(BOM + rows.join('\n'), 'ai-tools.csv');
 }
 
+// ── EU-AI-Act-Klassifizierung ─────────────────────────────────
+export interface EuAiActRow {
+  id: string; title: string; cl: string; rt: string; app: string;
+  relevant: boolean; categories: string;
+}
+
+export function exportEuAiActCSV(rows: EuAiActRow[]) {
+  const header = ['id', 'title', 'cluster', 'risk_tier', 'approval', 'eu_ai_act_relevant', 'kategorien'];
+  const out = [header.join(',')];
+  rows.forEach(r => out.push(
+    [r.id, r.title, r.cl, r.rt, r.app, r.relevant ? 'Ja' : 'Nein', r.categories].map(csvCell).join(','),
+  ));
+  downloadBlob(BOM + out.join('\n'), 'eu-ai-act-klassifizierung.csv');
+}
+
+// ── Reliability-Report ────────────────────────────────────────
+export function exportReliabilityCSV(useCases: UseCase[]) {
+  const header = ['id', 'title', 'cluster', 'reliability_tier', 'hitl_mode', 'autonomy_level', 'monitoring_sla', 'failure_modes', 'risk_tier', 'lifecycle'];
+  const out = [header.join(',')];
+  useCases.forEach(u => out.push([
+    u.id, u.title, u.cl, u.rl ?? '', u.hitlMode ?? '', u.autonomyLevel ?? '',
+    u.monitoringSla ?? '', (u.failureModes ?? []).join('|'), u.rt, u.lc,
+  ].map(csvCell).join(',')));
+  downloadBlob(BOM + out.join('\n'), 'reliability-report.csv');
+}
+
+// ── Management-Statusbericht (Kennzahlen) ─────────────────────
+export function exportManagementCSV(rows: [string, string | number][]) {
+  const out = ['kennzahl,wert'];
+  rows.forEach(([k, v]) => out.push([k, String(v)].map(csvCell).join(',')));
+  downloadBlob(BOM + out.join('\n'), 'management-statusbericht.csv');
+}
+
 // ── Excel-Export via SheetJS (gebundelt, kein CDN) ───────────
 export async function exportExcel(useCases: UseCase[], incidents: Incident[]) {
   const ucRows = useCases.filter(u => u.act).map(uc => {

@@ -17,6 +17,7 @@ import ArtefaktHub       from '@/components/screens/ArtefaktHub';
 import PortfolioBoard    from '@/components/screens/PortfolioBoard';
 import AuditLogScreen    from '@/components/screens/AuditLog';
 import AiToolsScreen      from '@/components/screens/AiTools';
+import ReportsScreen      from '@/components/screens/Reports';
 import InfoScreen        from '@/components/screens/Info';
 import AiStrategyScreen  from '@/components/screens/AiStrategy';
 import UcDashboard       from '@/components/screens/UcDashboard';
@@ -34,6 +35,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'Übersicht',
     items: [
       { id: 'dashboard',   label: 'Dashboard',        icon: '📊' },
+      { id: 'reports',     label: 'Berichte',         icon: '📑' },
       { id: 'portfolio',   label: 'Portfolio Board',  icon: '📁' },
       { id: 'aistrategy',  label: 'KI-Strategie',      icon: '💡' },
     ],
@@ -291,6 +293,7 @@ function AppShell() {
           {screen === 'users'      && <UsersScreen />}
           {screen === 'auditlog'   && <AuditLogScreen />}
           {screen === 'aitools'    && <AiToolsScreen />}
+          {screen === 'reports'    && <ReportsScreen />}
           {screen === 'info'       && <InfoScreen />}
           {screen === 'aistrategy' && <AiStrategyScreen onNav={(s) => setScreen(s as Screen)} />}
         </div>

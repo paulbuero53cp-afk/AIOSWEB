@@ -340,7 +340,7 @@ export type Screen =
   | 'dashboard' | 'portfolio' | 'aistrategy' | 'usecases' | 'new'
   | 'governance' | 'incidents' | 'agenthub' | 'artefakthub'
   | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog' | 'info'
-  | 'ucdashboard' | 'users' | 'aitools';
+  | 'ucdashboard' | 'users' | 'aitools' | 'reports';
 
 // ── AI Tool (Register erlaubter KI-Tools) ─────────────────────
 export type AiToolStatus =
