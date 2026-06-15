@@ -2,6 +2,7 @@ import { useUseCases } from '@/hooks/useUseCases';
 import { useIncidents } from '@/hooks/useIncidents';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useT } from '@/context/LanguageContext';
 import { RiskBadge, ApprovalBadge, LifecycleBadge, ReliabilityBadge } from '@/components/common/Badge';
 import type { UseCase, ReliabilityTier } from '@/types';
 
@@ -62,6 +63,7 @@ function GovItem({
 }: {
   uc: UseCase; showRl?: boolean; warn?: string; children?: React.ReactNode;
 }) {
+  const t = useT();
   return (
     <div className="li">
       <div className="li-hd">
@@ -80,7 +82,7 @@ function GovItem({
         </div>
       )}
       <div className="li-meta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-        <span>{uc.cl} · Owner: {uc.own}</span>
+        <span>{uc.cl} · {t('gov.owner')}: {uc.own}</span>
         {children}
       </div>
     </div>
@@ -94,6 +96,7 @@ const RL_COLOR: Record<ReliabilityTier, string> = {
 };
 
 function RlDistBar({ active }: { active: UseCase[] }) {
+  const t = useT();
   const counts = RL_TIERS.reduce(
     (acc, t) => { acc[t] = active.filter(uc => uc.rl === t).length; return acc; },
     {} as Record<ReliabilityTier, number>,
@@ -103,7 +106,7 @@ function RlDistBar({ active }: { active: UseCase[] }) {
   return (
     <div style={{ padding: '12px 20px 16px', borderBottom: '1px solid var(--border)' }}>
       <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--muted)', marginBottom: 10 }}>
-        R-Tier Verteilung — {active.length} aktive Use Cases
+        {t('gov.rTierDist', { n: active.length })}
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         {RL_TIERS.map(t => (
@@ -147,6 +150,7 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
   const { openCount }          = useIncidents();
   const { isApprover }         = useAuth();
   const { showToast }          = useToast();
+  const t                      = useT();
 
   const active = useCases.filter(u => u.act);
 
@@ -164,18 +168,18 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
   async function approve(uc: UseCase) {
     try {
       await updateUC(uc.id, { app: 'Approved' });
-      showToast(`✓ ${uc.title} freigegeben`, 'success');
+      showToast(t('gov.approvedToast', { title: uc.title }), 'success');
     } catch {
-      showToast('Fehler beim Freigeben', 'error');
+      showToast(t('gov.approveErr'), 'error');
     }
   }
 
   async function reject(uc: UseCase) {
     try {
       await updateUC(uc.id, { app: 'Rejected' });
-      showToast(`${uc.title} abgelehnt`, 'info');
+      showToast(t('gov.rejectedToast', { title: uc.title }), 'info');
     } catch {
-      showToast('Fehler beim Ablehnen', 'error');
+      showToast(t('gov.rejectErr'), 'error');
     }
   }
 
@@ -187,29 +191,29 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
         style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', marginBottom: 24 }}
       >
         <GovKpi
-          label="Freigabe ausstehend"
+          label={t('dash.kpiApprovalPending')}
           value={pending.length}
           color={pending.length > 0 ? 'red' : 'green'}
         />
         <GovKpi
-          label="High Risk"
+          label={t('dash.kpiHighRisk')}
           value={highRisk.length}
           color={highRisk.length > 0 ? 'red' : 'green'}
           onClick={() => onNav('riskassess')}
         />
         <GovKpi
-          label="KPI fehlt (Run)"
+          label={t('gov.kKpiMissing')}
           value={missingKpi.length}
           color={missingKpi.length > 0 ? 'yellow' : 'green'}
         />
         <GovKpi
-          label="Offene Incidents"
+          label={t('dash.kpiOpenInc')}
           value={openCount}
           color={openCount > 0 ? 'red' : 'green'}
           onClick={() => onNav('incidents')}
         />
         <GovKpi
-          label="R4/R5 ohne SLA"
+          label={t('gov.kR45NoSla')}
           value={rlNoSla.length}
           color={rlNoSla.length > 0 ? 'red' : 'green'}
         />
@@ -219,7 +223,7 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="ch">
           <span className="ch-title">
-            🎯 Reliability Snapshot
+            {t('gov.relSnapshot')}
             {rlWarnings.length > 0 && (
               <span className="badge br" style={{ marginLeft: 8, fontSize: 10 }}>
                 {rlWarnings.length}
@@ -230,22 +234,22 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
         <RlDistBar active={active} />
         {rlWarnings.length === 0 ? (
           <div className="empty" style={{ padding: '16px 20px' }}>
-            ✓ Alle R4/R5-Systeme haben Monitoring SLA und Human Oversight definiert
+            {t('gov.relAllOk')}
           </div>
         ) : (
           <div>
             {rlWarnings.map(uc => {
               const warns: string[] = [];
-              if (!uc.monitoringSla) warns.push('Kein Monitoring SLA definiert');
-              if (uc.hitlMode === 'none') warns.push('Human Oversight fehlt (hitlMode = none)');
+              if (!uc.monitoringSla) warns.push(t('gov.rlNoSlaWarn'));
+              if (uc.hitlMode === 'none') warns.push(t('gov.rlNoOversightWarn'));
               return (
                 <GovItem key={uc.id} uc={uc} showRl warn={warns.join(' · ')}>
                   <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
                     {!uc.monitoringSla && (
-                      <span className="badge by" style={{ fontSize: 10 }}>Kein SLA</span>
+                      <span className="badge by" style={{ fontSize: 10 }}>{t('gov.badgeNoSla')}</span>
                     )}
                     {uc.hitlMode === 'none' && (
-                      <span className="badge br" style={{ fontSize: 10 }}>Kein Oversight</span>
+                      <span className="badge br" style={{ fontSize: 10 }}>{t('gov.badgeNoOversight')}</span>
                     )}
                     {uc.autonomyLevel && (
                       <span className="badge bgr" style={{ fontSize: 10 }}>{uc.autonomyLevel}</span>
@@ -260,10 +264,10 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
 
       {/* 1 — Freigabe ausstehend */}
       <GovSection
-        title="Freigabe ausstehend"
+        title={t('gov.secPending')}
         icon="⏳"
         count={pending.length}
-        emptyText="Keine ausstehenden Freigaben"
+        emptyText={t('gov.secPendingEmpty')}
       >
         {pending.map(uc => (
           <GovItem key={uc.id} uc={uc}>
@@ -274,13 +278,13 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
                   style={{ background: 'var(--green)', color: '#fff', border: 'none' }}
                   onClick={() => approve(uc)}
                 >
-                  ✓ Freigeben
+                  {t('gov.btnApprove')}
                 </button>
                 <button
                   className="btn btn-sm btn-danger"
                   onClick={() => reject(uc)}
                 >
-                  ✕ Ablehnen
+                  {t('gov.btnReject')}
                 </button>
               </span>
             )}
@@ -290,10 +294,10 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
 
       {/* 2 — High Risk */}
       <GovSection
-        title="High Risk Use Cases"
+        title={t('gov.secHighRisk')}
         icon="🔴"
         count={highRisk.length}
-        emptyText="Keine High-Risk Use Cases"
+        emptyText={t('gov.secHighRiskEmpty')}
       >
         {highRisk.map(uc => (
           <GovItem key={uc.id} uc={uc}>
@@ -301,7 +305,7 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
               className="btn btn-outline btn-sm"
               onClick={() => onNav('riskassess')}
             >
-              Risk Assessment →
+              {t('gov.btnRA')}
             </button>
           </GovItem>
         ))}
@@ -309,10 +313,10 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
 
       {/* 3 — Governance-Trigger aktiv */}
       <GovSection
-        title="Governance-Trigger aktiv"
+        title={t('gov.secTriggers')}
         icon="⚡"
         count={triggers.length}
-        emptyText="Keine aktiven Governance-Trigger"
+        emptyText={t('gov.secTriggersEmpty')}
       >
         {triggers.map(uc => (
           <GovItem key={uc.id} uc={uc}>
@@ -331,10 +335,10 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
 
       {/* 4 — KPI-Definition fehlt */}
       <GovSection
-        title="KPI-Tracking fehlt (Lifecycle: Run)"
+        title={t('gov.secKpi')}
         icon="📊"
         count={missingKpi.length}
-        emptyText="Alle aktiven Use Cases haben KPI-Tracking definiert"
+        emptyText={t('gov.secKpiEmpty')}
       >
         {missingKpi.map(uc => (
           <GovItem key={uc.id} uc={uc}>
@@ -343,13 +347,13 @@ export default function Governance({ onNav }: { onNav: (s: string) => void }) {
               onClick={async () => {
                 try {
                   await updateUC(uc.id, { kpi: 'yes' });
-                  showToast(`KPI für ${uc.id} aktiviert`, 'success');
+                  showToast(t('gov.kpiActivatedToast', { id: uc.id }), 'success');
                 } catch {
-                  showToast('Fehler', 'error');
+                  showToast(t('common.errorPrefix'), 'error');
                 }
               }}
             >
-              KPI aktivieren
+              {t('gov.btnKpiActivate')}
             </button>
           </GovItem>
         ))}

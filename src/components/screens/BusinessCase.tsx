@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useArtefakt } from '@/hooks/useArtefakt';
 import { useUseCases } from '@/hooks/useUseCases';
 import { useToast } from '@/context/ToastContext';
+import { useT } from '@/context/LanguageContext';
 import { ArtHeader } from '@/components/common/ArtHeader';
 import { BC_DEFAULT_LOHNKOSTEN } from '@/lib/constants';
 import type { BusinessCase, BcCalculation } from '@/types';
@@ -93,6 +94,7 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
   const { updateUC }  = useUseCases();
+  const t             = useT();
 
   const { data, loading, save } = useArtefakt<Partial<BusinessCase>>('bc', ucId || null);
   const [local, setLocal] = useState<Partial<BusinessCase>>({});
@@ -117,9 +119,9 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
     try {
       await save(local);
       setDirty(false);
-      showToast('✓ Business Case gespeichert', 'success');
+      showToast(t('bc.savedToast'), 'success');
     } catch {
-      showToast('Fehler beim Speichern', 'error');
+      showToast(t('common.saveError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -129,9 +131,9 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
     if (!ucId) return;
     try {
       await updateUC(ucId, { pd: pd as import('@/types').PortfolioDecision });
-      showToast(`Portfolio Decision "${pd}" → Use Case übertragen`, 'success');
+      showToast(t('bc.syncToast', { pd }), 'success');
     } catch {
-      showToast('Sync-Fehler', 'error');
+      showToast(t('ra.syncErr'), 'error');
     }
   }
 
@@ -148,51 +150,51 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
       />
 
       {!ucId ? (
-        <div className="empty">Bitte Use Case auswählen.</div>
+        <div className="empty">{t('common.pickUc')}</div>
       ) : loading ? (
-        <div className="empty">Lade…</div>
+        <div className="empty">{t('common.loadingShort')}</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
           {/* Linke Spalte: Nutzen */}
           <div>
             <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ch"><span className="ch-title">Nutzen (€/Jahr)</span></div>
+              <div className="ch"><span className="ch-title">{t('bc.benefitTitle')}</span></div>
               <div style={{ padding: '16px 20px' }}>
                 <div className="fg">
                   <NumField
-                    label="Lohnkostensatz"
+                    label={t('bc.fLohn')}
                     suffix="€/h"
                     value={Number(local.lohnkosten ?? BC_DEFAULT_LOHNKOSTEN)}
                     onChange={v => set('lohnkosten', v)}
                   />
                   <NumField
-                    label="Zeitersparnis"
-                    suffix="h/Monat"
+                    label={t('bc.fZeit')}
+                    suffix={t('bc.suffixHMonth')}
                     value={Number(local.i_zeitersparnis ?? 0)}
                     onChange={v => set('i_zeitersparnis', v)}
-                    hint={`→ ${eur(calc.monetZeit)}/Jahr monetarisiert`}
+                    hint={t('bc.zeitHint', { v: eur(calc.monetZeit) })}
                   />
                   <NumField
-                    label="Fehlerreduktion"
-                    suffix="% weniger"
+                    label={t('bc.fFehler')}
+                    suffix={t('bc.suffixLess')}
                     value={Number(local.i_fehlerquote ?? 0)}
                     onChange={v => set('i_fehlerquote', v)}
                   />
                   <NumField
-                    label="Umsatzbeitrag"
-                    suffix="€/Jahr"
+                    label={t('bc.fUmsatz')}
+                    suffix={t('bc.suffixEurYear')}
                     value={Number(local.i_umsatz ?? 0)}
                     onChange={v => set('i_umsatz', v)}
                   />
                   <NumField
-                    label="NPS-Verbesserung"
-                    suffix="Punkte"
+                    label={t('bc.fNps')}
+                    suffix={t('bc.suffixPoints')}
                     value={Number(local.i_kundenzuf ?? 0)}
                     onChange={v => set('i_kundenzuf', v)}
                   />
                   <NumField
-                    label="Sonstiger Nutzen"
-                    suffix="€/Jahr"
+                    label={t('bc.fSonstNutzen')}
+                    suffix={t('bc.suffixEurYear')}
                     value={Number(local.i_sonstige ?? 0)}
                     onChange={v => set('i_sonstige', v)}
                   />
@@ -202,11 +204,11 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
 
             {/* Narrative */}
             <div className="card">
-              <div className="ch"><span className="ch-title">Begründung / Narrative</span></div>
+              <div className="ch"><span className="ch-title">{t('bc.narrativeTitle')}</span></div>
               <div style={{ padding: '12px 20px' }}>
                 <textarea
                   rows={4}
-                  placeholder="Qualitative Begründung für den Business Case…"
+                  placeholder={t('bc.narrativePh')}
                   value={local.narrative ?? ''}
                   onChange={e => set('narrative', e.target.value)}
                 />
@@ -217,48 +219,48 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
           {/* Rechte Spalte: Kosten + Ergebnis */}
           <div>
             <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ch"><span className="ch-title">Kosten</span></div>
+              <div className="ch"><span className="ch-title">{t('bc.costTitle')}</span></div>
               <div style={{ padding: '16px 20px' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>
-                  Einmalig
+                  {t('bc.once')}
                 </div>
                 <div className="fg" style={{ marginBottom: 16 }}>
-                  <NumField label="Entwicklung" suffix="€" value={Number(local.c_entwicklung ?? 0)} onChange={v => set('c_entwicklung', v)} />
-                  <NumField label="Schulung" suffix="€" value={Number(local.c_schulung ?? 0)} onChange={v => set('c_schulung', v)} />
+                  <NumField label={t('bc.fEntw')} suffix="€" value={Number(local.c_entwicklung ?? 0)} onChange={v => set('c_entwicklung', v)} />
+                  <NumField label={t('bc.fSchulung')} suffix="€" value={Number(local.c_schulung ?? 0)} onChange={v => set('c_schulung', v)} />
                 </div>
                 <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 10 }}>
-                  Laufend (€/Jahr)
+                  {t('bc.recurring')}
                 </div>
                 <div className="fg">
-                  <NumField label="Lizenz" suffix="€/Jahr" value={Number(local.c_lizenz ?? 0)} onChange={v => set('c_lizenz', v)} />
-                  <NumField label="Betrieb" suffix="€/Jahr" value={Number(local.c_betrieb ?? 0)} onChange={v => set('c_betrieb', v)} />
-                  <NumField label="Sonstiges" suffix="€/Jahr" value={Number(local.c_sonstige ?? 0)} onChange={v => set('c_sonstige', v)} />
+                  <NumField label={t('bc.fLizenz')} suffix={t('bc.suffixEurYear')} value={Number(local.c_lizenz ?? 0)} onChange={v => set('c_lizenz', v)} />
+                  <NumField label={t('bc.fBetrieb')} suffix={t('bc.suffixEurYear')} value={Number(local.c_betrieb ?? 0)} onChange={v => set('c_betrieb', v)} />
+                  <NumField label={t('bc.fSonstK')} suffix={t('bc.suffixEurYear')} value={Number(local.c_sonstige ?? 0)} onChange={v => set('c_sonstige', v)} />
                 </div>
               </div>
             </div>
 
             {/* Ergebnisse */}
             <div className="card" style={{ marginBottom: 14 }}>
-              <div className="ch"><span className="ch-title">Kalkulation</span></div>
+              <div className="ch"><span className="ch-title">{t('bc.calcTitle')}</span></div>
               <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <ResultKpi
-                  label="Nutzen/Jahr"
+                  label={t('bc.kBenefitYear')}
                   value={eur(calc.gesamtNutzen)}
                   color="var(--green)"
                 />
                 <ResultKpi
-                  label="Kosten einmalig"
+                  label={t('bc.kCostOnce')}
                   value={eur(calc.einmal)}
                   color="var(--red)"
                 />
                 <ResultKpi
-                  label="ROI (3 Jahre)"
+                  label={t('bc.kRoi')}
                   value={`${calc.roi3}%`}
                   color={calc.roi3 > 0 ? 'var(--green)' : 'var(--red)'}
                 />
                 <ResultKpi
-                  label="Breakeven"
-                  value={calc.breakeven >= 999 ? 'n/a' : `${calc.breakeven} Monate`}
+                  label={t('bc.kBreakeven')}
+                  value={calc.breakeven >= 999 ? 'n/a' : t('bc.months', { n: calc.breakeven })}
                   color={calc.breakeven <= 24 ? 'var(--green)' : calc.breakeven <= 48 ? 'var(--yellow)' : 'var(--red)'}
                 />
               </div>
@@ -266,7 +268,7 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
 
             {/* Actions */}
             <div className="card">
-              <div className="ch"><span className="ch-title">Empfehlung</span></div>
+              <div className="ch"><span className="ch-title">{t('bc.recTitle')}</span></div>
               <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {['Start', 'Scale', 'Hold', 'Stop', 'Backlog'].map(pd => (
                   <button
