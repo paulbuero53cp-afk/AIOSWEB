@@ -3,6 +3,7 @@ import { swrFetcher } from '@/lib/api';
 import { useUseCases, useIncidents } from '@/hooks/useUseCases';
 import { useAuth } from '@/context/AuthContext';
 import { useAppConfig } from '@/context/AppConfigContext';
+import { useT } from '@/context/LanguageContext';
 import { RiskBadge, ApprovalBadge, LifecycleBadge } from '@/components/common/Badge';
 import type { AuditEntry, UseCase } from '@/types';
 
@@ -30,6 +31,7 @@ const PD_COLORS: Record<string, string> = {
 };
 
 function PortfolioSnapshot({ useCases }: { useCases: UseCase[] }) {
+  const t = useT();
   const counts = useCases.reduce<Record<string, number>>((acc, uc) => {
     acc[uc.pd] = (acc[uc.pd] ?? 0) + 1;
     return acc;
@@ -38,7 +40,7 @@ function PortfolioSnapshot({ useCases }: { useCases: UseCase[] }) {
 
   return (
     <div className="card">
-      <div className="ch"><span className="ch-title">Portfolio Decision</span></div>
+      <div className="ch"><span className="ch-title">{t('dash.portfolioDecision')}</span></div>
       <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {['Start', 'Scale', 'Stop', 'Hold', 'Backlog'].map(pd => {
           const count = counts[pd] ?? 0;
@@ -62,6 +64,7 @@ function PortfolioSnapshot({ useCases }: { useCases: UseCase[] }) {
 
 // ── Risk-Verteilung ───────────────────────────────────────────
 function RiskSnapshot({ useCases }: { useCases: UseCase[] }) {
+  const t = useT();
   const high   = useCases.filter(u => u.rt === 'High').length;
   const medium = useCases.filter(u => u.rt === 'Medium').length;
   const low    = useCases.filter(u => u.rt === 'Low').length;
@@ -69,7 +72,7 @@ function RiskSnapshot({ useCases }: { useCases: UseCase[] }) {
 
   return (
     <div className="card">
-      <div className="ch"><span className="ch-title">Risk-Verteilung</span></div>
+      <div className="ch"><span className="ch-title">{t('dash.riskDist')}</span></div>
       <div style={{ padding: '14px 20px' }}>
         {[
           { label: 'High',   count: high,   color: 'var(--red)' },
@@ -93,6 +96,7 @@ function RiskSnapshot({ useCases }: { useCases: UseCase[] }) {
 
 // ── Aktivitätsstrom ───────────────────────────────────────────
 function ActivityStream() {
+  const t = useT();
   const { isAdmin } = useAuth();
   const { data } = useSWR<AuditEntry[]>(
     isAdmin ? '/api/auditlog?limit=10' : null,
@@ -102,8 +106,8 @@ function ActivityStream() {
   if (!isAdmin) {
     return (
       <div className="card">
-        <div className="ch"><span className="ch-title">Aktivitätsprotokoll</span></div>
-        <div className="empty">Nur für Administratoren sichtbar.</div>
+        <div className="ch"><span className="ch-title">{t('dash.activityLog')}</span></div>
+        <div className="empty">{t('common.adminOnly')}</div>
       </div>
     );
   }
@@ -115,11 +119,11 @@ function ActivityStream() {
 
   return (
     <div className="card">
-      <div className="ch"><span className="ch-title">Letzte Aktivitäten</span></div>
+      <div className="ch"><span className="ch-title">{t('dash.recentActivity')}</span></div>
       {!data ? (
-        <div className="empty">Lade…</div>
+        <div className="empty">{t('common.loadingShort')}</div>
       ) : data.length === 0 ? (
-        <div className="empty">Noch keine Einträge.</div>
+        <div className="empty">{t('common.noEntries')}</div>
       ) : (
         <div>
           {data.slice(0, 10).map(entry => (
@@ -148,6 +152,7 @@ function CriticalItems({
   useCases: UseCase[];
   onNav: (screen: string) => void;
 }) {
+  const t = useT();
   const critical = useCases
     .filter(u => u.rt === 'High' || u.app === 'Pending')
     .slice(0, 5);
@@ -155,13 +160,13 @@ function CriticalItems({
   return (
     <div className="card">
       <div className="ch">
-        <span className="ch-title">⚠ Kritisch / Ausstehend</span>
+        <span className="ch-title">{t('dash.criticalPending')}</span>
         <button className="btn btn-outline btn-sm" onClick={() => onNav('governance')}>
-          Alle →
+          {t('dash.allArrow')}
         </button>
       </div>
       {critical.length === 0 ? (
-        <div className="empty">Keine kritischen Use Cases.</div>
+        <div className="empty">{t('dash.noCritical')}</div>
       ) : (
         <div>
           {critical.map(uc => (
@@ -186,6 +191,7 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
   const { useCases, loading } = useUseCases();
   const { incidents } = useIncidents();
   const config = useAppConfig();
+  const t = useT();
 
   const total    = useCases.length;
   const active   = useCases.filter(u => u.lc === 'Run').length;
@@ -193,27 +199,27 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
   const pending  = useCases.filter(u => u.app === 'Pending').length;
   const openInc  = incidents.filter(i => i.st === 'Open').length;
 
-  if (loading) return <div className="empty">Lade Dashboard…</div>;
+  if (loading) return <div className="empty">{t('dash.loading')}</div>;
 
   return (
     <>
       {/* KPI Grid */}
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', marginBottom: 24 }}>
-        <KpiCard label="Use Cases (gesamt)" value={total} sub="aktiv" />
-        <KpiCard label="In Betrieb (Run)"   value={active} color="green" />
+        <KpiCard label={t('dash.kpiTotal')} value={total} sub={t('dash.kpiActiveSub')} />
+        <KpiCard label={t('dash.kpiRun')}   value={active} color="green" />
         <KpiCard
-          label="High Risk"
+          label={t('dash.kpiHighRisk')}
           value={highRisk}
           color={highRisk > 0 ? 'red' : 'green'}
-          sub={highRisk > 0 ? 'Prüfung erforderlich' : 'Alles OK'}
+          sub={highRisk > 0 ? t('dash.kpiReviewReq') : t('dash.kpiAllOk')}
         />
         <KpiCard
-          label="Freigabe ausstehend"
+          label={t('dash.kpiApprovalPending')}
           value={pending}
           color={pending > 0 ? 'yellow' : 'green'}
         />
         <KpiCard
-          label="Offene Incidents"
+          label={t('dash.kpiOpenInc')}
           value={openInc}
           color={openInc > 0 ? 'red' : 'green'}
         />
@@ -228,7 +234,7 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
           justifyContent: 'space-between', gap: 16,
         }}>
           <span style={{ fontSize: 13, color: 'var(--petrol)' }}>
-            🤖 <strong>{config.chatbot.label || 'KI-Assistent'}</strong>
+            🤖 <strong>{config.chatbot.label || t('chatbot.fallbackLabel')}</strong>
             {config.chatbot.hint && <span style={{ color: 'var(--muted)', marginLeft: 8 }}>{config.chatbot.hint}</span>}
           </span>
           <a
@@ -237,7 +243,7 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
             rel="noopener noreferrer"
             style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent)', whiteSpace: 'nowrap', textDecoration: 'none' }}
           >
-            {config.chatbot.label || 'Öffnen'} →
+            {config.chatbot.label || t('chatbot.open')} →
           </a>
         </div>
       )}
@@ -257,21 +263,21 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
 
           {/* Schnellzugriff */}
           <div className="card">
-            <div className="ch"><span className="ch-title">Schnellzugriff</span></div>
+            <div className="ch"><span className="ch-title">{t('dash.quickAccess')}</span></div>
             <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
-                { label: '➕ Neuer Use Case',      screen: 'new' },
-                { label: '🛡 Governance Cockpit',  screen: 'governance' },
-                { label: '📄 Dokumentations-Hub',  screen: 'artefakthub' },
-                { label: '⚠️ Incident melden',     screen: 'incidents' },
-              ].map(({ label, screen }) => (
+                { labelKey: 'dash.qNewUc',      screen: 'new' },
+                { labelKey: 'dash.qGovernance', screen: 'governance' },
+                { labelKey: 'dash.qDocHub',     screen: 'artefakthub' },
+                { labelKey: 'dash.qReportInc',  screen: 'incidents' },
+              ].map(({ labelKey, screen }) => (
                 <button
                   key={screen}
                   className="btn btn-outline"
                   style={{ justifyContent: 'flex-start' }}
                   onClick={() => onNav(screen)}
                 >
-                  {label}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>

@@ -4,6 +4,7 @@ import { useUseCases } from '@/hooks/useUseCases';
 import { useIncidents } from '@/hooks/useIncidents';
 import { useAiTools } from '@/hooks/useAiTools';
 import { useAuth } from '@/context/AuthContext';
+import { useT } from '@/context/LanguageContext';
 import { swrFetcher } from '@/lib/api';
 import { RA_EUAIACT, AITOOL_STATUS_OPTIONS, AITOOL_STATUS_CSS } from '@/lib/constants';
 import {
@@ -59,6 +60,7 @@ export default function Reports() {
   const { incidents }         = useIncidents();
   const { tools }             = useAiTools();
   const { isAdmin }           = useAuth();
+  const t                     = useT();
   const [tab, setTab]         = useState<Tab>('management');
 
   // Artefakte nur für Admin (Muster wie ArtefaktHub) — für EU-AI-Act + DSFA-Quote
@@ -100,7 +102,7 @@ export default function Reports() {
   const r3plus = useCases.filter(u => u.rl === 'R3' || u.rl === 'R4' || u.rl === 'R5');
   const fmCounts = count(incidents.filter(i => i.failureMode), i => i.failureMode as string);
 
-  if (loading) return <div className="empty">Lade Berichte…</div>;
+  if (loading) return <div className="empty">{t('rep.loading')}</div>;
 
   const tabBtn = (id: Tab, label: string) => (
     <div className={`tab${tab === id ? ' active' : ''}`} onClick={() => setTab(id)}>{label}</div>
@@ -108,13 +110,13 @@ export default function Reports() {
 
   return (
     <div>
-      <div className="sec-title">Berichte</div>
-      <div className="sec-sub">Verdichtete Governance-Auswertungen für Management, Regulatorik und Betrieb.</div>
+      <div className="sec-title">{t('rep.title')}</div>
+      <div className="sec-sub">{t('rep.sub')}</div>
 
       <div className="tabs">
-        {tabBtn('management', 'Management')}
-        {tabBtn('euaiact', 'EU AI Act')}
-        {tabBtn('reliability', 'Reliability')}
+        {tabBtn('management', t('rep.tabManagement'))}
+        {tabBtn('euaiact', t('rep.tabEuAiAct'))}
+        {tabBtn('reliability', t('rep.tabReliability'))}
       </div>
 
       {/* ── R1 Management ────────────────────────────────── */}
@@ -122,41 +124,41 @@ export default function Reports() {
         <div>
           <div className="fb" style={{ marginBottom: 14 }}>
             <div style={{ flex: 1 }} />
-            <button className="btn btn-outline btn-sm" onClick={() => exportManagementCSV(buildMgmtRows())}>⬇ CSV</button>
-            <button className="btn btn-primary btn-sm" onClick={() => window.print()}>🖨 PDF</button>
+            <button className="btn btn-outline btn-sm" onClick={() => exportManagementCSV(buildMgmtRows())}>⬇ {t('common.csv')}</button>
+            <button className="btn btn-primary btn-sm" onClick={() => window.print()}>🖨 {t('common.pdf')}</button>
           </div>
 
           <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(5,1fr)', marginBottom: 18 }}>
-            <div className="kc"><div className="kc-label">Use Cases</div><div className="kc-value">{total}</div></div>
-            <div className="kc green"><div className="kc-label">In Betrieb (Run)</div><div className="kc-value">{run}</div></div>
-            <div className={`kc ${highRisk > 0 ? 'red' : 'green'}`}><div className="kc-label">High Risk</div><div className="kc-value">{highRisk}</div></div>
-            <div className={`kc ${pending > 0 ? 'yellow' : 'green'}`}><div className="kc-label">Freigabe offen</div><div className="kc-value">{pending}</div></div>
-            <div className={`kc ${openInc > 0 ? 'red' : 'green'}`}><div className="kc-label">Offene Incidents</div><div className="kc-value">{openInc}</div></div>
+            <div className="kc"><div className="kc-label">{t('rep.useCases')}</div><div className="kc-value">{total}</div></div>
+            <div className="kc green"><div className="kc-label">{t('rep.run')}</div><div className="kc-value">{run}</div></div>
+            <div className={`kc ${highRisk > 0 ? 'red' : 'green'}`}><div className="kc-label">{t('rep.highRisk')}</div><div className="kc-value">{highRisk}</div></div>
+            <div className={`kc ${pending > 0 ? 'yellow' : 'green'}`}><div className="kc-label">{t('rep.approvalOpen')}</div><div className="kc-value">{pending}</div></div>
+            <div className={`kc ${openInc > 0 ? 'red' : 'green'}`}><div className="kc-label">{t('rep.openInc')}</div><div className="kc-value">{openInc}</div></div>
           </div>
 
           <div className="gg">
-            <Dist title="Portfolio-Entscheidung" order={PD_ORDER} counts={pdCounts} total={total} />
-            <Dist title="Lifecycle" order={LC_ORDER} counts={lcCounts} total={total} />
-            <Dist title="Risk-Tier" order={RT_ORDER} counts={rtCounts} total={total} />
-            <Dist title="Reliability-Tier" order={[...RL_ORDER, 'ohne']} counts={rlCounts} total={total} />
+            <Dist title={t('rep.distPortfolio')} order={PD_ORDER} counts={pdCounts} total={total} />
+            <Dist title={t('rep.distLifecycle')} order={LC_ORDER} counts={lcCounts} total={total} />
+            <Dist title={t('rep.distRiskTier')} order={RT_ORDER} counts={rtCounts} total={total} />
+            <Dist title={t('rep.distReliability')} order={[...RL_ORDER, 'ohne']} counts={rlCounts} total={total} />
           </div>
 
           <div className="gg" style={{ marginTop: 4 }}>
             {/* DSFA */}
             <div className="card">
-              <div className="ch"><span className="ch-title">DSFA-Status</span></div>
+              <div className="ch"><span className="ch-title">{t('rep.dsfaStatus')}</span></div>
               <div style={{ padding: '10px 16px', display: 'flex', gap: 24 }}>
-                <div><div className="kc-label">DSFA benötigt</div><div className="kc-value" style={{ fontSize: 26 }}>{needsDSFA}</div></div>
+                <div><div className="kc-label">{t('rep.dsfaNeeded')}</div><div className="kc-value" style={{ fontSize: 26 }}>{needsDSFA}</div></div>
                 <div>
-                  <div className="kc-label">Dokumentiert</div>
+                  <div className="kc-label">{t('rep.dsfaDocumented')}</div>
                   <div className="kc-value" style={{ fontSize: 26 }}>{withDSFA ?? '—'}</div>
-                  {withDSFA === null && <div className="kc-sub">nur für Admin</div>}
+                  {withDSFA === null && <div className="kc-sub">{t('rep.adminOnlyShort')}</div>}
                 </div>
               </div>
             </div>
             {/* AI-Tools */}
             <div className="card">
-              <div className="ch"><span className="ch-title">Erlaubte AI-Tools ({tools.length})</span></div>
+              <div className="ch"><span className="ch-title">{t('rep.toolsTitle', { n: tools.length })}</span></div>
               <div style={{ padding: '6px 16px 10px' }}>
                 {AITOOL_STATUS_OPTIONS.map(s => (
                   <div key={s} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13 }}>
@@ -173,29 +175,29 @@ export default function Reports() {
       {/* ── R2 EU AI Act ─────────────────────────────────── */}
       {tab === 'euaiact' && (
         !isAdmin ? (
-          <div className="empty">Das EU-AI-Act-Inventar wertet die Risk-Assessment-Artefakte aus und ist nur für Administratoren verfügbar.</div>
+          <div className="empty">{t('rep.euAdminOnly')}</div>
         ) : !artExport ? (
-          <div className="empty">Lade Artefakte…</div>
+          <div className="empty">{t('rep.euLoading')}</div>
         ) : (
           <div>
             <div className="fb" style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-                <strong style={{ color: 'var(--text)' }}>{euRelevant.length}</strong> von {total} Use Cases mit EU-AI-Act-Relevanz (High-Risk-Kandidaten)
+                <strong style={{ color: 'var(--text)' }}>{euRelevant.length}</strong> {t('rep.euRelevantInfo', { m: total })}
               </div>
               <div style={{ flex: 1 }} />
-              <button className="btn btn-outline btn-sm" onClick={() => exportEuAiActCSV(euRows)}>⬇ CSV</button>
+              <button className="btn btn-outline btn-sm" onClick={() => exportEuAiActCSV(euRows)}>⬇ {t('common.csv')}</button>
             </div>
             <div className="card" style={{ overflowX: 'auto' }}>
               <table>
                 <thead>
-                  <tr><th>Use Case</th><th>Risk-Tier</th><th>EU-AI-Act</th><th>Kategorien</th><th>Freigabe</th></tr>
+                  <tr><th>{t('rep.euColUc')}</th><th>{t('rep.euColRiskTier')}</th><th>{t('rep.euColEu')}</th><th>{t('rep.euColCats')}</th><th>{t('rep.euColApproval')}</th></tr>
                 </thead>
                 <tbody>
                   {euRows.map(r => (
                     <tr key={r.id}>
                       <td><div style={{ fontWeight: 600 }}>{r.title}</div><div style={{ fontSize: 11, color: 'var(--muted)' }}>{r.cl} · {r.id}</div></td>
                       <td><span className={`badge ${r.rt === 'High' ? 'br' : r.rt === 'Medium' ? 'by' : 'bg'}`}>{r.rt}</span></td>
-                      <td>{r.relevant ? <span className="badge br">High-Risk-Kandidat</span> : <span className="badge bg">nicht einschlägig</span>}</td>
+                      <td>{r.relevant ? <span className="badge br">{t('rep.euHighRisk')}</span> : <span className="badge bg">{t('rep.euNotApplicable')}</span>}</td>
                       <td style={{ fontSize: 12 }}>{r.categories || '—'}</td>
                       <td><span className={`badge ${r.app === 'Approved' ? 'bg' : r.app === 'Pending' ? 'by' : r.app === 'Rejected' ? 'br' : 'bgr'}`}>{r.app}</span></td>
                     </tr>
@@ -212,16 +214,16 @@ export default function Reports() {
         <div>
           <div className="fb" style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-              <strong style={{ color: 'var(--text)' }}>{r3plus.length}</strong> Systeme ab R3 (erhöhte Kontrollpflicht) · {noRl} ohne R-Tier
+              <strong style={{ color: 'var(--text)' }}>{r3plus.length}</strong> {t('rep.relInfo', { n: noRl })}
             </div>
             <div style={{ flex: 1 }} />
-            <button className="btn btn-outline btn-sm" onClick={() => exportReliabilityCSV(useCases)}>⬇ CSV</button>
+            <button className="btn btn-outline btn-sm" onClick={() => exportReliabilityCSV(useCases)}>⬇ {t('common.csv')}</button>
           </div>
 
           <div className="gg" style={{ marginBottom: 4 }}>
-            <Dist title="Reliability-Tier-Verteilung" order={[...RL_ORDER, 'ohne']} counts={rlCounts} total={total} />
+            <Dist title={t('rep.relDistTitle')} order={[...RL_ORDER, 'ohne']} counts={rlCounts} total={total} />
             <div className="card">
-              <div className="ch"><span className="ch-title">Incidents nach Failure Mode</span></div>
+              <div className="ch"><span className="ch-title">{t('rep.relFmTitle')}</span></div>
               <div style={{ padding: '6px 16px 10px' }}>
                 {Object.keys(FM_LABEL).map(fm => (
                   <div key={fm} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13 }}>
@@ -230,28 +232,28 @@ export default function Reports() {
                   </div>
                 ))}
                 <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>
-                  {incidents.filter(i => !i.failureMode).length} Incidents ohne Kategorisierung
+                  {t('rep.relUncategorized', { n: incidents.filter(i => !i.failureMode).length })}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="card" style={{ overflowX: 'auto' }}>
-            <div className="ch"><span className="ch-title">Systeme ab R3 — Kontroll- &amp; Monitoring-Status</span></div>
+            <div className="ch"><span className="ch-title">{t('rep.relTableTitle')}</span></div>
             <table>
               <thead>
-                <tr><th>Use Case</th><th>R-Tier</th><th>HITL-Modus</th><th>Autonomie</th><th>Monitoring-SLA</th><th>Failure Modes</th></tr>
+                <tr><th>{t('rep.relColUc')}</th><th>{t('rep.relColRTier')}</th><th>{t('rep.relColHitl')}</th><th>{t('rep.relColAutonomy')}</th><th>{t('rep.relColSla')}</th><th>{t('rep.relColFm')}</th></tr>
               </thead>
               <tbody>
                 {r3plus.length === 0 ? (
-                  <tr><td colSpan={6} className="empty">Keine Systeme ab R3.</td></tr>
+                  <tr><td colSpan={6} className="empty">{t('rep.relNoR3')}</td></tr>
                 ) : r3plus.map((u: UseCase) => (
                   <tr key={u.id}>
                     <td><div style={{ fontWeight: 600 }}>{u.title}</div><div style={{ fontSize: 11, color: 'var(--muted)' }}>{u.cl} · {u.id}</div></td>
                     <td><span className={`badge ${u.rl === 'R5' ? 'br' : 'by'}`}>{u.rl}</span></td>
                     <td>{u.hitlMode || '—'}</td>
                     <td>{u.autonomyLevel || '—'}</td>
-                    <td>{u.monitoringSla || <span style={{ color: 'var(--red)' }}>fehlt</span>}</td>
+                    <td>{u.monitoringSla || <span style={{ color: 'var(--red)' }}>{t('rep.slaMissing')}</span>}</td>
                     <td style={{ fontSize: 12 }}>{(u.failureModes ?? []).map(f => FM_LABEL[f] ?? f).join(', ') || '—'}</td>
                   </tr>
                 ))}

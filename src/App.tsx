@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ToastProvider, useToast } from '@/context/ToastContext';
 import { AppConfigProvider, useAppConfig } from '@/context/AppConfigContext';
+import { LanguageProvider, useLang } from '@/context/LanguageContext';
 import Dashboard    from '@/components/screens/Dashboard';
 import UseCases     from '@/components/screens/UseCases';
 import NewUseCase   from '@/components/screens/NewUseCase';
@@ -23,56 +24,56 @@ import AiStrategyScreen  from '@/components/screens/AiStrategy';
 import UcDashboard       from '@/components/screens/UcDashboard';
 import UsersScreen       from '@/components/screens/Users';
 import { swrFetcher } from '@/lib/api';
-import type { Screen, Language, UseCase, Incident, AppConfig } from '@/types';
+import type { Screen, UseCase, Incident, AppConfig } from '@/types';
 import '@/styles/global.css';
 
 // ── Sidebar Navigation Structure ─────────────────────────────
-type NavItem = { id: Screen; label: string; icon: string };
-type NavSection = { title: string; items: NavItem[] };
+type NavItem = { id: Screen; labelKey: string; icon: string };
+type NavSection = { titleKey: string; items: NavItem[] };
 
 const NAV_SECTIONS: NavSection[] = [
   {
-    title: 'Übersicht',
+    titleKey: 'sec.overview',
     items: [
-      { id: 'dashboard',   label: 'Dashboard',        icon: '📊' },
-      { id: 'reports',     label: 'Berichte',         icon: '📑' },
-      { id: 'portfolio',   label: 'Portfolio Board',  icon: '📁' },
-      { id: 'aistrategy',  label: 'KI-Strategie',      icon: '💡' },
+      { id: 'dashboard',   labelKey: 'nav.dashboard',   icon: '📊' },
+      { id: 'reports',     labelKey: 'nav.reports',     icon: '📑' },
+      { id: 'portfolio',   labelKey: 'nav.portfolio',   icon: '📁' },
+      { id: 'aistrategy',  labelKey: 'nav.aistrategy',  icon: '💡' },
     ],
   },
   {
-    title: 'Use Cases',
+    titleKey: 'sec.usecases',
     items: [
-      { id: 'usecases',    label: 'Alle Use Cases',   icon: '🤖' },
-      { id: 'ucdashboard', label: 'UC Dashboard',     icon: '📊' },
-      { id: 'agenthub',    label: 'AI Agent Hub',     icon: '⚡' },
-      { id: 'new',         label: 'Neu erfassen',      icon: '➕' },
+      { id: 'usecases',    labelKey: 'nav.usecases',    icon: '🤖' },
+      { id: 'ucdashboard', labelKey: 'nav.ucdashboard', icon: '📊' },
+      { id: 'agenthub',    labelKey: 'nav.agenthub',    icon: '⚡' },
+      { id: 'new',         labelKey: 'nav.new',         icon: '➕' },
     ],
   },
   {
-    title: 'Governance',
+    titleKey: 'sec.governance',
     items: [
-      { id: 'governance',  label: 'Governance Cockpit', icon: '🛡' },
-      { id: 'aitools',     label: 'Erlaubte AI-Tools',  icon: '✅' },
-      { id: 'incidents',   label: 'Incident Log',       icon: '⚠️' },
+      { id: 'governance',  labelKey: 'nav.governance',  icon: '🛡' },
+      { id: 'aitools',     labelKey: 'nav.aitools',     icon: '✅' },
+      { id: 'incidents',   labelKey: 'nav.incidents',   icon: '⚠️' },
     ],
   },
   {
-    title: 'Dokumente',
+    titleKey: 'sec.documents',
     items: [
-      { id: 'artefakthub', label: 'Dokumentations-Hub', icon: '📄' },
-      { id: 'riskassess',  label: 'Risk Assessment',    icon: '⚠' },
-      { id: 'gatechecks',  label: 'Gate-Checklisten',   icon: '✓' },
-      { id: 'bizcases',    label: 'Business Cases',     icon: '📈' },
-      { id: 'dsfa',        label: 'DSFA',               icon: '🔒' },
+      { id: 'artefakthub', labelKey: 'nav.artefakthub', icon: '📄' },
+      { id: 'riskassess',  labelKey: 'nav.riskassess',  icon: '⚠' },
+      { id: 'gatechecks',  labelKey: 'nav.gatechecks',  icon: '✓' },
+      { id: 'bizcases',    labelKey: 'nav.bizcases',    icon: '📈' },
+      { id: 'dsfa',        labelKey: 'nav.dsfa',        icon: '🔒' },
     ],
   },
   {
-    title: 'Admin',
+    titleKey: 'sec.admin',
     items: [
-      { id: 'users',       label: 'Benutzerverwaltung', icon: '👥' },
-      { id: 'auditlog',    label: 'Audit Log',          icon: '📋' },
-      { id: 'info',        label: 'Info & Config',      icon: 'ℹ️' },
+      { id: 'users',       labelKey: 'nav.users',       icon: '👥' },
+      { id: 'auditlog',    labelKey: 'nav.auditlog',    icon: '📋' },
+      { id: 'info',        labelKey: 'nav.info',        icon: 'ℹ️' },
     ],
   },
 ];
@@ -83,20 +84,17 @@ const NAV_ITEMS: NavItem[] = NAV_SECTIONS.flatMap(s => s.items);
 function Sidebar({
   active,
   onNav,
-  lang,
-  onLangToggle,
   govBadge,
   incBadge,
   config,
 }: {
   active: Screen;
   onNav: (s: Screen) => void;
-  lang: Language;
-  onLangToggle: () => void;
   govBadge: number;
   incBadge: number;
   config: AppConfig;
 }) {
+  const { lang, toggle, t } = useLang();
   return (
     <div className="sidebar">
       <div className="slogo">
@@ -105,8 +103,8 @@ function Sidebar({
       </div>
       <nav className="snav">
         {NAV_SECTIONS.map(section => (
-          <div key={section.title}>
-            <div className="nsec">{section.title}</div>
+          <div key={section.titleKey}>
+            <div className="nsec">{t(section.titleKey)}</div>
             {section.items.map(item => (
               <div
                 key={item.id}
@@ -114,7 +112,7 @@ function Sidebar({
                 onClick={() => onNav(item.id)}
               >
                 <span>{item.icon}</span>
-                <span>{item.id === 'aistrategy' ? `KI bei ${config.name}` : item.label}</span>
+                <span>{item.id === 'aistrategy' ? t('nav.aistrategyAt', { name: config.name }) : t(item.labelKey)}</span>
                 {item.id === 'governance' && govBadge > 0 && (
                   <span className="nbadge">{govBadge}</span>
                 )}
@@ -142,13 +140,13 @@ function Sidebar({
           onMouseOver={e => { (e.currentTarget as HTMLElement).style.color = '#fff'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,.05)'; }}
           onMouseOut={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.75)'; (e.currentTarget as HTMLElement).style.background = ''; }}
         >
-          🤖 {config.chatbot.label || 'KI-Assistent'}
+          🤖 {config.chatbot.label || t('chatbot.fallbackLabel')}
         </a>
       )}
       <div className="sfooter">
         <div style={{ marginBottom: 6 }}>{config.iso}</div>
         <button
-          onClick={onLangToggle}
+          onClick={toggle}
           style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.5)', cursor: 'pointer', fontSize: 11 }}
         >
           {lang === 'de' ? '🌐 EN' : '🌐 DE'}
@@ -162,9 +160,9 @@ function Sidebar({
 function AppShell() {
   const { loading, principal, isAuthenticated, aiosUser } = useAuth();
   const config = useAppConfig();
+  const { t } = useLang();
   const [screen, setScreen] = useState<Screen>('dashboard');
   const [selectedUcId, setSelectedUcId] = useState<string | undefined>(undefined);
-  const [lang, setLang] = useState<Language>('de');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Live-Badges — nur für autorisierte Nutzer laden (sonst 403-Rauschen)
@@ -179,7 +177,7 @@ function AppShell() {
       <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--petrol)', fontFamily: 'var(--font)' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>🤖</div>
-          <div style={{ fontSize: 14, color: 'var(--muted)' }}>AIOS wird geladen…</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)' }}>{t('shell.loading')}</div>
         </div>
       </div>
     );
@@ -190,7 +188,7 @@ function AppShell() {
     // Dieser State sollte nie auftreten — Fallback
     return (
       <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-        <a href="/.auth/login/aad" className="btn btn-primary">Mit Microsoft anmelden</a>
+        <a href="/.auth/login/aad" className="btn btn-primary">{t('shell.signInMs')}</a>
       </div>
     );
   }
@@ -203,24 +201,25 @@ function AppShell() {
         <div style={{ textAlign: 'center', maxWidth: 460 }}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
           <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--petrol)', marginBottom: 10 }}>
-            Kein Zugriff
+            {t('access.title')}
           </div>
           <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 8 }}>
-            Dieses Konto ist nicht für AIOS freigeschaltet.
+            {t('access.notEnabled')}
           </div>
           <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 24 }}>
-            Angemeldet als <strong>{principal?.userDetails ?? '—'}</strong>.<br />
-            Bitte wenden Sie sich an Ihren AIOS-Administrator, um eingeladen zu werden.
+            {t('access.loggedInAs')} <strong>{principal?.userDetails ?? '—'}</strong>.<br />
+            {t('access.contactAdmin')}
           </div>
           <a href="/.auth/logout" className="btn btn-outline btn-sm">
-            Abmelden / Konto wechseln
+            {t('access.logoutSwitch')}
           </a>
         </div>
       </div>
     );
   }
 
-  const screenTitle = NAV_ITEMS.find(n => n.id === screen)?.label ?? screen;
+  const screenNav = NAV_ITEMS.find(n => n.id === screen);
+  const screenTitle = screenNav ? t(screenNav.labelKey) : screen;
 
   return (
     <div className="app">
@@ -237,8 +236,6 @@ function AppShell() {
         <Sidebar
           active={screen}
           onNav={(s) => { setScreen(s); setSelectedUcId(undefined); setSidebarOpen(false); }}
-          lang={lang}
-          onLangToggle={() => setLang(l => l === 'de' ? 'en' : 'de')}
           govBadge={govBadge}
           incBadge={incBadge}
           config={config}
@@ -266,12 +263,12 @@ function AppShell() {
             <button
               className="btn btn-outline btn-sm"
               onClick={() => { setScreen('info'); setSidebarOpen(false); }}
-              title="Info & Konfiguration"
+              title="Info & Config"
             >
-              ⚙ Konfig
+              {t('top.config')}
             </button>
             <a href="/.auth/logout" className="btn btn-outline btn-sm">
-              Abmelden
+              {t('top.logout')}
             </a>
           </div>
         </div>
@@ -319,12 +316,14 @@ function ToastRenderer() {
 // ── Root ──────────────────────────────────────────────────────
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <AppConfigProvider>
-          <AppShell />
-        </AppConfigProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <AppConfigProvider>
+            <AppShell />
+          </AppConfigProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

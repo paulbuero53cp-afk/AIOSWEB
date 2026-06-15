@@ -3,6 +3,7 @@ import { useIncidents } from '@/hooks/useIncidents';
 import { useUseCases } from '@/hooks/useUseCases';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
+import { useT } from '@/context/LanguageContext';
 import { Modal } from '@/components/common/Modal';
 import type { Incident } from '@/types';
 
@@ -60,6 +61,7 @@ function IncidentModal({
   const { useCases } = useUseCases();
   const { createIncident, updateIncident } = useIncidents();
   const { showToast } = useToast();
+  const t = useT();
 
   const [form, setForm] = useState<IncidentFormState>(
     initial ? incidentToForm(initial) : EMPTY_FORM,
@@ -71,20 +73,20 @@ function IncidentModal({
   }
 
   async function handleSubmit() {
-    if (!form.ucid) { showToast('Bitte Use Case auswählen', 'error'); return; }
-    if (!form.desc.trim()) { showToast('Beschreibung ist Pflichtfeld', 'error'); return; }
+    if (!form.ucid) { showToast(t('inc.errUc'), 'error'); return; }
+    if (!form.desc.trim()) { showToast(t('inc.errDesc'), 'error'); return; }
     setSubmitting(true);
     try {
       if (editId) {
         await updateIncident(editId, form as Partial<Incident>);
-        showToast('Incident aktualisiert', 'success');
+        showToast(t('inc.savedUpd'), 'success');
       } else {
         await createIncident(form as Omit<Incident, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>);
-        showToast('✓ Incident erfasst', 'success');
+        showToast(t('inc.savedNew'), 'success');
       }
       onClose();
     } catch (err) {
-      showToast(`Fehler: ${String(err)}`, 'error');
+      showToast(`${t('common.errorPrefix')}: ${String(err)}`, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -106,13 +108,13 @@ function IncidentModal({
   return (
     <Modal
       open={open}
-      title={editId ? 'Incident bearbeiten' : 'Neuer Incident'}
+      title={editId ? t('inc.modalEdit') : t('inc.modalNew')}
       onClose={onClose}
       footer={
         <>
-          <button className="btn btn-outline" onClick={onClose}>Abbrechen</button>
+          <button className="btn btn-outline" onClick={onClose}>{t('common.cancel')}</button>
           <button className="btn btn-primary" disabled={submitting} onClick={handleSubmit}>
-            {submitting ? 'Speichert…' : editId ? 'Speichern' : 'Incident erfassen'}
+            {submitting ? t('inc.saving') : editId ? t('inc.save') : t('inc.create')}
           </button>
         </>
       }
@@ -120,9 +122,9 @@ function IncidentModal({
       <div className="fg">
         {/* Use Case */}
         <div className="fgroup full">
-          {label('Use Case *')}
+          {label(t('inc.fUseCase'))}
           <select value={form.ucid} onChange={e => set('ucid', e.target.value)}>
-            <option value="">— Use Case wählen —</option>
+            <option value="">{t('inc.fUseCasePick')}</option>
             {useCases.map(uc => (
               <option key={uc.id} value={uc.id}>{uc.id} — {uc.title}</option>
             ))}
@@ -131,43 +133,43 @@ function IncidentModal({
 
         {/* Typ + Schweregrad */}
         <div className="fgroup">
-          {label('Typ')}
+          {label(t('inc.fType'))}
           {sel('type', ['Incident', 'Deviation', 'Near Miss'])}
         </div>
         <div className="fgroup">
-          {label('Schweregrad')}
+          {label(t('inc.fSeverity'))}
           {sel('sev', ['Low', 'Medium', 'High'])}
         </div>
 
         {/* Status + Datum */}
         <div className="fgroup">
-          {label('Status')}
+          {label(t('inc.fStatus'))}
           {sel('st', ['Open', 'In Progress', 'Resolved'])}
         </div>
         <div className="fgroup">
-          {label('Datum des Vorfalls')}
+          {label(t('inc.fDate'))}
           <input type="date" value={form.date} onChange={e => set('date', e.target.value)} />
         </div>
 
         {/* Beschreibung */}
         <div className="fgroup full">
-          {label('Beschreibung *')}
+          {label(t('inc.fDesc'))}
           <textarea
             rows={3}
             value={form.desc}
             onChange={e => set('desc', e.target.value)}
-            placeholder="Was ist passiert?"
+            placeholder={t('inc.fDescPh')}
           />
         </div>
 
         {/* Maßnahmen */}
         <div className="fgroup full">
-          {label('Ergriffene Maßnahmen')}
+          {label(t('inc.fActions'))}
           <textarea
             rows={2}
             value={form.act}
             onChange={e => set('act', e.target.value)}
-            placeholder="Welche Maßnahmen wurden eingeleitet?"
+            placeholder={t('inc.fActionsPh')}
           />
         </div>
 
@@ -241,6 +243,7 @@ export default function IncidentLog() {
   const { incidents, loading } = useIncidents();
   const { useCases }           = useUseCases();
   const { isEditor }           = useAuth();
+  const t                      = useT();
 
   const [modalOpen, setModalOpen]   = useState(false);
   const [editInc,   setEditInc]     = useState<Incident | null>(null);
@@ -286,7 +289,7 @@ export default function IncidentLog() {
     { key: 'Resolved',    label: 'Resolved',     css: 'done' },
   ];
 
-  if (loading) return <div className="empty">Lade Incidents…</div>;
+  if (loading) return <div className="empty">{t('inc.loading')}</div>;
 
   return (
     <div>
@@ -298,7 +301,7 @@ export default function IncidentLog() {
           onChange={e => setFmFilter(e.target.value)}
           style={{ minWidth: 200 }}
         >
-          <option value="">Alle Failure Modes</option>
+          <option value="">{t('inc.allFm')}</option>
           {Object.entries(FM_LABEL).map(([val, lbl]) => (
             <option key={val} value={val}>
               {lbl}{fmCounts[val] > 0 ? ` (${fmCounts[val]})` : ''}
@@ -312,7 +315,7 @@ export default function IncidentLog() {
           onChange={e => setSevFilter(e.target.value)}
           style={{ width: 130 }}
         >
-          <option value="">Alle Schweregrade</option>
+          <option value="">{t('inc.allSev')}</option>
           {['High', 'Medium', 'Low'].map(s => (
             <option key={s}>{s}</option>
           ))}
@@ -332,7 +335,7 @@ export default function IncidentLog() {
 
         {isEditor && (
           <button className="btn btn-primary" onClick={openNew}>
-            ⚠️ Incident melden
+            {t('inc.report')}
           </button>
         )}
       </div>
@@ -340,7 +343,7 @@ export default function IncidentLog() {
       {/* Gefiltert-Info */}
       {(fmFilter || sevFilter) && (
         <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>
-          {filtered.length} von {incidents.length} Incidents
+          {t('inc.filtered', { n: filtered.length, m: incidents.length })}
           {fmFilter && <> · Failure Mode: <strong>{FM_LABEL[fmFilter]}</strong></>}
           {sevFilter && <> · Schweregrad: <strong>{sevFilter}</strong></>}
         </div>
@@ -361,7 +364,7 @@ export default function IncidentLog() {
               <div className="ib-body">
                 {colItems.length === 0 ? (
                   <div style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 12, padding: 8 }}>
-                    Keine Einträge
+                    {t('inc.noEntries')}
                   </div>
                 ) : (
                   colItems.map(inc => (
@@ -383,8 +386,8 @@ export default function IncidentLog() {
       {/* Summary */}
       <div style={{ marginTop: 12, fontSize: 12, color: 'var(--muted)', textAlign: 'right' }}>
         {filtered.length !== incidents.length
-          ? `${filtered.length} gefiltert von ${incidents.length} Incidents`
-          : `Gesamt: ${incidents.length} Incidents`}
+          ? t('inc.filtered', { n: filtered.length, m: incidents.length })
+          : t('inc.filteredAll', { n: incidents.length })}
       </div>
 
       {/* Modal */}

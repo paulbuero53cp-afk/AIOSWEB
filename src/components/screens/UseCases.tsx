@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import { useUseCases } from '@/hooks/useUseCases';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
+import { useT } from '@/context/LanguageContext';
 import { swrFetcher } from '@/lib/api';
 import {
   RiskBadge, LifecycleBadge, KiTypeBadges, ReliabilityBadge,
@@ -50,6 +51,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
   const { useCases, loading, updateUC } = useUseCases();
   const { showToast } = useToast();
   const { isEditor, isApprover } = useAuth();
+  const t = useT();
 
   // Artefakt-Status: { [ucId]: ['ra', 'gc', ...] }
   const { data: artStatus } = useSWR<Record<string, string[]>>(
@@ -108,9 +110,9 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
   async function handleInlineEdit(uc: UseCase, patch: Partial<UseCase>) {
     try {
       await updateUC(uc.id, patch);
-      showToast(`${uc.id} aktualisiert`, 'success');
+      showToast(t('uc.updated', { id: uc.id }), 'success');
     } catch (err) {
-      showToast(`Fehler: ${String(err)}`, 'error');
+      showToast(`${t('common.errorPrefix')}: ${String(err)}`, 'error');
     }
   }
 
@@ -119,7 +121,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
     return <span className="sort-icon" style={{ color: 'var(--accent)' }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
   }
 
-  if (loading) return <div className="empty">Lade Use Cases…</div>;
+  if (loading) return <div className="empty">{t('uc.loading')}</div>;
 
   return (
     <div>
@@ -128,38 +130,38 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
         <input
           value={filters.search}
           onChange={e => setFilter('search', e.target.value)}
-          placeholder="Suche nach ID, Titel, Cluster…"
+          placeholder={t('uc.searchPlaceholder')}
           style={{ flex: 1, minWidth: 180 }}
         />
         <select value={filters.rt} onChange={e => setFilter('rt', e.target.value)} style={{ width: 130 }}>
-          <option value="">Alle Risk Tier</option>
+          <option value="">{t('uc.allRiskTier')}</option>
           {['High', 'Medium', 'Low'].map(o => <option key={o}>{o}</option>)}
         </select>
         <select value={filters.lc} onChange={e => setFilter('lc', e.target.value)} style={{ width: 120 }}>
-          <option value="">Alle Lifecycle</option>
+          <option value="">{t('uc.allLifecycle')}</option>
           {['Idea', 'Build', 'Run', 'Retire'].map(o => <option key={o}>{o}</option>)}
         </select>
         <select value={filters.app} onChange={e => setFilter('app', e.target.value)} style={{ width: 160 }}>
-          <option value="">Alle Approval</option>
+          <option value="">{t('uc.allApproval')}</option>
           {['Not required', 'Pending', 'Approved', 'Rejected'].map(o => <option key={o}>{o}</option>)}
         </select>
         <select value={filters.kpi} onChange={e => setFilter('kpi', e.target.value)} style={{ width: 110 }}>
-          <option value="">KPI: Alle</option>
-          <option value="yes">KPI: Ja</option>
-          <option value="no">KPI: Nein</option>
+          <option value="">{t('uc.kpiAll')}</option>
+          <option value="yes">{t('uc.kpiYes')}</option>
+          <option value="no">{t('uc.kpiNo')}</option>
         </select>
         <select value={filters.cat} onChange={e => setFilter('cat', e.target.value)} style={{ width: 170 }}>
-          <option value="">Alle Kategorien</option>
+          <option value="">{t('uc.allCategories')}</option>
           {UC_CATEGORY_OPTIONS.map(o => <option key={o}>{o}</option>)}
         </select>
         <button className="btn btn-primary btn-sm" onClick={() => onNav('new')}>
-          ➕ Neu
+          ➕ {t('common.new')}
         </button>
       </div>
 
       {/* Ergebnis-Info */}
       <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>
-        {filtered.length} von {useCases.length} Use Cases · Seite {page + 1}/{totalPages}
+        {t('uc.resultInfo', { n: filtered.length, m: useCases.length, p: page + 1, t: totalPages })}
       </div>
 
       {/* Tabelle */}
@@ -168,35 +170,35 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
           <thead>
             <tr>
               <th className="sortable" onClick={() => toggleSort('id')}>
-                ID <SortIcon field="id" />
+                {t('uc.colId')} <SortIcon field="id" />
               </th>
               <th className="sortable" onClick={() => toggleSort('title')}>
-                Titel <SortIcon field="title" />
+                {t('uc.colTitle')} <SortIcon field="title" />
               </th>
-              <th>Cluster</th>
+              <th>{t('uc.colCluster')}</th>
               <th className="sortable" onClick={() => toggleSort('useCaseCategory' as keyof UseCase)}>
-                Kategorie <SortIcon field={'useCaseCategory' as keyof UseCase} />
+                {t('uc.colCategory')} <SortIcon field={'useCaseCategory' as keyof UseCase} />
               </th>
               <th className="sortable" onClick={() => toggleSort('rt')}>
-                Risk Tier <SortIcon field="rt" />
+                {t('uc.colRiskTier')} <SortIcon field="rt" />
               </th>
               <th className="sortable" onClick={() => toggleSort('rl')}>
-                R-Tier <SortIcon field="rl" />
+                {t('uc.colRTier')} <SortIcon field="rl" />
               </th>
               <th className="sortable" onClick={() => toggleSort('lc')}>
-                Lifecycle <SortIcon field="lc" />
+                {t('uc.colLifecycle')} <SortIcon field="lc" />
               </th>
-              <th>Portfolio</th>
-              <th>Approval</th>
-              <th>KI-Typ</th>
-              <th>KPI</th>
-              <th style={{ width: 130 }}>Artefakte</th>
+              <th>{t('uc.colPortfolio')}</th>
+              <th>{t('uc.colApproval')}</th>
+              <th>{t('uc.colAiType')}</th>
+              <th>{t('uc.colKpi')}</th>
+              <th style={{ width: 130 }}>{t('uc.colArtefacts')}</th>
             </tr>
           </thead>
           <tbody>
             {paged.length === 0 ? (
               <tr>
-                <td colSpan={12} className="empty">Keine Use Cases gefunden.</td>
+                <td colSpan={12} className="empty">{t('uc.none')}</td>
               </tr>
             ) : (
               paged.map(uc => (
@@ -215,7 +217,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
                       {uc.title}
                     </div>
                     {uc.legacy && (
-                      <div style={{ fontSize: 11, color: 'var(--muted)' }}>Legacy: {uc.legacy}</div>
+                      <div style={{ fontSize: 11, color: 'var(--muted)' }}>{t('uc.legacy')}: {uc.legacy}</div>
                     )}
                   </td>
                   <td>{uc.cl}</td>
@@ -246,7 +248,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
                   <td><KiTypeBadges kiType={uc.kiType} /></td>
                   <td>
                     <span className={`badge ${uc.kpi === 'yes' ? 'bg' : 'bgr'}`}>
-                      {uc.kpi === 'yes' ? 'Ja' : 'Nein'}
+                      {uc.kpi === 'yes' ? t('common.yes') : t('common.no')}
                     </span>
                   </td>
                   <td onClick={e => e.stopPropagation()}>
@@ -263,7 +265,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
                             key={screen}
                             className={`btn btn-sm${done ? ' btn-primary' : ' btn-outline'}`}
                             style={{ fontSize: 10, padding: '2px 6px', opacity: done ? 1 : 0.65 }}
-                            title={`${title}${done ? ' ✓' : ' — noch nicht ausgefüllt'}`}
+                            title={`${title}${done ? ' ✓' : ` — ${t('uc.artNotDone')}`}`}
                             onClick={() => onNav(screen, uc.id)}
                           >
                             {label}{done ? ' ✓' : ''}
@@ -286,7 +288,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
             className="btn btn-outline btn-sm"
             disabled={page === 0}
             onClick={() => setPage(p => p - 1)}
-          >← Zurück</button>
+          >← {t('common.back')}</button>
           <span style={{ lineHeight: '32px', fontSize: 13, color: 'var(--muted)' }}>
             {page + 1} / {totalPages}
           </span>
@@ -294,7 +296,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
             className="btn btn-outline btn-sm"
             disabled={page >= totalPages - 1}
             onClick={() => setPage(p => p + 1)}
-          >Weiter →</button>
+          >{t('common.next')} →</button>
         </div>
       )}
 
