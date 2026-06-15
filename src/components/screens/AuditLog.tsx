@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useAuth } from '@/context/AuthContext';
+import { useTx } from '@/context/LanguageContext';
 import type { AuditEntry } from '@/types';
 
 const ENTITY_OPTS = ['', 'UseCase', 'Incident', 'Artefakt'];
@@ -22,6 +23,7 @@ function ActionBadge({ action }: { action: string }) {
 
 function DiffCell({ diff }: { diff: Record<string, unknown> }) {
   const [open, setOpen] = useState(false);
+  const tx = useTx();
   const keys = Object.keys(diff);
   if (keys.length === 0) return <span style={{ color: 'var(--muted)', fontSize: 12 }}>—</span>;
 
@@ -29,7 +31,7 @@ function DiffCell({ diff }: { diff: Record<string, unknown> }) {
     <div>
       <button className="btn btn-sm btn-outline" style={{ fontSize: 11, padding: '1px 8px' }}
         onClick={() => setOpen(o => !o)}>
-        {keys.length} Feld{keys.length !== 1 ? 'er' : ''} {open ? '▲' : '▼'}
+        {keys.length} {tx(keys.length !== 1 ? 'Felder' : 'Feld')} {open ? '▲' : '▼'}
       </button>
       {open && (
         <pre style={{
@@ -57,6 +59,7 @@ function formatTs(ts: string) {
 
 export default function AuditLog() {
   const { isAdmin } = useAuth();
+  const tx = useTx();
   const [entityFilter, setEntityFilter] = useState('');
   const [limit, setLimit] = useState(100);
   const { entries, loading, error, refresh } = useAuditLog(limit);
@@ -65,7 +68,7 @@ export default function AuditLog() {
     return (
       <div>
         <div className="sec-title">Audit Log</div>
-        <div className="empty">🔒 Nur Administratoren können das Audit Log einsehen.</div>
+        <div className="empty">{tx('🔒 Nur Administratoren können das Audit Log einsehen.')}</div>
       </div>
     );
   }
@@ -77,51 +80,51 @@ export default function AuditLog() {
   return (
     <div>
       <div className="sec-title">Audit Log</div>
-      <div className="sec-sub">Lückenlose Protokollierung aller Änderungen</div>
+      <div className="sec-sub">{tx('Lückenlose Protokollierung aller Änderungen')}</div>
 
       {/* Toolbar */}
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
         <select className="filter-select" value={entityFilter}
           onChange={e => setEntityFilter(e.target.value)}>
           {ENTITY_OPTS.map(o => (
-            <option key={o} value={o}>{o || 'Alle Entitäten'}</option>
+            <option key={o} value={o}>{o || tx('Alle Entitäten')}</option>
           ))}
         </select>
 
         <select className="filter-select" value={limit}
           onChange={e => setLimit(Number(e.target.value))}>
           {[50, 100, 250, 500].map(n => (
-            <option key={n} value={n}>Max {n} Einträge</option>
+            <option key={n} value={n}>Max {n} {tx('Einträge')}</option>
           ))}
         </select>
 
-        <button className="btn btn-sm btn-outline" onClick={() => refresh()}>↺ Aktualisieren</button>
+        <button className="btn btn-sm btn-outline" onClick={() => refresh()}>↺ {tx('Aktualisieren')}</button>
 
         <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--muted)' }}>
-          {visible.length} Einträge
+          {visible.length} {tx('Einträge')}
         </span>
       </div>
 
-      {loading && <div className="empty">Lade Audit Log…</div>}
-      {error   && <div className="empty" style={{ color: 'var(--danger)' }}>Fehler: {error.message}</div>}
+      {loading && <div className="empty">{tx('Lade Audit Log…')}</div>}
+      {error   && <div className="empty" style={{ color: 'var(--danger)' }}>{tx('Fehler')}: {error.message}</div>}
 
       {!loading && !error && (
         <div className="table-wrap">
           <table className="uc-table">
             <thead>
               <tr>
-                <th>Zeitpunkt</th>
-                <th>Nutzer</th>
-                <th>Aktion</th>
-                <th>Entität</th>
+                <th>{tx('Zeitpunkt')}</th>
+                <th>{tx('Nutzer')}</th>
+                <th>{tx('Aktion')}</th>
+                <th>{tx('Entität')}</th>
                 <th>ID</th>
-                <th>Kommentar</th>
-                <th>Änderungen</th>
+                <th>{tx('Kommentar')}</th>
+                <th>{tx('Änderungen')}</th>
               </tr>
             </thead>
             <tbody>
               {visible.length === 0 && (
-                <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--muted)', padding: 24 }}>Keine Einträge</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', color: 'var(--muted)', padding: 24 }}>{tx('Keine Einträge')}</td></tr>
               )}
               {visible.map((e: AuditEntry) => (
                 <tr key={e.id}>

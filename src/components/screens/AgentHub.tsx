@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import { useUseCases } from '@/hooks/useUseCases';
+import { useTx } from '@/context/LanguageContext';
 import { RiskBadge, ReliabilityBadge } from '@/components/common/Badge';
 import { swrFetcher } from '@/lib/api';
 import type { UseCase } from '@/types';
@@ -54,6 +55,7 @@ function AmpelDot({ status, label, title }: { status: DotStatus; label: string; 
 }
 
 function ControlAmpel({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
+  const tx = useTx();
   // Only render for R3/R4/R5
   const rl = uc.rl ?? '';
   if (!['R3', 'R4', 'R5'].includes(rl)) return null;
@@ -65,22 +67,22 @@ function ControlAmpel({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
     : uc.hitlMode === 'none' ? 'red'
     : 'grey';
   const oversightTitle =
-    uc.hitlMode === 'HITL' ? 'Human in the Loop aktiv'
-    : uc.hitlMode === 'HOTL' ? 'Human on the Loop (überwacht)'
-    : uc.hitlMode === 'none' ? '⚠ Kein Mensch im Loop definiert'
-    : 'Oversight-Modus nicht gesetzt';
+    uc.hitlMode === 'HITL' ? tx('Human in the Loop aktiv')
+    : uc.hitlMode === 'HOTL' ? tx('Human on the Loop (überwacht)')
+    : uc.hitlMode === 'none' ? tx('⚠ Kein Mensch im Loop definiert')
+    : tx('Oversight-Modus nicht gesetzt');
 
   // 2. Monitoring SLA: set = green, unset = red
   const slaStatus: DotStatus = uc.monitoringSla ? 'green' : 'red';
   const slaTitle = uc.monitoringSla
     ? `Monitoring SLA: ${uc.monitoringSla}`
-    : '⚠ Kein Monitoring SLA definiert';
+    : tx('⚠ Kein Monitoring SLA definiert');
 
   // 3. Gate Check (Kill-Switch / Tracing documented): GC artefakt exists = green
   const gcStatus: DotStatus = gcExists ? 'green' : 'yellow';
   const gcTitle = gcExists
-    ? 'Gate-Checklisten ausgefüllt'
-    : 'Gate-Checklisten noch nicht ausgefüllt';
+    ? tx('Gate-Checklisten ausgefüllt')
+    : tx('Gate-Checklisten noch nicht ausgefüllt');
 
   // 4. Bounded Autonomy: supervised = green, semi-auto = yellow, autonomous = red
   const baStatus: DotStatus =
@@ -89,10 +91,10 @@ function ControlAmpel({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
     : uc.autonomyLevel === 'autonomous' ? 'red'
     : 'grey';
   const baTitle =
-    uc.autonomyLevel === 'supervised' ? 'Supervised — Bounded Autonomy definiert'
-    : uc.autonomyLevel === 'semi-auto' ? 'Semi-Auto — eingeschränkte Autonomie'
-    : uc.autonomyLevel === 'autonomous' ? '⚠ Vollständig autonom — Agentic Controls prüfen'
-    : 'Autonomiegrad nicht gesetzt';
+    uc.autonomyLevel === 'supervised' ? tx('Supervised — Bounded Autonomy definiert')
+    : uc.autonomyLevel === 'semi-auto' ? tx('Semi-Auto — eingeschränkte Autonomie')
+    : uc.autonomyLevel === 'autonomous' ? tx('⚠ Vollständig autonom — Agentic Controls prüfen')
+    : tx('Autonomiegrad nicht gesetzt');
 
   const worstStatus =
     [oversightStatus, slaStatus, gcStatus, baStatus].includes('red') ? 'red'
@@ -117,7 +119,7 @@ function ControlAmpel({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
         fontSize: 10, fontWeight: 700, color: 'var(--muted)',
         marginBottom: 5, letterSpacing: '0.05em', textTransform: 'uppercase',
       }}>
-        🚦 Kontrollen-Ampel
+        {tx('🚦 Kontrollen-Ampel')}
       </div>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <AmpelDot status={oversightStatus} label="Oversight"   title={oversightTitle} />
@@ -131,6 +133,7 @@ function ControlAmpel({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
 
 // ── Agent-Tile ────────────────────────────────────────────────
 function AgentTile({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
+  const tx = useTx();
   const emoji = clusterEmoji(uc.cl);
 
   function openLink(e: React.MouseEvent) {
@@ -143,7 +146,7 @@ function AgentTile({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
       {/* Visual */}
       <div className="agent-tile-visual">
         <span>{emoji}</span>
-        <span className="tile-cluster">{uc.cl}</span>
+        <span className="tile-cluster">{tx(uc.cl)}</span>
       </div>
 
       {/* Body */}
@@ -153,7 +156,7 @@ function AgentTile({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
           <RiskBadge tier={uc.rt} />
           <ReliabilityBadge tier={uc.rl} />
           {uc.kiType?.includes('einsatz') && (
-            <span className="badge bp" style={{ fontSize: 10 }}>KI im Einsatz</span>
+            <span className="badge bp" style={{ fontSize: 10 }}>{tx('KI im Einsatz')}</span>
           )}
         </div>
         <div className="agent-tile-desc">
@@ -176,11 +179,11 @@ function AgentTile({ uc, gcExists }: { uc: UseCase; gcExists: boolean }) {
         </span>
         <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
           <span className={`badge ${uc.or === 'Operational Ready' ? 'bg' : 'by'}`} style={{ fontSize: 10 }}>
-            {uc.or === 'Operational Ready' ? '● Live' : '◐ Teilbetrieb'}
+            {uc.or === 'Operational Ready' ? '● Live' : tx('◐ Teilbetrieb')}
           </span>
           {uc.link && (
             <button className="agent-tile-link" onClick={openLink}>
-              Öffnen ↗
+              {tx('Öffnen ↗')}
             </button>
           )}
         </span>
@@ -198,6 +201,7 @@ export default function AgentHub() {
   const { data: artStatus } = useSWR<Record<string, string[]>>(
     '/api/artefakte/status', swrFetcher
   );
+  const tx = useTx();
   const [filters, setFilters] = useState<Filters>({
     search: '', cl: '', rt: '', or: '', rl: '',
   });
@@ -233,14 +237,14 @@ export default function AgentHub() {
     return !gcOk || !slaOk || !oversightOk;
   }).length;
 
-  if (loading) return <div className="empty">Lade AI Agent Hub…</div>;
+  if (loading) return <div className="empty">{tx('Lade AI Agent Hub…')}</div>;
 
   return (
     <div>
       {/* KPI-Zeile */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <div className="kc" style={{ flex: '0 0 auto', minWidth: 120 }}>
-          <div className="kc-label">Agenten gesamt</div>
+          <div className="kc-label">{tx('Agenten gesamt')}</div>
           <div className="kc-value">{agents.length}</div>
         </div>
         <div className="kc green" style={{ flex: '0 0 auto', minWidth: 140 }}>
@@ -256,17 +260,17 @@ export default function AgentHub() {
           </div>
         </div>
         <div className="kc" style={{ flex: '0 0 auto', minWidth: 120 }}>
-          <div className="kc-label">R4/R5 Agenten</div>
+          <div className="kc-label">{tx('R4/R5 Agenten')}</div>
           <div className="kc-value">{highAutonomyCount}</div>
         </div>
         {controlsWarning > 0 && (
           <div className="kc red" style={{ flex: '0 0 auto', minWidth: 150 }}>
-            <div className="kc-label">🚦 Controls fehlen</div>
+            <div className="kc-label">{tx('🚦 Controls fehlen')}</div>
             <div className="kc-value">{controlsWarning}</div>
           </div>
         )}
         <div className="kc" style={{ flex: '0 0 auto', minWidth: 120 }}>
-          <div className="kc-label">Mit Link</div>
+          <div className="kc-label">{tx('Mit Link')}</div>
           <div className="kc-value">
             {agents.filter(u => !!u.link).length}
           </div>
@@ -278,7 +282,7 @@ export default function AgentHub() {
         <input
           value={filters.search}
           onChange={e => setFilter('search', e.target.value)}
-          placeholder="Agent suchen…"
+          placeholder={tx('Agent suchen…')}
           style={{ flex: 1, minWidth: 160 }}
         />
         <select
@@ -286,15 +290,15 @@ export default function AgentHub() {
           onChange={e => setFilter('cl', e.target.value)}
           style={{ width: 140 }}
         >
-          <option value="">Alle Cluster</option>
-          {clusters.map(c => <option key={c}>{c}</option>)}
+          <option value="">{tx('Alle Cluster')}</option>
+          {clusters.map(c => <option key={c} value={c}>{tx(c)}</option>)}
         </select>
         <select
           value={filters.rt}
           onChange={e => setFilter('rt', e.target.value)}
           style={{ width: 130 }}
         >
-          <option value="">Alle Risk Tier</option>
+          <option value="">{tx('Alle Risk Tier')}</option>
           {['High', 'Medium', 'Low'].map(o => <option key={o}>{o}</option>)}
         </select>
         <select
@@ -302,7 +306,7 @@ export default function AgentHub() {
           onChange={e => setFilter('rl', e.target.value)}
           style={{ width: 130 }}
         >
-          <option value="">Alle R-Tier</option>
+          <option value="">{tx('Alle R-Tier')}</option>
           {['R1', 'R2', 'R3', 'R4', 'R5'].map(o => <option key={o}>{o}</option>)}
         </select>
         <select
@@ -310,22 +314,22 @@ export default function AgentHub() {
           onChange={e => setFilter('or', e.target.value)}
           style={{ width: 170 }}
         >
-          <option value="">Alle Bereitschaft</option>
+          <option value="">{tx('Alle Bereitschaft')}</option>
           <option value="ready">Operational Ready</option>
         </select>
       </div>
 
       {/* Ergebnis-Info */}
       <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
-        {filtered.length} von {agents.length} Agenten
+        {filtered.length} {tx('von')} {agents.length} {tx('Agenten')}
       </div>
 
       {/* Tile Grid */}
       {filtered.length === 0 ? (
         <div className="empty">
           {agents.length === 0
-            ? 'Keine Use Cases mit Lifecycle "Run" vorhanden.'
-            : 'Kein Agent passt zu den Filterkriterien.'}
+            ? tx('Keine Use Cases mit Lifecycle "Run" vorhanden.')
+            : tx('Kein Agent passt zu den Filterkriterien.')}
         </div>
       ) : (
         <div style={{

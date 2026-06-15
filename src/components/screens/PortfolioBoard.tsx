@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useUseCases } from '@/hooks/useUseCases';
+import { useTx } from '@/context/LanguageContext';
 import { RiskBadge, LifecycleBadge } from '@/components/common/Badge';
 import type { UseCase, PortfolioDecision } from '@/types';
 
@@ -78,6 +79,7 @@ function KanbanView({ useCases }: { useCases: UseCase[] }) {
 // ── Bubble Chart ──────────────────────────────────────────────
 function BubbleChart({ useCases }: { useCases: UseCase[] }) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const tx = useTx();
   const W = 560, H = 400, PAD = 48;
 
   function xPos(vs: number) { return PAD + ((vs - 1) / 4) * (W - PAD * 2); }
@@ -146,7 +148,7 @@ function BubbleChart({ useCases }: { useCases: UseCase[] }) {
             {tier} Risk
           </span>
         ))}
-        <span style={{ fontSize: 12, color: 'var(--muted)' }}>· Blasengröße = Risk Score</span>
+        <span style={{ fontSize: 12, color: 'var(--muted)' }}>{tx('· Blasengröße = Risk Score')}</span>
       </div>
     </div>
   );
@@ -156,6 +158,7 @@ function BubbleChart({ useCases }: { useCases: UseCase[] }) {
 export default function PortfolioBoard() {
   const [view, setView] = useState<View>('kanban');
   const { useCases, loading } = useUseCases();
+  const tx = useTx();
 
   const total    = useCases.length;
   const active   = useCases.filter(uc => uc.lc !== 'Retire').length;
@@ -165,7 +168,7 @@ export default function PortfolioBoard() {
   return (
     <div>
       <div className="sec-title">Portfolio Board</div>
-      <div className="sec-sub">Überblick aller Use Cases nach Portfolio-Entscheidung</div>
+      <div className="sec-sub">{tx('Überblick aller Use Cases nach Portfolio-Entscheidung')}</div>
 
       {/* KPI */}
       <div className="kpi-bar" style={{ marginBottom: 20 }}>
@@ -177,7 +180,7 @@ export default function PortfolioBoard() {
         ].map(k => (
           <div key={k.label} className="kpi-card">
             <div className="kpi-val">{k.value}</div>
-            <div className="kpi-label">{k.label}</div>
+            <div className="kpi-label">{tx(k.label)}</div>
           </div>
         ))}
       </div>
@@ -197,9 +200,9 @@ export default function PortfolioBoard() {
       </div>
 
       {loading
-        ? <div className="empty">Lade Daten…</div>
+        ? <div className="empty">{tx('Lade Daten…')}</div>
         : useCases.length === 0
-          ? <div className="empty">Keine Use Cases vorhanden.</div>
+          ? <div className="empty">{tx('Keine Use Cases vorhanden.')}</div>
           : view === 'kanban'
             ? <KanbanView useCases={useCases} />
             : <BubbleChart useCases={useCases} />
