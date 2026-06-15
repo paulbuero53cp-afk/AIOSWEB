@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useArtefakt } from '@/hooks/useArtefakt';
 import { useToast } from '@/context/ToastContext';
+import { useT } from '@/context/LanguageContext';
 import { useUseCases } from '@/hooks/useUseCases';
 import { ArtHeader } from '@/components/common/ArtHeader';
 import { GATES, GATES_RELIABILITY } from '@/lib/constants';
@@ -9,11 +10,12 @@ import type { GateChecks } from '@/types';
 
 // ── Fortschrittsbalken ────────────────────────────────────────
 function ProgressBar({ done, total, color }: { done: number; total: number; color: string }) {
+  const t = useT();
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-        <span style={{ fontSize: 12, color: 'var(--muted)' }}>{done}/{total} Punkte</span>
+        <span style={{ fontSize: 12, color: 'var(--muted)' }}>{done}/{total} {t('gate.points')}</span>
         <span style={{ fontSize: 12, fontWeight: 600, color }}>{pct}%</span>
       </div>
       <div style={{ height: 6, background: 'var(--border)', borderRadius: 3 }}>
@@ -37,13 +39,15 @@ type GateDef = {
 };
 
 function GatePanel({
-  gate, data, onChange, badge,
+  gate, gateKey, data, onChange, badge,
 }: {
   gate: GateDef;
+  gateKey: string;
   data: Record<string, unknown>;
   onChange: (key: string, val: boolean) => void;
   badge?: React.ReactNode;
 }) {
+  const t = useT();
   const done  = gate.items.filter(i => Boolean(data[i.key])).length;
   const total = gate.items.length;
 
@@ -51,9 +55,9 @@ function GatePanel({
     <div className="card" style={{ marginBottom: 16, borderTop: `3px solid ${gate.color}` }}>
       <div className="ch" style={gate.bg ? { background: gate.bg } : undefined}>
         <div style={{ flex: 1 }}>
-          <span className="ch-title">{gate.name}</span>
+          <span className="ch-title">{t(`gate.${gateKey}.name`)}</span>
           {badge && <span style={{ marginLeft: 8 }}>{badge}</span>}
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{gate.desc}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{t(`gate.${gateKey}.desc`)}</div>
         </div>
       </div>
       <div style={{ padding: '0 20px 8px' }}>
@@ -76,7 +80,7 @@ function GatePanel({
               style={{ marginTop: 2, flexShrink: 0 }}
             />
             <span style={{ color: data[item.key] ? 'var(--muted)' : 'var(--text)' }}>
-              {item.label}
+              {t(`gate.item.${item.key}`)}
             </span>
           </label>
         ))}
@@ -92,6 +96,7 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
   const { useCases }   = useUseCases();
+  const t              = useT();
 
   const { data, loading, save } = useArtefakt<Partial<GateChecks>>('gc', ucId || null);
   const [local, setLocal] = useState<Record<string, unknown>>({});
@@ -126,9 +131,9 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
     try {
       await save(local as Partial<GateChecks>);
       setDirty(false);
-      showToast('✓ Gate-Checklisten gespeichert', 'success');
+      showToast(t('gate.savedToast'), 'success');
     } catch {
-      showToast('Fehler beim Speichern', 'error');
+      showToast(t('gate.saveError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -137,7 +142,7 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
   return (
     <div>
       <ArtHeader
-        title="Gate-Checklisten"
+        title={t('gate.title')}
         icon="✓"
         ucId={ucId}
         onUcChange={id => { setUcId(id); setDirty(false); }}
@@ -147,15 +152,15 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
       />
 
       {!ucId ? (
-        <div className="empty">Bitte Use Case auswählen.</div>
+        <div className="empty">{t('gate.pickUc')}</div>
       ) : loading ? (
-        <div className="empty">Lade…</div>
+        <div className="empty">{t('common.loadingShort')}</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: 18, alignItems: 'start' }}>
           {/* Gates A / B / C */}
           <div>
             {(['A', 'B', 'C'] as const).map(k => (
-              <GatePanel key={k} gate={GATES[k]} data={local} onChange={set} />
+              <GatePanel key={k} gateKey={k} gate={GATES[k]} data={local} onChange={set} />
             ))}
 
             {/* Reliability Controls — nur für R3/R4/R5 */}
@@ -167,14 +172,15 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
                   paddingTop: 8, borderTop: '2px dashed var(--border)',
                 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--petrol)' }}>
-                    🎯 Reliability-Pflichtkontrollen
+                    {t('gate.relMandatory')}
                   </span>
                   <ReliabilityBadge tier={rlTier} />
                   <span style={{ fontSize: 11, color: 'var(--muted)' }}>
-                    — aktiviert weil R-Tier {rlTier}
+                    {t('gate.activatedBecause', { tier: rlTier })}
                   </span>
                 </div>
                 <GatePanel
+                  gateKey="rlbase"
                   gate={GATES_RELIABILITY.base}
                   data={local}
                   onChange={set}
@@ -185,6 +191,7 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
             {/* Agentic Controls — nur für R5 */}
             {showRlAgentic && (
               <GatePanel
+                gateKey="rlagentic"
                 gate={GATES_RELIABILITY.agentic}
                 data={local}
                 onChange={set}
@@ -196,7 +203,7 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
           {/* Sidebar-Übersicht */}
           <div style={{ position: 'sticky', top: 20 }}>
             <div className="card">
-              <div className="ch"><span className="ch-title">Gesamtfortschritt</span></div>
+              <div className="ch"><span className="ch-title">{t('gate.totalProgress')}</span></div>
               <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <ProgressBar done={totalDone} total={totalCount} color="var(--accent)" />
 
@@ -207,7 +214,7 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
                   return (
                     <div key={k}>
                       <div style={{ fontSize: 11, fontWeight: 600, color: gate.color, marginBottom: 4 }}>
-                        {gate.name}
+                        {t(`gate.${k}.name`)}
                       </div>
                       <ProgressBar done={d} total={gate.items.length} color={gate.color} />
                     </div>
@@ -218,7 +225,7 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
                 {showRlBase && (
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: GATES_RELIABILITY.base.color, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      Reliability Controls
+                      {t('gate.relControls')}
                       <ReliabilityBadge tier={rlTier} />
                     </div>
                     <ProgressBar
@@ -231,7 +238,7 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
                 {showRlAgentic && (
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 600, color: GATES_RELIABILITY.agentic.color, marginBottom: 4 }}>
-                      Agentic Controls
+                      {t('gate.agenticControls')}
                     </div>
                     <ProgressBar
                       done={GATES_RELIABILITY.agentic.items.filter(i => Boolean(local[i.key])).length}
@@ -246,7 +253,7 @@ export default function GateChecksScreen({ initialUcId }: { initialUcId?: string
                   onClick={handleSave}
                   disabled={saving || !dirty}
                 >
-                  {saving ? '⏳' : '💾'} Speichern
+                  {saving ? '⏳' : '💾'} {t('common.save')}
                 </button>
               </div>
             </div>
