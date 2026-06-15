@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useArtefakt } from '@/hooks/useArtefakt';
 import { useUseCases } from '@/hooks/useUseCases';
 import { useToast } from '@/context/ToastContext';
+import { useT } from '@/context/LanguageContext';
 import { ArtHeader } from '@/components/common/ArtHeader';
 import {
   RA_DIMS, RA_EUAIACT, RA_MITIGATION, calcRiskScore,
@@ -45,20 +46,21 @@ function DimSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const t = useT();
   return (
     <div className="card" style={{ marginBottom: 10 }}>
       <div style={{ padding: '12px 16px' }}>
         <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--petrol)', marginBottom: 4 }}>
-          {dim.label}
+          {t(`ra.dim.${dim.key}.label`)}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>{dim.help}</div>
+        <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>{t(`ra.dim.${dim.key}.help`)}</div>
         <select
           value={value}
           onChange={e => onChange(e.target.value)}
           style={{ width: '100%' }}
         >
-          {dim.opts.map((o, i) => (
-            <option key={i} value={String(i + 1)}>{o}</option>
+          {dim.opts.map((_o, i) => (
+            <option key={i} value={String(i + 1)}>{t(`ra.dim.${dim.key}.o${i + 1}`)}</option>
           ))}
         </select>
       </div>
@@ -68,13 +70,15 @@ function DimSelect({
 
 // ── Checkbox-Liste ────────────────────────────────────────────
 function CheckList({
-  title, items, data, onChange,
+  title, items, keyPrefix, data, onChange,
 }: {
   title: string;
   items: readonly { key: string; label: string }[];
+  keyPrefix: string;
   data: Record<string, unknown>;
   onChange: (key: string, val: boolean) => void;
 }) {
+  const t = useT();
   return (
     <div className="card" style={{ marginBottom: 16 }}>
       <div className="ch"><span className="ch-title">{title}</span></div>
@@ -90,7 +94,7 @@ function CheckList({
               onChange={e => onChange(item.key, e.target.checked)}
               style={{ marginTop: 2, flexShrink: 0 }}
             />
-            <span>{item.label}</span>
+            <span>{t(`${keyPrefix}${item.key}`)}</span>
           </label>
         ))}
       </div>
@@ -105,6 +109,7 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
   const [saving, setSaving] = useState(false);
   const { showToast }       = useToast();
   const { updateUC }        = useUseCases();
+  const t                   = useT();
 
   const { data, loading, save } = useArtefakt<Partial<RiskAssessment>>('ra', ucId || null);
 
@@ -131,9 +136,9 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
     try {
       await save(local as Partial<RiskAssessment>);
       setDirty(false);
-      showToast('✓ Risk Assessment gespeichert', 'success');
+      showToast(t('ra.savedToast'), 'success');
     } catch {
-      showToast('Fehler beim Speichern', 'error');
+      showToast(t('common.saveError'), 'error');
     } finally {
       setSaving(false);
     }
@@ -143,16 +148,16 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
     if (!ucId) return;
     try {
       await updateUC(ucId, { rt: score.tier });
-      showToast(`Risk Tier "${score.tier}" → Use Case übertragen`, 'success');
+      showToast(t('ra.syncToast', { tier: score.tier }), 'success');
     } catch {
-      showToast('Sync-Fehler', 'error');
+      showToast(t('ra.syncErr'), 'error');
     }
   }
 
   return (
     <div>
       <ArtHeader
-        title="Risk Assessment"
+        title={t('nav.riskassess')}
         icon="⚠"
         ucId={ucId}
         onUcChange={id => { setUcId(id); setDirty(false); }}
@@ -162,14 +167,14 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
       />
 
       {!ucId ? (
-        <div className="empty">Bitte Use Case auswählen.</div>
+        <div className="empty">{t('ra.pickUc')}</div>
       ) : loading ? (
-        <div className="empty">Lade…</div>
+        <div className="empty">{t('common.loadingShort')}</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 18, alignItems: 'start' }}>
           {/* Linke Spalte: Dimensionen */}
           <div>
-            <div className="sec-title" style={{ marginBottom: 12 }}>Schritt 1 — Bewertungsdimensionen</div>
+            <div className="sec-title" style={{ marginBottom: 12 }}>{t('ra.step1')}</div>
             {RA_DIMS.map(dim => (
               <DimSelect
                 key={dim.key}
@@ -180,15 +185,17 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
             ))}
 
             <CheckList
-              title="Schritt 2 — EU AI Act Hochrisiko-Check (Anhang III)"
+              title={t('ra.step2')}
               items={RA_EUAIACT}
+              keyPrefix="ra.euaiact."
               data={local}
               onChange={(k, v) => set(k, v)}
             />
 
             <CheckList
-              title="Schritt 3 — Mitigationsmaßnahmen"
+              title={t('ra.step3')}
               items={RA_MITIGATION}
+              keyPrefix="ra.mit."
               data={local}
               onChange={(k, v) => set(k, v)}
             />
@@ -197,7 +204,7 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
           {/* Rechte Spalte: Score + Actions */}
           <div style={{ position: 'sticky', top: 20 }}>
             <div className="card" style={{ marginBottom: 12 }}>
-              <div className="ch"><span className="ch-title">Ergebnis</span></div>
+              <div className="ch"><span className="ch-title">{t('ra.result')}</span></div>
               <ScoreRing pct={score.pct} tier={score.tier} />
               <div style={{ padding: '0 20px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {/* EU AI Act Warnung */}
@@ -206,7 +213,7 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
                     background: 'var(--red-bg)', color: 'var(--red)',
                     borderRadius: 8, padding: '10px 12px', fontSize: 12, fontWeight: 600,
                   }}>
-                    ⚠ EU AI Act: Hochrisiko-Indikator aktiv
+                    {t('ra.euWarn')}
                   </div>
                 )}
 
@@ -217,7 +224,7 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
                   return (
                     <div>
                       <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>
-                        Maßnahmen: {done}/{total}
+                        {t('ra.measures', { done, total })}
                       </div>
                       <div style={{ height: 6, background: 'var(--border)', borderRadius: 3 }}>
                         <div style={{
@@ -231,10 +238,10 @@ export default function RiskAssessmentScreen({ initialUcId }: { initialUcId?: st
                 })()}
 
                 <button className="btn btn-primary" onClick={handleSave} disabled={saving || !dirty}>
-                  {saving ? '⏳ Speichert…' : '💾 Speichern'}
+                  {saving ? `⏳ ${t('common.saving')}` : `💾 ${t('common.save')}`}
                 </button>
                 <button className="btn btn-outline" onClick={syncToUC}>
-                  ↩ Risk Tier → Use Case
+                  {t('ra.syncBtn')}
                 </button>
               </div>
             </div>

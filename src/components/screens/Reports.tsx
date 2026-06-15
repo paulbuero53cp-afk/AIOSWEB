@@ -92,10 +92,10 @@ export default function Reports() {
     if (!artExport) return [];
     return useCases.map(uc => {
       const ra = artExport.ra?.[uc.id] ?? {};
-      const cats = RA_EUAIACT.filter(e => ra[e.key]).map(e => e.label);
+      const cats = RA_EUAIACT.filter(e => ra[e.key]).map(e => t(`ra.euaiact.${e.key}`));
       return { id: uc.id, title: uc.title, cl: uc.cl, rt: uc.rt, app: uc.app, relevant: cats.length > 0, categories: cats.join('; ') };
     });
-  }, [artExport, useCases]);
+  }, [artExport, useCases, t]);
   const euRelevant = euRows.filter(r => r.relevant);
 
   // ── Reliability ───────────────────────────────────────────
