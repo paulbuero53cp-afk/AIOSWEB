@@ -984,6 +984,21 @@ const byTextEn: Record<string, string> = {
   'Datenschutz-Folgenabschätzung (DSFA)': 'Data Protection Impact Assessment (DPIA)',
   '✓ DSFA gespeichert': '✓ DPIA saved',
   'Fehler beim Speichern': 'Error while saving',
+  // AI-Tools-Enum-Werte (in SharePoint deutsch gespeichert → EN-Anzeige)
+  'Erlaubt': 'Allowed',
+  'Eingeschränkt erlaubt': 'Restricted',
+  'In Prüfung': 'Under review',
+  'Abgelehnt': 'Rejected',
+  'Zurückgezogen': 'Withdrawn',
+  'LLM-Chat': 'LLM chat',
+  'Code-Assistent': 'Code assistant',
+  'Bildgenerierung': 'Image generation',
+  'Audio/Transkription': 'Audio/transcription',
+  'Übersetzung': 'Translation',
+  'Suche/RAG': 'Search/RAG',
+  'Automatisierung': 'Automation',
+  'Sonstiges': 'Other',
+  'Global/Unklar': 'Global/unclear',
 };
 
 export function translateText(lang: Language, source: string): string {

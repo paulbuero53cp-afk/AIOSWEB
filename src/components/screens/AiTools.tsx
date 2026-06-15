@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAiTools } from '@/hooks/useAiTools';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
-import { useT } from '@/context/LanguageContext';
+import { useT, useTx } from '@/context/LanguageContext';
 import { Modal } from '@/components/common/Modal';
 import { aiToolApi } from '@/lib/api';
 import { exportAiToolsCSV } from '@/lib/exports';
@@ -53,6 +53,7 @@ function AiToolModal({
   const { showToast } = useToast();
   const { isEditor, isApprover } = useAuth();
   const t = useT();
+  const tx = useTx();
 
   const [tab, setTab]   = useState<'details' | 'history'>('details');
   const [form, setForm] = useState<FormState>(tool ? toForm(tool) : EMPTY);
@@ -160,14 +161,14 @@ function AiToolModal({
           <div className="fgroup">
             {label(t('tools.fCategory'))}
             <select value={form.category} disabled={readOnly} onChange={e => set('category', e.target.value)}>
-              {AITOOL_CATEGORY_OPTIONS.map(o => <option key={o}>{o}</option>)}
+              {AITOOL_CATEGORY_OPTIONS.map(o => <option key={o} value={o}>{tx(o)}</option>)}
             </select>
           </div>
           <div className="fgroup">
             {label(t('tools.fStatus'))}
             <select value={form.status} disabled={readOnly} onChange={e => set('status', e.target.value)}>
               {/* aktuellen Status immer anzeigen, auch wenn Rolle ihn nicht setzen dürfte */}
-              {Array.from(new Set([form.status, ...allowedStatuses])).map(o => <option key={o}>{o}</option>)}
+              {Array.from(new Set([form.status, ...allowedStatuses])).map(o => <option key={o} value={o}>{tx(o)}</option>)}
             </select>
             {!isApprover && !readOnly && (
               <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
@@ -190,7 +191,7 @@ function AiToolModal({
           <div className="fgroup">
             {label(t('tools.fDataLoc'))}
             <select value={form.dataLocation} disabled={readOnly} onChange={e => set('dataLocation', e.target.value)}>
-              {AITOOL_DATALOCATION_OPTIONS.map(o => <option key={o}>{o}</option>)}
+              {AITOOL_DATALOCATION_OPTIONS.map(o => <option key={o} value={o}>{tx(o)}</option>)}
             </select>
           </div>
           <div className="fgroup">
@@ -251,6 +252,7 @@ export default function AiTools() {
   const { tools, loading } = useAiTools();
   const { isEditor } = useAuth();
   const t = useT();
+  const tx = useTx();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [active, setActive]       = useState<AiTool | null>(null);
@@ -284,11 +286,11 @@ export default function AiTools() {
         <input placeholder={t('tools.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} style={{ minWidth: 180 }} />
         <select value={statusF} onChange={e => setStatusF(e.target.value)} style={{ width: 170 }}>
           <option value="">{t('tools.allStatus')}</option>
-          {AITOOL_STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
+          {AITOOL_STATUS_OPTIONS.map(s => <option key={s} value={s}>{tx(s)}</option>)}
         </select>
         <select value={catF} onChange={e => setCatF(e.target.value)} style={{ width: 160 }}>
           <option value="">{t('tools.allCategories')}</option>
-          {AITOOL_CATEGORY_OPTIONS.map(c => <option key={c}>{c}</option>)}
+          {AITOOL_CATEGORY_OPTIONS.map(c => <option key={c} value={c}>{tx(c)}</option>)}
         </select>
         {(statusF || catF || search) && (
           <button className="btn btn-outline btn-sm" onClick={() => { setStatusF(''); setCatF(''); setSearch(''); }}>✕ {t('common.search')}</button>
@@ -317,9 +319,9 @@ export default function AiTools() {
                     <div style={{ fontWeight: 600 }}>{tool.name}</div>
                     <div style={{ fontSize: 11, color: 'var(--muted)' }}>{tool.vendor || '—'} · {tool.id}</div>
                   </td>
-                  <td>{tool.category}</td>
-                  <td><span className={`badge ${AITOOL_STATUS_CSS[tool.status] ?? 'bgr'}`}>{tool.status}</span></td>
-                  <td>{tool.dataLocation}</td>
+                  <td>{tx(tool.category)}</td>
+                  <td><span className={`badge ${AITOOL_STATUS_CSS[tool.status] ?? 'bgr'}`}>{tx(tool.status)}</span></td>
+                  <td>{tx(tool.dataLocation)}</td>
                   <td>{tool.dpa ? '✓' : '—'}</td>
                   <td>
                     {tool.reviewDate ? new Date(tool.reviewDate).toLocaleDateString('de-DE') : '—'}

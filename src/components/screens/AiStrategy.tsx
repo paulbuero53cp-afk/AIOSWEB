@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useAppConfig } from '@/context/AppConfigContext';
+import { useLang } from '@/context/LanguageContext';
 
 type Lang = 'de' | 'en';
 
@@ -67,7 +68,7 @@ function CheckList({ label, color, items }: { label: string; color: string; item
 // ── Main Component ────────────────────────────────────────────
 
 export default function AiStrategy({ onNav }: { onNav?: (s: string) => void }) {
-  const [lang, setLang] = useState<Lang>('de');
+  const { lang, setLang } = useLang();
   const [active, setActive] = useState('s01');
   const contentRef = useRef<HTMLDivElement>(null);
   const { name: companyName } = useAppConfig();

@@ -4,7 +4,7 @@ import { useUseCases } from '@/hooks/useUseCases';
 import { useIncidents } from '@/hooks/useIncidents';
 import { useAiTools } from '@/hooks/useAiTools';
 import { useAuth } from '@/context/AuthContext';
-import { useT } from '@/context/LanguageContext';
+import { useT, useTx } from '@/context/LanguageContext';
 import { swrFetcher } from '@/lib/api';
 import { RA_EUAIACT, AITOOL_STATUS_OPTIONS, AITOOL_STATUS_CSS } from '@/lib/constants';
 import {
@@ -61,6 +61,7 @@ export default function Reports() {
   const { tools }             = useAiTools();
   const { isAdmin }           = useAuth();
   const t                     = useT();
+  const tx                    = useTx();
   const [tab, setTab]         = useState<Tab>('management');
 
   // Artefakte nur für Admin (Muster wie ArtefaktHub) — für EU-AI-Act + DSFA-Quote
@@ -162,7 +163,7 @@ export default function Reports() {
               <div style={{ padding: '6px 16px 10px' }}>
                 {AITOOL_STATUS_OPTIONS.map(s => (
                   <div key={s} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13 }}>
-                    <span><span className={`badge ${AITOOL_STATUS_CSS[s] ?? 'bgr'}`}>{s}</span></span>
+                    <span><span className={`badge ${AITOOL_STATUS_CSS[s] ?? 'bgr'}`}>{tx(s)}</span></span>
                     <strong>{toolCounts[s] ?? 0}</strong>
                   </div>
                 ))}
