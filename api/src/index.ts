@@ -14,3 +14,4 @@ import './functions/artefakte';
 import './functions/auditlog';
 import './functions/config';
 import './functions/users';
+import './functions/aitools';

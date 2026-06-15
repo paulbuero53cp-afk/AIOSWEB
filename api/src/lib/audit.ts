@@ -13,7 +13,7 @@ export type AuditAction =
   | 'role-change' | 'config-change' | 'export';
 
 export type AuditEntity =
-  | 'UseCase' | 'Incident' | 'Artefakt' | 'User' | 'Config';
+  | 'UseCase' | 'Incident' | 'Artefakt' | 'User' | 'Config' | 'AiTool';
 
 export async function writeAuditLog(
   actor: ClientPrincipal,

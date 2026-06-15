@@ -181,7 +181,7 @@ $alFields = @(
     @{ N="EntryId";    D="Eintrag-ID";      T="Text" },
     @{ N="Actor";      D="Actor (UPN)";     T="Text" },
     @{ N="Action";     D="Aktion";          T="Choice"; Extra=@{Choices=@("create","edit","approve","reject","delete","save-artefakt","inline-edit")} },
-    @{ N="Entity";     D="Entität";         T="Choice"; Extra=@{Choices=@("UseCase","Incident","Artefakt")} },
+    @{ N="Entity";     D="Entität";         T="Choice"; Extra=@{Choices=@("UseCase","Incident","Artefakt","AiTool","User","Config")} },
     @{ N="EntityId";   D="Entität-ID";      T="Text" },
     @{ N="Diff";       D="Änderungen (JSON)";T="Note" },
     @{ N="Comment";    D="Kommentar";       T="Text" }
@@ -240,6 +240,35 @@ if ($existing.Count -eq 0) {
     } | ConvertTo-Json -Compress
     Add-PnPListItem -List "AIOS_Config" -Values @{ Title="COMPANY"; ConfigKey="COMPANY"; ConfigValue=$companyConfig } | Out-Null
     Write-Host "  ✓ Default COMPANY-Konfiguration eingefügt" -ForegroundColor Green
+}
+
+# ════════════════════════════════════════════════════════════════
+# 7. AIOS_AiTools (Register erlaubter KI-Tools)
+# ════════════════════════════════════════════════════════════════
+Write-Host "`n[7] AIOS_AiTools" -ForegroundColor Cyan
+EnsureList -Title "AIOS_AiTools" -Description "Register erlaubter KI-Tools inkl. Begruendung; Historie via AIOS_AuditLog" | Out-Null
+
+$toolFields = @(
+    @{ N="ToolId";        D="Tool-ID";                T="Text" },
+    @{ N="Vendor";        D="Anbieter / Hersteller";  T="Text" },
+    @{ N="Category";      D="Kategorie";              T="Choice"; Extra=@{Choices=@("LLM-Chat","Code-Assistent","Bildgenerierung","Audio/Transkription","Übersetzung","Suche/RAG","Automatisierung","Sonstiges")} },
+    @{ N="Status";        D="Status";                 T="Choice"; Extra=@{Choices=@("Erlaubt","Eingeschränkt erlaubt","In Prüfung","Abgelehnt","Zurückgezogen")} },
+    @{ N="Justification"; D="Begründung";             T="Note" },
+    @{ N="Scope";         D="Freigabe-Scope";         T="Note" },
+    @{ N="DataLocation";  D="Datenstandort";          T="Choice"; Extra=@{Choices=@("EU","USA","Global/Unklar")} },
+    @{ N="DpaInPlace";    D="AVV/DPA vorhanden";      T="Boolean" },
+    @{ N="Url";           D="Produkt-URL";            T="Text" },
+    @{ N="DecidedBy";     D="Entschieden von";        T="Text" },
+    @{ N="DecisionDate";  D="Entscheidungsdatum";     T="Text" },
+    @{ N="ReviewDate";    D="Review-Datum";           T="Text" },
+    @{ N="LinkedUseCases";D="Verknüpfte Use Cases";   T="Note" },
+    @{ N="Active";        D="Aktiv";                  T="Boolean" },
+    @{ N="CreatedBy_x";   D="Erstellt von (Actor)";   T="Text" },
+    @{ N="UpdatedBy_x";   D="Geändert von (Actor)";   T="Text" }
+)
+foreach ($f in $toolFields) {
+    $extra = if ($f.Extra) { $f.Extra } else { @{} }
+    EnsureField -ListTitle "AIOS_AiTools" -InternalName $f.N -DisplayName $f.D -Type $f.T -Extra $extra
 }
 
 # ── Zusammenfassung ───────────────────────────────────────────

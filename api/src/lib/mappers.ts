@@ -303,3 +303,69 @@ export function auditToSp(entry: Partial<AuditEntry>): Record<string, unknown> {
     ...(entry.comment  !== undefined && { Comment: entry.comment }),
   };
 }
+
+// ── AI Tool (Allowlist / Register erlaubter KI-Tools) ─────────
+
+export interface AiTool {
+  id: string;             // ToolId  TOOL-YYYY-NNN
+  name: string;           // Title (SP-Pflichtfeld)
+  vendor: string;
+  category: string;
+  status: string;         // Erlaubt | Eingeschränkt erlaubt | In Prüfung | Abgelehnt | Zurückgezogen
+  justification: string;  // Begründung der aktuellen Entscheidung
+  scope: string;          // Freigabe-Scope (für wen / welche Datenklassen)
+  dataLocation: string;   // EU | USA | Global/Unklar
+  dpa: boolean;           // AVV/DPA vorhanden
+  url: string;
+  decidedBy: string;
+  decisionDate: string;   // ISO — letzte Entscheidung
+  reviewDate: string;     // ISO — nächste Re-Zertifizierung
+  linkedUseCases: string; // komma-separierte UC-IDs
+  active: boolean;
+  createdAt: string; updatedAt: string; createdBy: string; updatedBy: string;
+  _spId?: string;
+}
+
+export function spToAiTool(spId: string, f: Record<string, unknown>): AiTool {
+  return {
+    _spId:          spId,
+    id:             s(f['ToolId']),
+    name:           s(f['Title']),
+    vendor:         s(f['Vendor']),
+    category:       s(f['Category'], 'Sonstiges'),
+    status:         s(f['Status'], 'In Prüfung'),
+    justification:  s(f['Justification']),
+    scope:          s(f['Scope']),
+    dataLocation:   s(f['DataLocation'], 'Global/Unklar'),
+    dpa:            b(f['DpaInPlace']),
+    url:            s(f['Url']),
+    decidedBy:      s(f['DecidedBy']),
+    decisionDate:   s(f['DecisionDate']),
+    reviewDate:     s(f['ReviewDate']),
+    linkedUseCases: s(f['LinkedUseCases']),
+    active:         f['Active'] !== false,
+    createdAt:      s(f['Created']),
+    updatedAt:      s(f['Modified']),
+    createdBy:      s(f['CreatedBy_x']),
+    updatedBy:      s(f['UpdatedBy_x']),
+  };
+}
+
+export function aiToolToSp(t: Partial<AiTool>): Record<string, unknown> {
+  const fields: Record<string, unknown> = {};
+  const map: [keyof AiTool, string][] = [
+    ['id', 'ToolId'], ['name', 'Title'], ['vendor', 'Vendor'],
+    ['category', 'Category'], ['status', 'Status'], ['justification', 'Justification'],
+    ['scope', 'Scope'], ['dataLocation', 'DataLocation'], ['url', 'Url'],
+    ['decidedBy', 'DecidedBy'], ['linkedUseCases', 'LinkedUseCases'],
+    ['active', 'Active'], ['createdBy', 'CreatedBy_x'], ['updatedBy', 'UpdatedBy_x'],
+  ];
+  for (const [tsKey, spKey] of map) {
+    if (t[tsKey] !== undefined) fields[spKey] = t[tsKey];
+  }
+  if (t.dpa !== undefined) fields['DpaInPlace'] = t.dpa;
+  // DateTime-Spalten: leere Strings NICHT senden (SP lehnt '' mit 500 ab)
+  if (t.decisionDate) fields['DecisionDate'] = t.decisionDate;
+  if (t.reviewDate)   fields['ReviewDate']   = t.reviewDate;
+  return fields;
+}

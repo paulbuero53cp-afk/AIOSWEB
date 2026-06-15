@@ -340,7 +340,34 @@ export type Screen =
   | 'dashboard' | 'portfolio' | 'aistrategy' | 'usecases' | 'new'
   | 'governance' | 'incidents' | 'agenthub' | 'artefakthub'
   | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog' | 'info'
-  | 'ucdashboard' | 'users';
+  | 'ucdashboard' | 'users' | 'aitools';
+
+// ── AI Tool (Register erlaubter KI-Tools) ─────────────────────
+export type AiToolStatus =
+  | 'Erlaubt' | 'Eingeschränkt erlaubt' | 'In Prüfung' | 'Abgelehnt' | 'Zurückgezogen';
+
+export interface AiTool {
+  id: string;
+  name: string;
+  vendor: string;
+  category: string;
+  status: AiToolStatus;
+  justification: string;
+  scope: string;
+  dataLocation: string;
+  dpa: boolean;
+  url: string;
+  decidedBy: string;
+  decisionDate: string;
+  reviewDate: string;
+  linkedUseCases: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+  updatedBy: string;
+  _spId?: string;
+}
 
 export type Language = 'de' | 'en';
 

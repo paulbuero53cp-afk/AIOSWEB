@@ -3,7 +3,7 @@
 //  Alle Calls gehen gegen /api/* (Azure Functions via SWA-Proxy)
 //  Kein direkter Graph-Aufruf aus dem Frontend
 // ─────────────────────────────────────────────────────────────
-import type { UseCase, Incident, AuditEntry, AppConfig } from '@/types';
+import type { UseCase, Incident, AuditEntry, AppConfig, AiTool } from '@/types';
 
 const BASE = '/api';
 
@@ -72,9 +72,31 @@ export const artApi = {
   exportAll: () => apiFetch<Record<string, unknown>>('/artefakte/export'),
 };
 
+// ── AI Tools (Register erlaubter KI-Tools) ───────────────────
+export const aiToolApi = {
+  list: () => apiFetch<AiTool[]>('/aitools'),
+
+  create: (data: Partial<AiTool>) =>
+    apiFetch<AiTool>('/aitools', { method: 'POST', body: JSON.stringify(data) }),
+
+  update: (id: string, patch: Partial<AiTool>) =>
+    apiFetch<AiTool>(`/aitools/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+
+  delete: (id: string) =>
+    apiFetch<void>(`/aitools/${id}`, { method: 'DELETE' }),
+
+  // Änderungshistorie dieses Tools (scoped, requireUser)
+  history: (id: string) => apiFetch<AuditEntry[]>(`/aitools/${id}`),
+};
+
 // ── Audit Log ─────────────────────────────────────────────────
 export const auditApi = {
-  list: (limit = 100) => apiFetch<AuditEntry[]>(`/auditlog?limit=${limit}`),
+  list: (limit = 100, entity?: string, entityId?: string) => {
+    const p = new URLSearchParams({ limit: String(limit) });
+    if (entity)   p.set('entity', entity);
+    if (entityId) p.set('entityId', entityId);
+    return apiFetch<AuditEntry[]>(`/auditlog?${p.toString()}`);
+  },
 };
 
 // ── Config ────────────────────────────────────────────────────

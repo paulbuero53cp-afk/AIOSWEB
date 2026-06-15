@@ -16,6 +16,7 @@ import DsfaScreen        from '@/components/screens/Dsfa';
 import ArtefaktHub       from '@/components/screens/ArtefaktHub';
 import PortfolioBoard    from '@/components/screens/PortfolioBoard';
 import AuditLogScreen    from '@/components/screens/AuditLog';
+import AiToolsScreen      from '@/components/screens/AiTools';
 import InfoScreen        from '@/components/screens/Info';
 import AiStrategyScreen  from '@/components/screens/AiStrategy';
 import UcDashboard       from '@/components/screens/UcDashboard';
@@ -50,6 +51,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'Governance',
     items: [
       { id: 'governance',  label: 'Governance Cockpit', icon: '🛡' },
+      { id: 'aitools',     label: 'Erlaubte AI-Tools',  icon: '✅' },
       { id: 'incidents',   label: 'Incident Log',       icon: '⚠️' },
     ],
   },
@@ -288,6 +290,7 @@ function AppShell() {
           {screen === 'ucdashboard'&& <UcDashboard       key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
           {screen === 'users'      && <UsersScreen />}
           {screen === 'auditlog'   && <AuditLogScreen />}
+          {screen === 'aitools'    && <AiToolsScreen />}
           {screen === 'info'       && <InfoScreen />}
           {screen === 'aistrategy' && <AiStrategyScreen onNav={(s) => setScreen(s as Screen)} />}
         </div>

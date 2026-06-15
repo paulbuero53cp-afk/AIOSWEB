@@ -270,7 +270,7 @@ const LISTS = [
       txt('EntryId',    'Eintrag-ID'),
       txt('Actor',      'Actor (UPN)'),
       choice('Action',  'Aktion',  ['create','edit','approve','reject','delete','save-artefakt','inline-edit']),
-      choice('Entity',  'Entität', ['UseCase','Incident','Artefakt']),
+      choice('Entity',  'Entität', ['UseCase','Incident','Artefakt','AiTool','User','Config']),
       txt('EntityId',   'Entität-ID'),
       note('Diff',      'Änderungen (JSON)'),
       txt('Comment',    'Kommentar'),
@@ -284,6 +284,30 @@ const LISTS = [
     cols: [
       txt('ConfigKey',   'Schlüssel'),
       note('ConfigValue','Wert (JSON)'),
+    ],
+  },
+
+  // 6 — AI Tools (Allowlist / Register erlaubter KI-Tools)
+  {
+    name: 'AIOS_AiTools',
+    desc: 'Register erlaubter KI-Tools inkl. Begründung; Historie via AIOS_AuditLog',
+    cols: [
+      txt('ToolId',        'Tool-ID'),
+      txt('Vendor',        'Anbieter / Hersteller'),
+      choice('Category',   'Kategorie', ['LLM-Chat','Code-Assistent','Bildgenerierung','Audio/Transkription','Übersetzung','Suche/RAG','Automatisierung','Sonstiges']),
+      choice('Status',     'Status',    ['Erlaubt','Eingeschränkt erlaubt','In Prüfung','Abgelehnt','Zurückgezogen']),
+      note('Justification','Begründung'),
+      note('Scope',        'Freigabe-Scope'),
+      choice('DataLocation','Datenstandort', ['EU','USA','Global/Unklar']),
+      bool('DpaInPlace',   'AVV/DPA vorhanden'),
+      txt('Url',           'Produkt-URL'),
+      txt('DecidedBy',     'Entschieden von'),
+      txt('DecisionDate',  'Entscheidungsdatum'),
+      txt('ReviewDate',    'Review-Datum'),
+      note('LinkedUseCases','Verknüpfte Use Cases (IDs)'),
+      bool('Active',       'Aktiv'),
+      txt('CreatedBy_x',   'Erstellt von (Actor)'),
+      txt('UpdatedBy_x',   'Geändert von (Actor)'),
     ],
   },
 ];

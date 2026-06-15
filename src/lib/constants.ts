@@ -247,3 +247,24 @@ export function calcRiskScore(data: Record<string, string | boolean>): {
   const tier = pct >= 70 ? 'High' : pct >= 40 ? 'Medium' : 'Low';  // 1:1 HTML-Baseline
   return { raw: sum, pct, tier };
 }
+
+// ── AI-Tools-Register ─────────────────────────────────────────
+export const AITOOL_STATUS_OPTIONS = [
+  'Erlaubt', 'Eingeschränkt erlaubt', 'In Prüfung', 'Abgelehnt', 'Zurückgezogen',
+] as const;
+
+export const AITOOL_CATEGORY_OPTIONS = [
+  'LLM-Chat', 'Code-Assistent', 'Bildgenerierung', 'Audio/Transkription',
+  'Übersetzung', 'Suche/RAG', 'Automatisierung', 'Sonstiges',
+];
+
+export const AITOOL_DATALOCATION_OPTIONS = ['EU', 'USA', 'Global/Unklar'];
+
+// Status → Badge-CSS-Klasse (siehe global.css: .bg/.by/.bb/.br/.bgr)
+export const AITOOL_STATUS_CSS: Record<string, string> = {
+  'Erlaubt':               'bg',
+  'Eingeschränkt erlaubt': 'by',
+  'In Prüfung':            'bb',
+  'Abgelehnt':             'br',
+  'Zurückgezogen':         'bgr',
+};

@@ -159,6 +159,25 @@ export function exportAuditLogCSV(entries: import('@/types').AuditEntry[]) {
   downloadBlob(BOM + rows.join('\n'), 'auditlog.csv');
 }
 
+// ── AI-Tools-CSV ──────────────────────────────────────────────
+const AITOOL_FIELDS = [
+  'id','name','vendor','category','status','dataLocation','dpa','url',
+  'justification','scope','decidedBy','decisionDate','reviewDate',
+  'linkedUseCases','createdAt','updatedAt',
+] as const;
+
+export function exportAiToolsCSV(tools: import('@/types').AiTool[]) {
+  const rows = [AITOOL_FIELDS.join(',')];
+  tools.forEach(t => {
+    rows.push([
+      t.id, t.name, t.vendor, t.category, t.status, t.dataLocation,
+      t.dpa ? 'Ja' : 'Nein', t.url, t.justification, t.scope, t.decidedBy,
+      t.decisionDate, t.reviewDate, t.linkedUseCases, t.createdAt, t.updatedAt,
+    ].map(csvCell).join(','));
+  });
+  downloadBlob(BOM + rows.join('\n'), 'ai-tools.csv');
+}
+
 // ── Excel-Export via SheetJS (gebundelt, kein CDN) ───────────
 export async function exportExcel(useCases: UseCase[], incidents: Incident[]) {
   const ucRows = useCases.filter(u => u.act).map(uc => {

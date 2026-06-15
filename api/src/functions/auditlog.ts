@@ -20,21 +20,24 @@ async function auditlogHandler(
   const principal = await requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
-  const limitParam  = req.query.get('limit');
-  const entityParam = req.query.get('entity');
+  const limitParam    = req.query.get('limit');
+  const entityParam   = req.query.get('entity');
+  const entityIdParam = req.query.get('entityId');
   const limit = Math.min(parseInt(limitParam ?? '100'), 500);
 
   if (MOCK) {
     const entries = MOCK_AUDIT
-      .filter(e => !entityParam || e.entity === entityParam)
+      .filter(e => !entityParam   || e.entity === entityParam)
+      .filter(e => !entityIdParam || e.entityId === entityIdParam)
       .slice(0, limit);
     return { status: 200, jsonBody: entries };
   }
 
   try {
-    const filter = entityParam
-      ? `fields/Entity eq '${odataEscape(entityParam)}'`
-      : undefined;
+    const clauses: string[] = [];
+    if (entityParam)   clauses.push(`fields/Entity eq '${odataEscape(entityParam)}'`);
+    if (entityIdParam) clauses.push(`fields/EntityId eq '${odataEscape(entityIdParam)}'`);
+    const filter = clauses.length ? clauses.join(' and ') : undefined;
 
     const items = await listItems('AUDITLOG', filter, undefined, limit);
     const entries = items
