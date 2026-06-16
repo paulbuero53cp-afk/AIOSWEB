@@ -426,6 +426,15 @@ const de: Dict = {
   'gov.approveErr': 'Fehler beim Freigeben',
   'gov.rejectErr': 'Fehler beim Ablehnen',
   'gov.kpiActivatedToast': 'KPI für {id} aktiviert',
+
+  // ── Benutzerverwaltung (interpolierte Toasts) ──
+  'usr.created': 'Benutzer {email} angelegt',
+  'usr.createErr': 'Fehler beim Anlegen',
+  'usr.roleSet': 'Rolle für {email} auf {role} gesetzt',
+  'usr.locked': '{email} gesperrt',
+  'usr.unlocked': '{email} entsperrt',
+  'usr.confirmDelete': 'Benutzer {email} wirklich löschen?',
+  'usr.deleted': '{email} gelöscht',
 };
 
 const en: Dict = {
@@ -847,6 +856,15 @@ const en: Dict = {
   'gov.approveErr': 'Error while approving',
   'gov.rejectErr': 'Error while rejecting',
   'gov.kpiActivatedToast': 'KPI activated for {id}',
+
+  // ── User management (interpolated toasts) ──
+  'usr.created': 'User {email} created',
+  'usr.createErr': 'Error creating user',
+  'usr.roleSet': 'Role for {email} set to {role}',
+  'usr.locked': '{email} locked',
+  'usr.unlocked': '{email} unlocked',
+  'usr.confirmDelete': 'Really delete user {email}?',
+  'usr.deleted': '{email} deleted',
 };
 
 export const translations: Record<Language, Dict> = { de, en };
@@ -1055,6 +1073,37 @@ const byTextEn: Record<string, string> = {
   'Agenten': 'agents', 'von': 'of',
   'Keine Use Cases mit Lifecycle "Run" vorhanden.': 'No use cases with lifecycle "Run" available.',
   'Kein Agent passt zu den Filterkriterien.': 'No agent matches the filter criteria.',
+  // Benutzerverwaltung (statisch)
+  'E-Mail *': 'Email *',
+  'Rolle': 'Role',
+  '+ Benutzer anlegen': '+ Create user',
+  'Abbrechen': 'Cancel',
+  'Eigene Rolle kann nicht geändert werden': 'Your own role cannot be changed',
+  'Gesperrt': 'Locked',
+  '🔒 Sperren': '🔒 Lock',
+  '🔓 Entsperren': '🔓 Unlock',
+  'Eigenen Account nicht sperren': 'Cannot lock your own account',
+  'Sperren': 'Lock',
+  'Entsperren': 'Unlock',
+  'Eigenen Account nicht löschen': 'Cannot delete your own account',
+  'Benutzer löschen': 'Delete user',
+  '🔒 Diese Seite ist nur für Administratoren zugänglich.': '🔒 This page is only accessible to administrators.',
+  'Benutzerverwaltung': 'User Management',
+  'Rollen und Zugriff für AIOS-Benutzer verwalten': 'Manage roles and access for AIOS users',
+  'Benutzer gesamt': 'Users total',
+  'Suche nach Name oder E-Mail…': 'Search by name or email…',
+  '✕ Abbrechen': '✕ Cancel',
+  '+ Benutzer einladen': '+ Invite user',
+  'Lädt…': 'Loading…',
+  'Benutzer': 'User',
+  'Letzter Login': 'Last login',
+  'Eingeladen von': 'Invited by',
+  'Aktionen': 'Actions',
+  'Keine Benutzer gefunden': 'No users found',
+  'Keine Benutzer gefunden.': 'No users found.',
+  'Lege zunächst dich selbst als Admin an, damit die SP-Listenverwaltung aktiv wird. Trage die E-Mail-Adresse ein, mit der du dich bei Azure AD anmeldest.': 'First add yourself as an admin so the SP list management becomes active. Enter the email address you use to sign in to Azure AD.',
+  'Hinweis:': 'Note:',
+  'Benutzer mit SWA-Rollen (Azure Portal → Role Management) behalten ihren Zugriff als Fallback, solange kein Eintrag in der AIOS_Users-Liste vorhanden ist. Nach Anlage eines Eintrags hier wird dieser bevorzugt.': 'Users with SWA roles (Azure Portal → Role Management) keep their access as a fallback as long as no entry exists in the AIOS_Users list. Once an entry is created here, it takes precedence.',
 };
 
 export function translateText(lang: Language, source: string): string {

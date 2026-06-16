@@ -9,6 +9,7 @@ import useSWR, { mutate } from 'swr';
 import { swrFetcher, apiFetch } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useT, useTx } from '@/context/LanguageContext';
 import type { AiosUser, AiosRoleValue } from '@/types';
 
 const ROLES: AiosRoleValue[] = ['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin'];
@@ -30,6 +31,8 @@ const ROLE_COLOR: Record<AiosRoleValue, string> = {
 // ── Invite Form ───────────────────────────────────────────────
 function InviteForm({ onDone }: { onDone: () => void }) {
   const { showToast } = useToast();
+  const t = useT();
+  const tx = useTx();
   const [email, setEmail]   = useState('');
   const [name, setName]     = useState('');
   const [role, setRole]     = useState<AiosRoleValue>('AIOS.Viewer');
@@ -44,11 +47,11 @@ function InviteForm({ onDone }: { onDone: () => void }) {
         method: 'POST',
         body: JSON.stringify({ email: email.trim(), displayName: name.trim() || email.trim(), role }),
       });
-      showToast(`Benutzer ${email} angelegt`, 'success');
+      showToast(t('usr.created', { email }), 'success');
       mutate('/api/users');
       onDone();
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Fehler beim Anlegen', 'error');
+      showToast(err instanceof Error ? err.message : t('usr.createErr'), 'error');
     } finally {
       setSaving(false);
     }
@@ -57,7 +60,7 @@ function InviteForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={submit} style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end', padding: '16px 0' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <label style={{ fontSize: 12, color: 'var(--muted)' }}>E-Mail *</label>
+        <label style={{ fontSize: 12, color: 'var(--muted)' }}>{tx('E-Mail *')}</label>
         <input
           type="email"
           required
@@ -68,7 +71,7 @@ function InviteForm({ onDone }: { onDone: () => void }) {
         />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <label style={{ fontSize: 12, color: 'var(--muted)' }}>Name</label>
+        <label style={{ fontSize: 12, color: 'var(--muted)' }}>{tx('Name')}</label>
         <input
           type="text"
           value={name}
@@ -78,7 +81,7 @@ function InviteForm({ onDone }: { onDone: () => void }) {
         />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <label style={{ fontSize: 12, color: 'var(--muted)' }}>Rolle</label>
+        <label style={{ fontSize: 12, color: 'var(--muted)' }}>{tx('Rolle')}</label>
         <select
           value={role}
           onChange={e => setRole(e.target.value as AiosRoleValue)}
@@ -88,7 +91,7 @@ function InviteForm({ onDone }: { onDone: () => void }) {
         </select>
       </div>
       <button className="btn btn-primary btn-sm" type="submit" disabled={saving}>
-        {saving ? '…' : '+ Benutzer anlegen'}
+        {saving ? '…' : tx('+ Benutzer anlegen')}
       </button>
       <button
         className="btn btn-outline btn-sm"
@@ -96,7 +99,7 @@ function InviteForm({ onDone }: { onDone: () => void }) {
         onClick={onDone}
         style={{ marginLeft: 4 }}
       >
-        Abbrechen
+        {tx('Abbrechen')}
       </button>
     </form>
   );
@@ -111,6 +114,8 @@ function UserRow({
   currentUserId: string;
 }) {
   const { showToast } = useToast();
+  const t = useT();
+  const tx = useTx();
   const [roleVal, setRoleVal]   = useState<AiosRoleValue>(user.role as AiosRoleValue);
   const [saving, setSaving]     = useState(false);
   const isSelf = user.aadUserId === currentUserId;
@@ -123,10 +128,10 @@ function UserRow({
         method: 'PATCH',
         body: JSON.stringify({ role: newRole }),
       });
-      showToast(`Rolle für ${user.email} auf ${ROLE_LABEL[newRole]} gesetzt`, 'success');
+      showToast(t('usr.roleSet', { email: user.email, role: ROLE_LABEL[newRole] }), 'success');
       mutate('/api/users');
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Fehler', 'error');
+      showToast(err instanceof Error ? err.message : t('common.errorPrefix'), 'error');
       setRoleVal(user.role as AiosRoleValue);
     } finally {
       setSaving(false);
@@ -140,24 +145,24 @@ function UserRow({
         method: 'PATCH',
         body: JSON.stringify({ active: !user.active }),
       });
-      showToast(user.active ? `${user.email} gesperrt` : `${user.email} entsperrt`, 'success');
+      showToast(user.active ? t('usr.locked', { email: user.email }) : t('usr.unlocked', { email: user.email }), 'success');
       mutate('/api/users');
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Fehler', 'error');
+      showToast(err instanceof Error ? err.message : t('common.errorPrefix'), 'error');
     } finally {
       setSaving(false);
     }
   }
 
   async function deleteUser() {
-    if (!confirm(`Benutzer ${user.email} wirklich löschen?`)) return;
+    if (!confirm(t('usr.confirmDelete', { email: user.email }))) return;
     setSaving(true);
     try {
       await apiFetch(`/users/${user.id}`, { method: 'DELETE' });
-      showToast(`${user.email} gelöscht`, 'success');
+      showToast(t('usr.deleted', { email: user.email }), 'success');
       mutate('/api/users');
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Fehler', 'error');
+      showToast(err instanceof Error ? err.message : t('common.errorPrefix'), 'error');
     } finally {
       setSaving(false);
     }
@@ -178,7 +183,7 @@ function UserRow({
           value={roleVal}
           onChange={e => changeRole(e.target.value as AiosRoleValue)}
           disabled={saving || isSelf}
-          title={isSelf ? 'Eigene Rolle kann nicht geändert werden' : undefined}
+          title={isSelf ? tx('Eigene Rolle kann nicht geändert werden') : undefined}
           style={{
             padding: '3px 8px',
             border: `1.5px solid ${ROLE_COLOR[roleVal]}`,
@@ -205,7 +210,7 @@ function UserRow({
             color: user.active ? '#059669' : '#dc2626',
           }}
         >
-          {user.active ? 'Aktiv' : 'Gesperrt'}
+          {user.active ? tx('Aktiv') : tx('Gesperrt')}
         </span>
       </td>
       <td style={{ fontSize: 12, color: 'var(--muted)' }}>{lastLogin}</td>
@@ -218,16 +223,16 @@ function UserRow({
             className={`btn btn-sm ${user.active ? 'btn-outline' : 'btn-primary'}`}
             onClick={toggleActive}
             disabled={saving || isSelf}
-            title={isSelf ? 'Eigenen Account nicht sperren' : (user.active ? 'Sperren' : 'Entsperren')}
+            title={isSelf ? tx('Eigenen Account nicht sperren') : (user.active ? tx('Sperren') : tx('Entsperren'))}
             style={{ fontSize: 11 }}
           >
-            {user.active ? '🔒 Sperren' : '🔓 Entsperren'}
+            {user.active ? tx('🔒 Sperren') : tx('🔓 Entsperren')}
           </button>
           <button
             className="btn btn-outline btn-sm"
             onClick={deleteUser}
             disabled={saving || isSelf}
-            title={isSelf ? 'Eigenen Account nicht löschen' : 'Löschen'}
+            title={isSelf ? tx('Eigenen Account nicht löschen') : tx('Benutzer löschen')}
             style={{ fontSize: 11, color: '#dc2626', borderColor: '#dc2626' }}
           >
             🗑
@@ -241,6 +246,7 @@ function UserRow({
 // ── Main Screen ───────────────────────────────────────────────
 export default function UsersScreen() {
   const { isAdmin, aiosUser } = useAuth();
+  const tx = useTx();
   const { data: users, isLoading, error } = useSWR<AiosUser[]>('/api/users', swrFetcher);
   const [showInvite, setShowInvite] = useState(false);
   const [search, setSearch]         = useState('');
@@ -248,7 +254,7 @@ export default function UsersScreen() {
   if (!isAdmin) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: 'var(--muted)' }}>
-        🔒 Diese Seite ist nur für Administratoren zugänglich.
+        {tx('🔒 Diese Seite ist nur für Administratoren zugänglich.')}
       </div>
     );
   }
@@ -267,9 +273,9 @@ export default function UsersScreen() {
     <div style={{ padding: 24 }}>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Benutzerverwaltung</h2>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>{tx('Benutzerverwaltung')}</h2>
         <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--muted)' }}>
-          Rollen und Zugriff für AIOS-Benutzer verwalten
+          {tx('Rollen und Zugriff für AIOS-Benutzer verwalten')}
         </p>
       </div>
 
@@ -277,11 +283,11 @@ export default function UsersScreen() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <div className="kpi-card" style={{ minWidth: 120 }}>
           <div className="kpi-val">{total}</div>
-          <div className="kpi-lbl">Benutzer gesamt</div>
+          <div className="kpi-lbl">{tx('Benutzer gesamt')}</div>
         </div>
         <div className="kpi-card" style={{ minWidth: 120 }}>
           <div className="kpi-val" style={{ color: '#059669' }}>{active}</div>
-          <div className="kpi-lbl">Aktiv</div>
+          <div className="kpi-lbl">{tx('Aktiv')}</div>
         </div>
         {byRole.map(({ role, count }) => (
           <div className="kpi-card" key={role} style={{ minWidth: 100 }}>
@@ -295,7 +301,7 @@ export default function UsersScreen() {
       <div style={{ display: 'flex', gap: 10, marginBottom: 16, alignItems: 'center', flexWrap: 'wrap' }}>
         <input
           type="text"
-          placeholder="Suche nach Name oder E-Mail…"
+          placeholder={tx('Suche nach Name oder E-Mail…')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 13, width: 260 }}
@@ -304,7 +310,7 @@ export default function UsersScreen() {
           className="btn btn-primary btn-sm"
           onClick={() => setShowInvite(v => !v)}
         >
-          {showInvite ? '✕ Abbrechen' : '+ Benutzer einladen'}
+          {showInvite ? tx('✕ Abbrechen') : tx('+ Benutzer einladen')}
         </button>
       </div>
 
@@ -314,32 +320,31 @@ export default function UsersScreen() {
       {/* Bootstrap-Hinweis */}
       {!isLoading && total === 0 && (
         <div style={{ padding: '12px 16px', background: '#fffbeb', border: '1px solid #f59e0b', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
-          ⚠️ <strong>Keine Benutzer gefunden.</strong> Lege zunächst dich selbst als Admin an,
-          damit die SP-Listenverwaltung aktiv wird. Trage die E-Mail-Adresse ein, mit der du dich bei Azure AD anmeldest.
+          ⚠️ <strong>{tx('Keine Benutzer gefunden.')}</strong> {tx('Lege zunächst dich selbst als Admin an, damit die SP-Listenverwaltung aktiv wird. Trage die E-Mail-Adresse ein, mit der du dich bei Azure AD anmeldest.')}
         </div>
       )}
 
       {/* Tabelle */}
-      {isLoading && <div style={{ padding: 24, color: 'var(--muted)' }}>Lädt…</div>}
-      {error   && <div style={{ padding: 24, color: 'var(--danger, #dc2626)' }}>Fehler: {String(error)}</div>}
+      {isLoading && <div style={{ padding: 24, color: 'var(--muted)' }}>{tx('Lädt…')}</div>}
+      {error   && <div style={{ padding: 24, color: 'var(--danger, #dc2626)' }}>{tx('Fehler')}: {String(error)}</div>}
 
       {!isLoading && !error && (
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th>Benutzer</th>
-                <th>Rolle</th>
+                <th>{tx('Benutzer')}</th>
+                <th>{tx('Rolle')}</th>
                 <th>Status</th>
-                <th>Letzter Login</th>
-                <th>Eingeladen von</th>
-                <th>Aktionen</th>
+                <th>{tx('Letzter Login')}</th>
+                <th>{tx('Eingeladen von')}</th>
+                <th>{tx('Aktionen')}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
                 <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)', padding: 24 }}>
-                  Keine Benutzer gefunden
+                  {tx('Keine Benutzer gefunden')}
                 </td></tr>
               )}
               {filtered.map(u => (
@@ -352,9 +357,7 @@ export default function UsersScreen() {
 
       {/* Info-Box */}
       <div style={{ marginTop: 24, padding: '12px 16px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--muted)' }}>
-        <strong>Hinweis:</strong> Benutzer mit SWA-Rollen (Azure Portal → Role Management) behalten ihren Zugriff als Fallback,
-        solange kein Eintrag in der AIOS_Users-Liste vorhanden ist.
-        Nach Anlage eines Eintrags hier wird dieser bevorzugt.
+        <strong>{tx('Hinweis:')}</strong> {tx('Benutzer mit SWA-Rollen (Azure Portal → Role Management) behalten ihren Zugriff als Fallback, solange kein Eintrag in der AIOS_Users-Liste vorhanden ist. Nach Anlage eines Eintrags hier wird dieser bevorzugt.')}
       </div>
     </div>
   );
