@@ -8,6 +8,7 @@ import { Modal } from '@/components/common/Modal';
 import { useUseCases } from '@/hooks/useUseCases';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
+import { useTx } from '@/context/LanguageContext';
 import UcForm, { MC_LABELS } from './UcForm';
 import type { UseCase } from '@/types';
 
@@ -44,6 +45,7 @@ function Chip({ label, value, color }: { label: string; value: string; color?: s
 function ArtCard({
   label, exists, onOpen,
 }: { label: string; exists: boolean; onOpen: () => void }) {
+  const tx = useTx();
   return (
     <div style={{
       border: `1.5px solid ${exists ? 'var(--green)' : 'var(--border)'}`,
@@ -55,7 +57,7 @@ function ArtCard({
       <div>
         <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{label}</div>
         <div style={{ fontSize: 12, color: exists ? 'var(--green)' : 'var(--muted)', marginTop: 2 }}>
-          {exists ? 'Vorhanden' : 'Ausstehend'}
+          {exists ? tx('Vorhanden') : tx('Ausstehend')}
         </div>
       </div>
       <button
@@ -63,7 +65,7 @@ function ArtCard({
         style={{ fontSize: 12, whiteSpace: 'nowrap' }}
         onClick={onOpen}
       >
-        {exists ? 'Öffnen ›' : 'Starten ›'}
+        {exists ? tx('Öffnen ›') : tx('Starten ›')}
       </button>
     </div>
   );
@@ -81,38 +83,36 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
   const { updateUC } = useUseCases();
   const { showToast } = useToast();
   const { isApprover } = useAuth();
+  const tx = useTx();
 
   const [submitting, setSubmitting] = useState(false);
   const [mode, setMode]     = useState<'view' | 'edit'>('view');
   const [editTab, setEditTab] = useState(0);
 
-  // Reset to detail view whenever a different UC is opened
   useEffect(() => { setMode('view'); }, [uc?.id]);
 
-  // ── Submit (aus UcForm) ───────────────────────────────────────
   async function handleSubmit(data: Partial<UseCase>) {
     if (!uc) return;
     setSubmitting(true);
     try {
       await updateUC(uc.id, data);
-      showToast(`✓ ${uc.title} gespeichert`, 'success');
+      showToast(`✓ ${uc.title} ${tx('gespeichert')}`, 'success');
       setMode('view');
     } catch (err) {
-      showToast(`Fehler: ${String(err)}`, 'error');
+      showToast(`${tx('Fehler')}: ${String(err)}`, 'error');
     } finally {
       setSubmitting(false);
     }
   }
 
-  // ── Freigeben ─────────────────────────────────────────────────
   async function handleApprove() {
     if (!uc) return;
     try {
       await updateUC(uc.id, { app: 'Approved' });
-      showToast(`✓ ${uc.title} freigegeben`, 'success');
+      showToast(`✓ ${uc.title} ${tx('freigegeben')}`, 'success');
       onClose();
     } catch (err) {
-      showToast(`Fehler: ${String(err)}`, 'error');
+      showToast(`${tx('Fehler')}: ${String(err)}`, 'error');
     }
   }
 
@@ -127,7 +127,6 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
   const mcDone = uc.mc.filter(Boolean).length;
   const mcTotal = MC_LABELS.length;
 
-  // Governance-Tier Farbe
   const tierColor: Record<string, string> = {
     '1': 'var(--green)', '2': 'var(--yellow)', '3': 'var(--red)',
   };
@@ -136,19 +135,17 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
     'Pending': 'var(--yellow)', 'Not required': 'var(--muted)',
   };
 
-  // ── Modaltitel ────────────────────────────────────────────────
   const title = `${uc.title} – ${uc.id}`;
 
   return (
     <Modal open={true} title={title} onClose={onClose} wide>
       {mode === 'view' ? (
-        // ── DETAIL-ANSICHT ───────────────────────────────────────
         <div>
           {/* Key Metrics Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px 20px', marginBottom: 18 }}>
-            <Chip label="Governance-Tier" value={`Tier ${uc.tier}`} color={tierColor[uc.tier]} />
+            <Chip label={tx('Governance-Tier')} value={`Tier ${uc.tier}`} color={tierColor[uc.tier]} />
             <Chip label="Risk Tier" value={uc.rt} color={uc.rt === 'High' ? 'var(--red)' : uc.rt === 'Medium' ? 'var(--orange, #e09a00)' : 'var(--green)'} />
-            <Chip label="Entscheidungen" value={uc.rev === 'yes' ? 'Reversibel' : 'Irreversibel'} />
+            <Chip label={tx('Entscheidungen')} value={uc.rev === 'yes' ? tx('Reversibel') : tx('Irreversibel')} />
             <Chip label="Approval" value={uc.app} color={appColor[uc.app]} />
             <Chip label="Lifecycle" value={uc.lc} />
             <Chip label="Portfolio" value={uc.pd} />
@@ -157,7 +154,7 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
           {/* Scores */}
           <div style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--muted)', marginBottom: 8 }}>
-              Scores
+              {tx('Scores')}
             </div>
             <div style={{ display: 'flex', gap: 20 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -183,7 +180,7 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {MC_LABELS.map((lbl, i) => {
                 const done = uc.mc[i] ?? false;
-                const short = lbl.split(' - ')[0]; // "MC01"
+                const short = lbl.split(' - ')[0];
                 const rest  = lbl.split(' - ').slice(1).join(' - ');
                 return (
                   <span
@@ -208,7 +205,7 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
           {uc.desc && (
             <div style={{ marginBottom: 18 }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--muted)', marginBottom: 6 }}>
-                Beschreibung
+                {tx('Beschreibung')}
               </div>
               <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6, margin: 0 }}>
                 {uc.desc}
@@ -219,7 +216,7 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
           {/* Governance-Artefakte */}
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--muted)', marginBottom: 10 }}>
-              Governance-Artefakte
+              {tx('Governance-Artefakte')}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <ArtCard
@@ -228,7 +225,7 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
                 onOpen={() => onNavToArt?.('riskassess', uc.id)}
               />
               <ArtCard
-                label="Gate-Checklisten"
+                label={tx('Gate-Checklisten')}
                 exists={ucArts.includes('gc')}
                 onOpen={() => onNavToArt?.('gatechecks', uc.id)}
               />
@@ -238,7 +235,7 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
                 onOpen={() => onNavToArt?.('bizcases', uc.id)}
               />
               <ArtCard
-                label={`DSFA${ucArts.includes('dsfa') ? '' : ' (Ausstehend)'}`}
+                label={`${tx('DSFA')}${ucArts.includes('dsfa') ? '' : ` (${tx('Ausstehend')})`}`}
                 exists={ucArts.includes('dsfa')}
                 onOpen={() => onNavToArt?.('dsfa', uc.id)}
               />
@@ -251,35 +248,34 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
             borderTop: '1px solid var(--border)', flexWrap: 'wrap',
           }}>
             <button className="btn btn-outline" onClick={onClose}>
-              Schliessen
+              {tx('Schliessen')}
             </button>
             <button className="btn btn-outline btn-sm" onClick={() => openEditTab(0)}>
-              ✎ Stammdaten
+              {tx('✎ Stammdaten')}
             </button>
             <button className="btn btn-outline btn-sm" onClick={() => openEditTab(1)}>
-              ✎ Bewertung
+              {tx('✎ Bewertung')}
             </button>
             <button className="btn btn-outline btn-sm" onClick={() => openEditTab(2)}>
-              ✎ Governance
+              {tx('✎ Governance')}
             </button>
             <button className="btn btn-outline btn-sm" onClick={() => openEditTab(3)}>
-              ✎ Reliabilität
+              {tx('✎ Reliabilität')}
             </button>
             {isApprover && uc.app === 'Pending' && (
               <button className="btn btn-primary" style={{ marginLeft: 'auto' }} onClick={handleApprove}>
-                Freigeben
+                {tx('Freigeben')}
               </button>
             )}
           </div>
         </div>
       ) : (
-        // ── EDIT-ANSICHT ─────────────────────────────────────────
         <UcForm
           key={`${uc.id}-${editTab}`}
           defaultValues={uc}
           onSubmit={handleSubmit}
           onCancel={() => setMode('view')}
-          submitLabel="Änderungen speichern"
+          submitLabel={tx('Änderungen speichern')}
           isSubmitting={submitting}
           initialTab={editTab}
         />

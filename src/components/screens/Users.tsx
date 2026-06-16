@@ -9,7 +9,7 @@ import useSWR, { mutate } from 'swr';
 import { swrFetcher, apiFetch } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { useT, useTx } from '@/context/LanguageContext';
+import { useLang, useT, useTx } from '@/context/LanguageContext';
 import type { AiosUser, AiosRoleValue } from '@/types';
 
 const ROLES: AiosRoleValue[] = ['AIOS.Viewer', 'AIOS.Editor', 'AIOS.Approver', 'AIOS.Admin'];
@@ -114,6 +114,7 @@ function UserRow({
   currentUserId: string;
 }) {
   const { showToast } = useToast();
+  const { lang } = useLang();
   const t = useT();
   const tx = useTx();
   const [roleVal, setRoleVal]   = useState<AiosRoleValue>(user.role as AiosRoleValue);
@@ -168,8 +169,9 @@ function UserRow({
     }
   }
 
+  const locale = lang === 'de' ? 'de-DE' : 'en-GB';
   const lastLogin = user.lastLogin
-    ? new Date(user.lastLogin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    ? new Date(user.lastLogin).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
     : '—';
 
   return (

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useAuth } from '@/context/AuthContext';
-import { useTx } from '@/context/LanguageContext';
+import { useLang, useTx } from '@/context/LanguageContext';
 import type { AuditEntry } from '@/types';
 
 const ENTITY_OPTS = ['', 'UseCase', 'Incident', 'Artefakt'];
@@ -47,10 +47,10 @@ function DiffCell({ diff }: { diff: Record<string, unknown> }) {
   );
 }
 
-function formatTs(ts: string) {
+function formatTs(ts: string, locale: string) {
   if (!ts) return '—';
   try {
-    return new Date(ts).toLocaleString('de-DE', {
+    return new Date(ts).toLocaleString(locale, {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
@@ -59,7 +59,9 @@ function formatTs(ts: string) {
 
 export default function AuditLog() {
   const { isAdmin } = useAuth();
+  const { lang } = useLang();
   const tx = useTx();
+  const locale = lang === 'de' ? 'de-DE' : 'en-GB';
   const [entityFilter, setEntityFilter] = useState('');
   const [limit, setLimit] = useState(100);
   const { entries, loading, error, refresh } = useAuditLog(limit);
@@ -128,7 +130,7 @@ export default function AuditLog() {
               )}
               {visible.map((e: AuditEntry) => (
                 <tr key={e.id}>
-                  <td style={{ whiteSpace: 'nowrap', fontSize: 12 }}>{formatTs(e.ts)}</td>
+                  <td style={{ whiteSpace: 'nowrap', fontSize: 12 }}>{formatTs(e.ts, locale)}</td>
                   <td style={{ fontSize: 12 }}>{e.actor}</td>
                   <td><ActionBadge action={e.action} /></td>
                   <td style={{ fontSize: 12 }}>{e.entity}</td>

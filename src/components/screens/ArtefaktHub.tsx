@@ -4,6 +4,7 @@ import { useUseCases } from '@/hooks/useUseCases';
 import { useIncidents } from '@/hooks/useIncidents';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
+import { useTx } from '@/context/LanguageContext';
 import { swrFetcher } from '@/lib/api';
 import {
   exportUseCasesCSV, exportIncidentsCSV, exportComplianceCSV,
@@ -45,6 +46,7 @@ function ArtBadge({ hasData, label, icon, onClick }: {
 function ComplianceLight({ uc, hub }: {
   uc: UseCase; hub: Record<string, unknown> | undefined;
 }) {
+  const tx = useTx();
   if (!hub) return <span className="badge bgr" style={{ fontSize: 10 }}>—</span>;
   const ra   = Object.keys((hub as Record<string, Record<string, unknown>>).ra   ?? {}).length > 0;
   const gc   = Object.keys((hub as Record<string, Record<string, unknown>>).gc   ?? {}).length > 0;
@@ -55,7 +57,7 @@ function ComplianceLight({ uc, hub }: {
   const partial = ra || gc;
   return (
     <span className={`badge ${ok ? 'bg' : partial ? 'by' : 'br'}`} style={{ fontSize: 10 }}>
-      {ok ? '✓ Vollständig' : partial ? '◐ Teilweise' : '✕ Offen'}
+      {ok ? tx('✓ Vollständig') : partial ? tx('◐ Teilweise') : tx('✕ Offen')}
     </span>
   );
 }
@@ -68,6 +70,7 @@ function ExportDropdown({ useCases, incidents, isAdmin }: {
 }) {
   const [open, setOpen]   = useState(false);
   const { showToast }     = useToast();
+  const tx                = useTx();
   const { data: artExport } = useSWR<Record<string, Record<string, unknown>>>(
     isAdmin ? '/api/artefakte/export' : null, swrFetcher,
   );
@@ -85,9 +88,9 @@ function ExportDropdown({ useCases, incidents, isAdmin }: {
   async function run(fn: () => void | Promise<void>, label: string) {
     try {
       await fn();
-      showToast(`✓ ${label} exportiert`, 'success');
+      showToast(`✓ ${label} ${tx('exportiert')}`, 'success');
     } catch (err) {
-      showToast(`Export fehlgeschlagen: ${String(err)}`, 'error');
+      showToast(`${tx('Fehler beim Speichern')}: ${String(err)}`, 'error');
     }
     setOpen(false);
   }
@@ -95,7 +98,7 @@ function ExportDropdown({ useCases, incidents, isAdmin }: {
   return (
     <div className="csv-drop">
       <button className="btn btn-outline" onClick={() => setOpen(o => !o)}>
-        ↓ Exportieren
+        {tx('↓ Exportieren')}
       </button>
       {open && (
         <>
@@ -111,7 +114,7 @@ function ExportDropdown({ useCases, incidents, isAdmin }: {
               <span className="csv-di-icon">↓</span> Compliance-Status (CSV)
             </button>
             <button className="csv-drop-item" onClick={() => run(() => exportExcel(useCases, incidents), 'Excel')}>
-              <span className="csv-di-icon">↓</span> Alle Daten (Excel .xlsx)
+              <span className="csv-di-icon">↓</span> {tx('Alle Daten (Excel .xlsx)')}
             </button>
             {isAdmin && (
               <>
@@ -140,8 +143,6 @@ function HubRow({ uc, hub, onNav }: {
   const h = hub as Record<ArtType, Record<string, unknown>> | undefined;
 
   function navTo(screen: string) {
-    // Navigiert zum Artefakt-Screen; UC-Auswahl wird über URL-State simuliert
-    // Im nächsten Ausbau: URL-Parameter oder Context übergeben
     onNav(screen);
   }
 
@@ -191,15 +192,13 @@ export default function ArtefaktHub({ onNav }: { onNav: (s: string) => void }) {
   const { useCases, loading } = useUseCases();
   const { incidents }         = useIncidents();
   const { isAdmin }           = useAuth();
+  const tx                    = useTx();
   const [search, setSearch]   = useState('');
 
-  // Alle Artefakte als Gesamt-Export (für Admin)
   const { data: artExport } = useSWR<Record<string, Record<string, unknown>>>(
     isAdmin ? '/api/artefakte/export' : null, swrFetcher,
   );
 
-  // Pro UC: /api/artefakte/all/{ucId} — zu teuer für alle UCs gleichzeitig
-  // Stattdessen: artExport aufdröseln
   function hubForUC(ucId: string): Record<ArtType, Record<string, unknown>> | undefined {
     if (!artExport) return undefined;
     return {
@@ -210,7 +209,6 @@ export default function ArtefaktHub({ onNav }: { onNav: (s: string) => void }) {
     };
   }
 
-  // KPIs
   const total     = useCases.length;
   const withRA    = useCases.filter(u => Object.keys(hubForUC(u.id)?.ra   ?? {}).length > 0).length;
   const withDSFA  = useCases.filter(u => Object.keys(hubForUC(u.id)?.dsfa ?? {}).length > 0).length;
@@ -221,23 +219,27 @@ export default function ArtefaktHub({ onNav }: { onNav: (s: string) => void }) {
     return !s || u.title.toLowerCase().includes(s) || u.id.toLowerCase().includes(s) || u.cl.toLowerCase().includes(s);
   });
 
-  if (loading) return <div className="empty">Lade Dokumentations-Hub…</div>;
+  if (loading) return <div className="empty">{tx('Lade Dokumentations-Hub…')}</div>;
 
   return (
     <div>
       {/* KPI-Leiste */}
       <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(4,1fr)', marginBottom: 20 }}>
-        <div className="kc"><div className="kc-label">Use Cases gesamt</div><div className="kc-value">{total}</div></div>
+        <div className="kc">
+          <div className="kc-label">{tx('Use Cases gesamt')}</div>
+          <div className="kc-value">{total}</div>
+        </div>
         <div className={`kc ${withRA === total ? 'green' : 'yellow'}`}>
-          <div className="kc-label">Mit Risk Assessment</div><div className="kc-value">{withRA}</div>
+          <div className="kc-label">{tx('Mit Risk Assessment')}</div>
+          <div className="kc-value">{withRA}</div>
         </div>
         <div className={`kc ${needsDSFA > 0 && withDSFA < needsDSFA ? 'red' : 'green'}`}>
-          <div className="kc-label">DSFA benötigt</div>
+          <div className="kc-label">{tx('DSFA benötigt')}</div>
           <div className="kc-value">{needsDSFA}</div>
-          <div className="kc-sub">{withDSFA} ausgefüllt</div>
+          <div className="kc-sub">{withDSFA} {tx('ausgefüllt')}</div>
         </div>
         <div className="kc">
-          <div className="kc-label">Incidents gesamt</div>
+          <div className="kc-label">{tx('Incidents gesamt')}</div>
           <div className="kc-value">{incidents.length}</div>
         </div>
       </div>
@@ -247,7 +249,7 @@ export default function ArtefaktHub({ onNav }: { onNav: (s: string) => void }) {
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Use Case suchen…"
+          placeholder={tx('Use Case suchen…')}
           style={{ flex: 1 }}
         />
         <ExportDropdown useCases={useCases} incidents={incidents} isAdmin={isAdmin} />
@@ -267,7 +269,7 @@ export default function ArtefaktHub({ onNav }: { onNav: (s: string) => void }) {
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={5} className="empty">Keine Ergebnisse.</td></tr>
+              <tr><td colSpan={5} className="empty">{tx('Keine Ergebnisse.')}</td></tr>
             ) : (
               filtered.map(uc => (
                 <HubRow
@@ -284,7 +286,7 @@ export default function ArtefaktHub({ onNav }: { onNav: (s: string) => void }) {
 
       {!isAdmin && (
         <div style={{ marginTop: 12, fontSize: 12, color: 'var(--muted)', textAlign: 'center' }}>
-          Export und vollständige Artefakt-Übersicht sind nur für Administratoren verfügbar.
+          {tx('Export und vollständige Artefakt-Übersicht sind nur für Administratoren verfügbar.')}
         </div>
       )}
     </div>

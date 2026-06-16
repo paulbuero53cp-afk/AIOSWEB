@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useUseCases } from '@/hooks/useUseCases';
 import { useArtefaktHub } from '@/hooks/useArtefakt';
+import { useLang, useTx } from '@/context/LanguageContext';
 import type { UseCase } from '@/types';
 
 // ── Hilfsfunktionen ───────────────────────────────────────────
@@ -196,10 +197,19 @@ function ArtStatus({ label, exists, date }: { label: string; exists: boolean; da
 
 // ── Dashboard Content ─────────────────────────────────────────
 function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknown> | undefined }) {
+  const { lang } = useLang();
+  const tx = useTx();
+  const locale = lang === 'de' ? 'de-DE' : 'en-GB';
+
   const ra   = (hub as Record<string, {savedAt?: string}> | undefined)?.ra;
   const gc   = (hub as Record<string, {savedAt?: string}> | undefined)?.gc;
   const bc   = (hub as Record<string, {savedAt?: string}> | undefined)?.bc;
   const dsfa = (hub as Record<string, {savedAt?: string}> | undefined)?.dsfa;
+
+  // Translated label maps
+  const rlLabelsTx = Object.fromEntries(Object.entries(RL_LABEL).map(([k, v]) => [k, tx(v)]));
+  const hitlLabelTx = (key: string) => tx(HITL_LABEL[key] ?? key);
+  const autonomyLabelTx = (key: string) => tx(AUTONOMY_LABEL[key] ?? key);
 
   const lcColor: Record<string, string> = {
     Idea: '#e8a020', Build: '#4d8080', Run: '#2eaa6e', Retire: '#888',
@@ -258,32 +268,32 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
         {/* Stammdaten */}
         <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
-            Stammdaten
+            {tx('Stammdaten')}
           </div>
-          <KV label="Business Owner"     value={uc.own} />
-          <KV label="Cluster / Abteilung" value={uc.cl} />
-          <KV label="System / Werkzeug"   value={uc.sys} />
-          <KV label="KI-Technologie"      value={uc.cap} />
-          <KV label="Autonomiegrad"        value={uc.auto} />
+          <KV label="Business Owner"       value={uc.own} />
+          <KV label="Cluster / Abteilung"  value={uc.cl} />
+          <KV label="System / Werkzeug"    value={uc.sys} />
+          <KV label="KI-Technologie"       value={uc.cap} />
+          <KV label="Autonomiegrad"         value={uc.auto} />
           {uc.legacy && <KV label="Legacy-System" value={uc.legacy} />}
-          <KV label="Governance-Tier"     value={`Tier ${uc.tier}`} />
-          <KV label="Approval Status"     value={uc.app} />
+          <KV label="Governance-Tier"      value={`Tier ${uc.tier}`} />
+          <KV label="Approval Status"      value={uc.app} />
           <KV label="Operational Readiness" value={uc.or} />
         </div>
 
         {/* Bewertung */}
         <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
-            Bewertung
+            {tx('Bewertung')}
           </div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
             <ScoreChip label="Value"        value={uc.vs} />
             <ScoreChip label="Feasibility"  value={uc.fs} />
             <ScoreChip label="Risk"         value={uc.rs} />
           </div>
-          <KV label="KPI definiert"     value={uc.kpi === 'yes' ? '✓ Ja' : '✗ Nein'} />
-          <KV label="HITL"              value={uc.hitl === 'yes' ? '✓ Ja' : '✗ Nein'} />
-          <KV label="Reversible Entscheidungen" value={uc.rev === 'yes' ? '✓ Ja' : '✗ Nein'} />
+          <KV label="KPI definiert"              value={uc.kpi === 'yes' ? '✓ Ja' : '✗ Nein'} />
+          <KV label="HITL"                       value={uc.hitl === 'yes' ? '✓ Ja' : '✗ Nein'} />
+          <KV label="Reversible Entscheidungen"  value={uc.rev === 'yes' ? '✓ Ja' : '✗ Nein'} />
           {uc.desc && (
             <div style={{ marginTop: 10, fontSize: 12, color: '#4a6b6b', lineHeight: 1.5, borderTop: '1px solid #d4e5e5', paddingTop: 10 }}>
               {uc.desc.length > 200 ? uc.desc.slice(0, 200) + '…' : uc.desc}
@@ -308,20 +318,20 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
             <div>
               <KV label="Reliability Tier" value={
-                badge(uc.rl, RL_COLOR, RL_BG, RL_LABEL)
+                badge(uc.rl, RL_COLOR, RL_BG, rlLabelsTx)
               } />
             </div>
             {uc.hitlMode && (
               <div>
                 <KV label="HITL-Modus" value={
-                  <span style={{ fontSize: 12 }}>{HITL_LABEL[uc.hitlMode] ?? uc.hitlMode}</span>
+                  <span style={{ fontSize: 12 }}>{hitlLabelTx(uc.hitlMode)}</span>
                 } />
               </div>
             )}
             {uc.autonomyLevel && (
               <div>
                 <KV label="Automationsgrad" value={
-                  <span style={{ fontSize: 12 }}>{AUTONOMY_LABEL[uc.autonomyLevel] ?? uc.autonomyLevel}</span>
+                  <span style={{ fontSize: 12 }}>{autonomyLabelTx(uc.autonomyLevel)}</span>
                 } />
               </div>
             )}
@@ -336,7 +346,7 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
           {uc.failureModes && uc.failureModes.length > 0 && (
             <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #d4e5e5' }}>
               <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: '#4a6b6b', marginBottom: 6 }}>
-                Bekannte Failure Modes
+                {tx('Bekannte Failure Modes')}
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {uc.failureModes.map(fm => (
@@ -368,30 +378,30 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
           </div>
           <BoolGrid
             title=""
-            labels={MC_LABELS}
+            labels={MC_LABELS.map(tx)}
             values={MC_LABELS.map((_, i) => uc.mc?.[i] === true)}
             color="#2eaa6e"
           />
           <div style={{ marginTop: 8, fontSize: 11, color: '#4a6b6b' }}>
-            {(uc.mc ?? []).filter(Boolean).length} / {MC_LABELS.length} erfüllt
+            {(uc.mc ?? []).filter(Boolean).length} / {MC_LABELS.length} {tx('erfüllt')}
           </div>
         </div>
 
         {/* Governance Trigger + Sensible Bereiche */}
         <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
-            Governance Trigger &amp; Sensible Bereiche
+            {tx('Governance Trigger & Sensible Bereiche')}
           </div>
           <BoolGrid
-            title="Governance Trigger (GT)"
-            labels={GT_LABELS}
+            title={tx('Governance Trigger (GT)')}
+            labels={GT_LABELS.map(tx)}
             values={GT_LABELS.map((_, i) => uc.gt?.[i] === true)}
             color="#d94040"
           />
           <div style={{ marginBottom: 10 }} />
           <BoolGrid
-            title="Sensible Bereiche (SB)"
-            labels={SB_LABELS}
+            title={tx('Sensible Bereiche (SB)')}
+            labels={SB_LABELS.map(tx)}
             values={SB_LABELS.map((_, i) => uc.sb?.[i] === true)}
             color="#d97020"
           />
@@ -401,19 +411,19 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
       {/* ── Row 4: Artefakt-Status ───────────────────────── */}
       <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px', marginBottom: 12 }}>
         <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
-          Dokumentations-Status
+          {tx('Dokumentations-Status')}
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           <ArtStatus label="Risk Assessment" exists={!!ra && Object.keys(ra).length > 0} date={(ra as {savedAt?: string})?.savedAt} />
           <ArtStatus label="Gate Checks"     exists={!!gc && Object.keys(gc).length > 0} date={(gc as {savedAt?: string})?.savedAt} />
           <ArtStatus label="Business Case"   exists={!!bc && Object.keys(bc).length > 0} date={(bc as {savedAt?: string})?.savedAt} />
-          <ArtStatus label="DSFA"            exists={!!dsfa && Object.keys(dsfa).length > 0} date={(dsfa as {savedAt?: string})?.savedAt} />
+          <ArtStatus label={tx('DSFA')}      exists={!!dsfa && Object.keys(dsfa).length > 0} date={(dsfa as {savedAt?: string})?.savedAt} />
         </div>
       </div>
 
       {/* ── Footer ──────────────────────────────────────── */}
       <div style={{ textAlign: 'right', fontSize: 10, color: '#9ab', marginTop: 4 }}>
-        AIOS · {uc.id} · Stand: {new Date(uc.updatedAt || uc.createdAt || '').toLocaleDateString('de-DE')}
+        AIOS · {uc.id} · {tx('Stand:')} {new Date(uc.updatedAt || uc.createdAt || '').toLocaleDateString(locale)}
       </div>
 
     </div>
@@ -429,6 +439,7 @@ export default function UcDashboard({ initialUcId }: UcDashboardProps) {
   const { useCases, loading } = useUseCases();
   const [ucId, setUcId] = useState<string>(initialUcId ?? '');
   const { hub } = useArtefaktHub(ucId || null);
+  const tx = useTx();
 
   const uc = useCases.find(u => u.id === ucId);
 
@@ -445,7 +456,7 @@ export default function UcDashboard({ initialUcId }: UcDashboardProps) {
               disabled={loading}
               style={{ fontSize: 13, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border)', minWidth: 240 }}
             >
-              <option value="">— Use Case wählen —</option>
+              <option value="">{tx('— Use Case wählen —')}</option>
               {useCases.map((u: UseCase) => (
                 <option key={u.id} value={u.id}>
                   {u.id} — {u.title}
@@ -458,7 +469,7 @@ export default function UcDashboard({ initialUcId }: UcDashboardProps) {
                 onClick={() => window.print()}
                 style={{ display: 'flex', alignItems: 'center', gap: 5 }}
               >
-                🖨️ Als PDF drucken
+                {tx('🖨️ Als PDF drucken')}
               </button>
             )}
           </div>
@@ -480,7 +491,7 @@ export default function UcDashboard({ initialUcId }: UcDashboardProps) {
             UC Dashboard
           </div>
           <div style={{ fontSize: 13 }}>
-            Wähle einen Use Case aus der Dropdown-Liste, um den One-Pager anzuzeigen.
+            {tx('Wähle einen Use Case aus der Dropdown-Liste, um den One-Pager anzuzeigen.')}
           </div>
         </div>
       )}
@@ -488,7 +499,7 @@ export default function UcDashboard({ initialUcId }: UcDashboardProps) {
       {/* ── UC not found ────────────────────────────────── */}
       {ucId && !uc && !loading && (
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 10, padding: 24, color: 'var(--muted)' }}>
-          Use Case nicht gefunden.
+          {tx('Use Case nicht gefunden.')}
         </div>
       )}
 
