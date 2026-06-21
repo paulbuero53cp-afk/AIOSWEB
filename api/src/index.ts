@@ -15,3 +15,4 @@ import './functions/auditlog';
 import './functions/config';
 import './functions/users';
 import './functions/aitools';
+import './functions/exchange';

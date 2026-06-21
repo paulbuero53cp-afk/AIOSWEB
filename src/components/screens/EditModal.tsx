@@ -9,6 +9,8 @@ import { useUseCases } from '@/hooks/useUseCases';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTx } from '@/context/LanguageContext';
+import { artApi } from '@/lib/api';
+import { exportUcBundle } from '@/lib/exports';
 import UcForm, { MC_LABELS } from './UcForm';
 import type { UseCase } from '@/types';
 
@@ -82,12 +84,13 @@ interface EditModalProps {
 export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditModalProps) {
   const { updateUC } = useUseCases();
   const { showToast } = useToast();
-  const { isApprover } = useAuth();
+  const { isApprover, isAdmin } = useAuth();
   const tx = useTx();
 
-  const [submitting, setSubmitting] = useState(false);
-  const [mode, setMode]     = useState<'view' | 'edit'>('view');
-  const [editTab, setEditTab] = useState(0);
+  const [submitting, setSubmitting]   = useState(false);
+  const [mode, setMode]               = useState<'view' | 'edit'>('view');
+  const [editTab, setEditTab]         = useState(0);
+  const [exporting, setExporting]     = useState(false);
 
   useEffect(() => { setMode('view'); }, [uc?.id]);
 
@@ -119,6 +122,19 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
   function openEditTab(tab: number) {
     setEditTab(tab);
     setMode('edit');
+  }
+
+  async function handleExport() {
+    if (!uc) return;
+    setExporting(true);
+    try {
+      const artefakte = await artApi.getAll(uc.id);
+      exportUcBundle(uc, artefakte);
+    } catch (err) {
+      showToast(`${tx('Export fehlgeschlagen')}: ${String(err)}`, 'error');
+    } finally {
+      setExporting(false);
+    }
   }
 
   if (!uc) return null;
@@ -250,6 +266,16 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
             <button className="btn btn-outline" onClick={onClose}>
               {tx('Schliessen')}
             </button>
+            {isAdmin && (
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={handleExport}
+                disabled={exporting}
+                title={tx('Use Case inkl. Artefakte exportieren')}
+              >
+                {exporting ? tx('Exportiere…') : tx('⬇ Export')}
+              </button>
+            )}
             <button className="btn btn-outline btn-sm" onClick={() => openEditTab(0)}>
               {tx('✎ Stammdaten')}
             </button>

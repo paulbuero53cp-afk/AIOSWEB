@@ -29,8 +29,24 @@ function downloadBlob(content: string, filename: string, mime = 'text/csv;charse
   URL.revokeObjectURL(url);
 }
 
-function downloadJson(data: unknown, filename: string) {
+export function downloadJson(data: unknown, filename: string) {
   downloadBlob(JSON.stringify(data, null, 2), filename, 'application/json');
+}
+
+// ── UC-Bundle Export (Einzel-UC inkl. Artefakte) ─────────────
+export function exportUcBundle(
+  uc: UseCase,
+  artefakte: { ra?: unknown; gc?: unknown; bc?: unknown; dsfa?: unknown },
+) {
+  const bundle = {
+    exportVersion: '1.0',
+    exportedAt: new Date().toISOString(),
+    source: 'AIOS',
+    count: 1,
+    useCases: [{ useCase: uc, artefakte }],
+  };
+  const safeName = uc.title.replace(/[^\w-]/g, '_').slice(0, 40);
+  downloadJson(bundle, `AIOS_UC_${uc.id}_${safeName}.json`);
 }
 
 // ── UC-CSV ────────────────────────────────────────────────────

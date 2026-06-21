@@ -10,7 +10,7 @@ import type { ClientPrincipal } from './auth';
 export type AuditAction =
   | 'create' | 'edit' | 'approve' | 'reject'
   | 'delete' | 'save-artefakt' | 'inline-edit'
-  | 'role-change' | 'config-change' | 'export';
+  | 'role-change' | 'config-change' | 'export' | 'import';
 
 export type AuditEntity =
   | 'UseCase' | 'Incident' | 'Artefakt' | 'User' | 'Config' | 'AiTool';

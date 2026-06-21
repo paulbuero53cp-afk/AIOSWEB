@@ -106,6 +106,38 @@ export const configApi = {
     apiFetch<AppConfig>('/config', { method: 'POST', body: JSON.stringify(data) }),
 };
 
+// ── Data Exchange (UC-Bundle Export / Import) ─────────────────
+export interface UcBundle {
+  exportVersion: string;
+  exportedAt: string;
+  source: string;
+  count: number;
+  useCases: Array<{
+    useCase: unknown;
+    artefakte: Record<string, unknown>;
+  }>;
+}
+
+export interface ImportResult {
+  imported: number;
+  updated: number;
+  errors: string[];
+}
+
+export const exchangeApi = {
+  export: (ucIds?: string[]) =>
+    apiFetch<UcBundle>('/exchange/export', {
+      method: 'POST',
+      body: JSON.stringify({ ucIds }),
+    }),
+
+  import: (bundle: UcBundle) =>
+    apiFetch<ImportResult>('/exchange/import', {
+      method: 'POST',
+      body: JSON.stringify(bundle),
+    }),
+};
+
 // ── SWR Fetcher (kompatibel mit useSWR) ──────────────────────
 export const swrFetcher = (url: string) =>
   fetch(url).then(r => {

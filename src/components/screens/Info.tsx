@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
-import { configApi, swrFetcher } from '@/lib/api';
+import { configApi, exchangeApi, swrFetcher } from '@/lib/api';
+import type { UcBundle, ImportResult } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useTx } from '@/context/LanguageContext';
+import { downloadJson } from '@/lib/exports';
 import type { AppConfig } from '@/types';
 
 const APP_VERSION = '1.0.0';
@@ -90,6 +92,166 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ── Exchange Panel ────────────────────────────────────────────
+type ExportState = 'idle' | 'exporting' | 'done' | 'error';
+type ImportPhase = 'idle' | 'parsed' | 'importing' | 'done' | 'error';
+
+function ExchangePanel() {
+  const [exportState, setExportState]   = useState<ExportState>('idle');
+  const [exportCount, setExportCount]   = useState<number | null>(null);
+  const [importPhase, setImportPhase]   = useState<ImportPhase>('idle');
+  const [importBundle, setImportBundle] = useState<UcBundle | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importError, setImportError]   = useState('');
+  const fileInputRef                    = useRef<HTMLInputElement>(null);
+  const { showToast }                   = useToast();
+  const tx                              = useTx();
+
+  async function handleExport() {
+    setExportState('exporting');
+    setExportCount(null);
+    try {
+      const bundle = await exchangeApi.export();
+      const date   = new Date().toISOString().slice(0, 10);
+      downloadJson(bundle, `AIOS_Export_${date}.json`);
+      setExportCount(bundle.count);
+      setExportState('done');
+      setTimeout(() => setExportState('idle'), 4000);
+    } catch (err) {
+      showToast(`Export fehlgeschlagen: ${String(err)}`, 'error');
+      setExportState('error');
+      setTimeout(() => setExportState('idle'), 3000);
+    }
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportPhase('idle');
+    setImportError('');
+    setImportResult(null);
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const bundle = JSON.parse(ev.target?.result as string) as UcBundle;
+        if (!bundle?.useCases || !Array.isArray(bundle.useCases)) {
+          setImportError('Ungültiges Format: useCases-Array fehlt');
+          setImportPhase('error');
+          return;
+        }
+        setImportBundle(bundle);
+        setImportPhase('parsed');
+      } catch {
+        setImportError('Datei konnte nicht als JSON gelesen werden');
+        setImportPhase('error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async function handleImport() {
+    if (!importBundle) return;
+    setImportPhase('importing');
+    try {
+      const result = await exchangeApi.import(importBundle);
+      setImportResult(result);
+      setImportPhase('done');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch (err) {
+      setImportError(String(err));
+      setImportPhase('error');
+    }
+  }
+
+  const statusStyle = (color: string) => ({
+    fontSize: 12, color, marginTop: 8,
+  });
+
+  return (
+    <div>
+      {/* Export */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+          {tx('Export')}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
+          {tx('Alle aktiven Use Cases inklusive Artefakte als JSON-Bundle herunterladen.')}
+        </div>
+        <button
+          className="btn"
+          onClick={handleExport}
+          disabled={exportState === 'exporting'}
+        >
+          {exportState === 'exporting'
+            ? tx('Exportiere…')
+            : exportState === 'done'
+              ? tx('✓ Heruntergeladen')
+              : tx('⬇ Alle exportieren')}
+        </button>
+        {exportState === 'done' && exportCount !== null && (
+          <div style={statusStyle('var(--green)')}>
+            {exportCount} {tx('Use Cases exportiert')}
+          </div>
+        )}
+      </div>
+
+      <div style={{ borderTop: '1px solid var(--border)', marginBottom: 20 }} />
+
+      {/* Import */}
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+          {tx('Import')}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
+          {tx('AIOS-Bundle (.json) importieren. Bestehende Use Cases werden aktualisiert, neue angelegt.')}
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleFileSelect}
+          style={{ fontSize: 13, display: 'block', marginBottom: 12 }}
+        />
+
+        {importPhase === 'parsed' && importBundle && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+              {importBundle.count} {tx('Use Cases im Bundle')}
+              {importBundle.exportedAt && ` · ${tx('exportiert am')} ${new Date(importBundle.exportedAt).toLocaleDateString('de-DE')}`}
+            </span>
+            <button className="btn btn-primary btn-sm" onClick={handleImport}>
+              {tx('Importieren')}
+            </button>
+          </div>
+        )}
+
+        {importPhase === 'importing' && (
+          <div style={statusStyle('var(--muted)')}>{tx('Importiere…')}</div>
+        )}
+
+        {importPhase === 'done' && importResult && (
+          <div style={{ marginTop: 8 }}>
+            <div style={statusStyle('var(--green)')}>
+              ✓ {importResult.imported} {tx('neu angelegt')}, {importResult.updated} {tx('aktualisiert')}
+            </div>
+            {importResult.errors.length > 0 && (
+              <div style={{ fontSize: 12, color: 'var(--red)', marginTop: 4 }}>
+                {importResult.errors.length} {tx('Fehler')}: {importResult.errors.join(' · ')}
+              </div>
+            )}
+          </div>
+        )}
+
+        {importPhase === 'error' && (
+          <div style={statusStyle('var(--red)')}>{importError}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────
 export default function Info() {
   const { isAdmin, principal } = useAuth();
@@ -137,10 +299,19 @@ export default function Info() {
 
       {/* Config Editor (Admin only) */}
       {isAdmin && (
-        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20 }}>
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20, marginBottom: 24 }}>
           <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{tx('Konfiguration bearbeiten')}</div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>{tx('Nur für Administratoren sichtbar')}</div>
           <ConfigEditor initial={cfg} onSaved={() => mutate('/api/config')} />
+        </div>
+      )}
+
+      {/* Data Exchange (Admin only) */}
+      {isAdmin && (
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{tx('Datenaustausch')}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>{tx('Nur für Administratoren sichtbar')}</div>
+          <ExchangePanel />
         </div>
       )}
     </div>
