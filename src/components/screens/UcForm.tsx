@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────
 //  UcForm — Shared Form für New UC und Edit Modal
-//  3 Tabs: Stammdaten / Bewertung / Governance
+//  4 Tabs: Stammdaten / Bewertung / Governance / Reliabilität
 // ─────────────────────────────────────────────────────────────
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -8,12 +8,13 @@ import type { UseCase } from '@/types';
 import {
   CLUSTERS, CAP_OPTIONS, AUTO_OPTIONS,
   LIFECYCLE_OPTIONS, PD_OPTIONS, RISK_TIER_OPTIONS,
-  UC_CATEGORY_OPTIONS,
+  UC_CATEGORY_OPTIONS, AITOOL_STATUS_CSS,
 } from '@/lib/constants';
+import { useAiTools } from '@/hooks/useAiTools';
 
 // ── Formular-Felder (flaches Modell für RHF) ─────────────────
 export interface UcFormValues {
-  title: string; cl: string; sys: string; legacy: string;
+  title: string; cl: string; sys: string; toolRef: string; legacy: string;
   own: string; cap: string; useCaseCategory: string; auto: string; lc: string; desc: string; link: string;
   kiEinsatz: boolean; kiErstellung: boolean;
   vs: number; fs: number; rs: number;
@@ -43,6 +44,7 @@ function ucToFormValues(uc?: Partial<UseCase>): UcFormValues {
     title:        uc?.title ?? '',
     cl:           uc?.cl ?? 'HR',
     sys:          uc?.sys ?? '',
+    toolRef:      uc?.toolRef ?? '',
     legacy:       uc?.legacy ?? '',
     own:          uc?.own ?? '',
     cap:          uc?.cap ?? 'Generative KI',
@@ -81,10 +83,11 @@ function ucToFormValues(uc?: Partial<UseCase>): UcFormValues {
 
 export function formValuesToUcPatch(v: UcFormValues): Partial<UseCase> {
   return {
-    title:  v.title,
-    cl:     v.cl,
-    sys:    v.sys,
-    legacy: v.legacy,
+    title:   v.title,
+    cl:      v.cl,
+    sys:     v.sys,
+    toolRef: v.toolRef || undefined,
+    legacy:  v.legacy,
     own:    v.own,
     cap:    v.cap,
     useCaseCategory: v.useCaseCategory,
@@ -201,13 +204,17 @@ export default function UcForm({
   initialTab = 0,
 }: UcFormProps) {
   const [activeTab, setActiveTab] = useState(initialTab);
+  const { tools } = useAiTools();
 
   const {
-    register, handleSubmit,
+    register, handleSubmit, watch, setValue,
     formState: { errors },
   } = useForm<UcFormValues>({
     defaultValues: ucToFormValues(defaultValues),
   });
+
+  const watchedToolRef = watch('toolRef');
+  const selectedTool = tools.find(tool => tool.id === watchedToolRef);
 
   const handleFormSubmit = handleSubmit(async (v) => {
     await onSubmit(formValuesToUcPatch(v));
@@ -250,7 +257,41 @@ export default function UcForm({
           </Field>
 
           <Field label="System / Werkzeug">
-            <input {...register('sys')} placeholder="z.B. Copilot M365, Azure AI…" />
+            {/* Dropdown aus AI-Tools-Register */}
+            <select
+              value={watchedToolRef}
+              onChange={e => {
+                const id = e.target.value;
+                setValue('toolRef', id);
+                if (id) {
+                  const tool = tools.find(tool => tool.id === id);
+                  if (tool) setValue('sys', tool.name);
+                }
+              }}
+              style={{ marginBottom: 4 }}
+            >
+              <option value="">— aus Register wählen oder manuell eingeben —</option>
+              {tools.map(tool => (
+                <option key={tool.id} value={tool.id}>
+                  {tool.name}{tool.vendor ? ` (${tool.vendor})` : ''} [{tool.status}]
+                </option>
+              ))}
+            </select>
+            <input type="hidden" {...register('toolRef')} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <input
+                {...register('sys')}
+                placeholder="z.B. Copilot M365, Azure AI…"
+                style={{ flex: 1 }}
+              />
+              {selectedTool && (
+                <span className={`badge ${AITOOL_STATUS_CSS[selectedTool.status] ?? 'bb'}`}
+                  title={`${selectedTool.name} — ${selectedTool.status}`}
+                  style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  {selectedTool.status}
+                </span>
+              )}
+            </div>
           </Field>
 
           <Field label="Betroffenes Legacy-System">

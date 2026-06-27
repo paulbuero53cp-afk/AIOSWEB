@@ -1,6 +1,14 @@
 {
   "routes": [
     {
+      "route": "/register",
+      "allowedRoles": ["anonymous"]
+    },
+    {
+      "route": "/api/submit",
+      "allowedRoles": ["anonymous"]
+    },
+    {
       "route": "/api/*",
       "allowedRoles": ["authenticated"]
     },

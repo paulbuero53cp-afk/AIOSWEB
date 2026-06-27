@@ -64,6 +64,7 @@ export interface UseCase {
   app: ApprovalStatus;
   or: OperationalReadiness;
   hitl: 'yes' | 'no';                 // Human in the Loop (Legacy: yes/no)
+  toolRef?: string;                   // Verknüpfter AI-Tool (TOOL-ID aus AIOS_AiTools)
   // ── Reliability (P0 — neu) ────────────────────────────────
   rl?: ReliabilityTier;              // Reliability Tier R1–R5
   hitlMode?: HitlMode;               // HITL / HOTL / none (präziser als hitl)
@@ -344,7 +345,9 @@ export type Screen =
 
 // ── AI Tool (Register erlaubter KI-Tools) ─────────────────────
 export type AiToolStatus =
-  | 'Erlaubt' | 'Eingeschränkt erlaubt' | 'In Prüfung' | 'Abgelehnt' | 'Zurückgezogen';
+  | 'Angefragt' | 'In Prüfung' | 'Erlaubt' | 'Eingeschränkt erlaubt'
+  | 'Nicht erlaubt' | 'Zurückgezogen'
+  | 'Abgelehnt'; // backwards-compat
 
 export interface AiTool {
   id: string;
@@ -361,6 +364,7 @@ export interface AiTool {
   decisionDate: string;
   reviewDate: string;
   linkedUseCases: string;
+  approver?: string;       // Freitext: wer hat entschieden / soll entscheiden
   active: boolean;
   createdAt: string;
   updatedAt: string;

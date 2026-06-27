@@ -8,30 +8,31 @@ import { aiToolApi } from '@/lib/api';
 import { exportAiToolsCSV } from '@/lib/exports';
 import {
   AITOOL_STATUS_OPTIONS, AITOOL_CATEGORY_OPTIONS,
-  AITOOL_DATALOCATION_OPTIONS, AITOOL_STATUS_CSS,
+  AITOOL_DATALOCATION_OPTIONS, AITOOL_STATUS_CSS, AITOOL_DECISION_STATES,
 } from '@/lib/constants';
 import type { AiTool, AuditEntry } from '@/types';
 
-const DECISION_STATES = ['Erlaubt', 'Eingeschränkt erlaubt', 'Abgelehnt', 'Zurückgezogen'];
+// Nutze exportierte Konstante — Approver/Admin-only-States
+const DECISION_STATES: readonly string[] = AITOOL_DECISION_STATES;
 
 // ── Formular-State ────────────────────────────────────────────
 interface FormState {
   name: string; vendor: string; category: string; url: string;
-  status: string; justification: string; scope: string;
+  status: string; justification: string; approver: string; scope: string;
   dataLocation: string; dpa: boolean; reviewDate: string; linkedUseCases: string;
 }
 
 const EMPTY: FormState = {
   name: '', vendor: '', category: 'Sonstiges', url: '',
-  status: 'In Prüfung', justification: '', scope: '',
+  status: 'Angefragt', justification: '', approver: '', scope: '',
   dataLocation: 'Global/Unklar', dpa: false, reviewDate: '', linkedUseCases: '',
 };
 
 function toForm(t: AiTool): FormState {
   return {
     name: t.name, vendor: t.vendor, category: t.category, url: t.url,
-    status: t.status, justification: t.justification, scope: t.scope,
-    dataLocation: t.dataLocation, dpa: t.dpa,
+    status: t.status, justification: t.justification, approver: t.approver ?? '',
+    scope: t.scope, dataLocation: t.dataLocation, dpa: t.dpa,
     reviewDate: t.reviewDate?.split('T')[0] ?? '',
     linkedUseCases: t.linkedUseCases,
   };
@@ -76,10 +77,10 @@ function AiToolModal({
   }, [tab, tool, history]);
 
   const readOnly = !isEditor;
-  // Editor darf keine Freigabe-Status setzen → nur Approver/Admin
+  // Approver/Admin: alle Status; Editor: nur Angefragt + In Prüfung
   const allowedStatuses = isApprover
     ? AITOOL_STATUS_OPTIONS as readonly string[]
-    : AITOOL_STATUS_OPTIONS.filter(s => !DECISION_STATES.includes(s));
+    : (AITOOL_STATUS_OPTIONS as readonly string[]).filter(s => !DECISION_STATES.includes(s));
 
   function set<K extends keyof FormState>(key: K, val: FormState[K]) {
     setForm(f => ({ ...f, [key]: val }));
@@ -103,12 +104,17 @@ function AiToolModal({
           scope: form.scope, dataLocation: form.dataLocation, dpa: form.dpa,
           reviewDate: form.reviewDate, linkedUseCases: form.linkedUseCases,
           justification: form.justification,
+          approver: form.approver || undefined,
         };
         if (statusChanged) patch.status = form.status as AiTool['status'];
         await updateTool(tool.id, patch);
         showToast(t('tools.savedUpd'), 'success');
       } else {
-        await createTool({ ...form, status: form.status as AiTool['status'] });
+        await createTool({
+          ...form,
+          status: form.status as AiTool['status'],
+          approver: form.approver || undefined,
+        });
         showToast(t('tools.savedNew'), 'success');
       }
       onClose();
@@ -175,6 +181,12 @@ function AiToolModal({
                 {t('tools.fApproverHint')}
               </div>
             )}
+          </div>
+          <div className="fgroup">
+            {label(t('tools.fApprover'))}
+            <input value={form.approver} disabled={readOnly}
+              onChange={e => set('approver', e.target.value)}
+              placeholder={t('tools.fApproverPh')} />
           </div>
           <div className="fgroup full">
             {label(t('tools.fJustification'))}

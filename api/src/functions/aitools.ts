@@ -23,7 +23,8 @@ import { writeAuditLog, diffObjects } from '../lib/audit';
 const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 
 // Freigabe-Entscheidungen — nur Approver/Admin dürfen diese Status setzen.
-const APPROVAL_STATES = ['Erlaubt', 'Eingeschränkt erlaubt', 'Abgelehnt', 'Zurückgezogen'];
+// Workflow: Angefragt → In Prüfung → Erlaubt / Nicht erlaubt
+const APPROVAL_STATES = ['Erlaubt', 'Eingeschränkt erlaubt', 'Nicht erlaubt', 'Abgelehnt', 'Zurückgezogen'];
 
 // ── GET /api/aitools ──────────────────────────────────────────
 async function handleGet(req: HttpRequest): Promise<HttpResponseInit> {
@@ -176,7 +177,7 @@ async function handlePatch(req: HttpRequest, toolId: string): Promise<HttpRespon
   // Audit-Action: approve / reject / edit
   let action: 'approve' | 'reject' | 'edit' = 'edit';
   if (body.status === 'Erlaubt' || body.status === 'Eingeschränkt erlaubt') action = 'approve';
-  else if (body.status === 'Abgelehnt' || body.status === 'Zurückgezogen') action = 'reject';
+  else if (body.status === 'Nicht erlaubt' || body.status === 'Abgelehnt' || body.status === 'Zurückgezogen') action = 'reject';
 
   await writeAuditLog(
     principal, action, 'AiTool', toolId,

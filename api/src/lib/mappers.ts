@@ -14,6 +14,7 @@ export interface UseCase {
   kpi: string; app: string; or: string; hitl: string;
   gt: boolean[]; sb: boolean[]; mc: boolean[];
   act: boolean; desc: string; link: string;
+  toolRef?: string;        // Verknüpfter AI-Tool (TOOL-ID)
   createdAt: string; updatedAt: string; createdBy: string; updatedBy: string;
   // ── Reliability (P0) ──────────────────────────────────────
   rl?: string;            // R1–R5
@@ -60,6 +61,7 @@ export function spToUC(spId: string, f: Record<string, unknown>): UseCase {
     cl:       s(f['Cluster'], 'Sonstiges'),
     sys:      s(f['System']),
     legacy:   s(f['Legacy']),
+    toolRef:  s(f['ToolRef']) || undefined,
     own:      s(f['Owner'], 'N/A'),
     cap:             s(f['Capability'], 'Generative KI'),
     useCaseCategory: s(f['UCCategory'], 'Sonstiges'),
@@ -112,7 +114,7 @@ export function ucToSp(uc: Partial<UseCase>): Record<string, unknown> {
 
   const map: [keyof UseCase, string][] = [
     ['id', 'UCId'], ['title', 'Title'], ['cl', 'Cluster'],
-    ['sys', 'System'], ['legacy', 'Legacy'], ['own', 'Owner'],
+    ['sys', 'System'], ['legacy', 'Legacy'], ['toolRef', 'ToolRef'], ['own', 'Owner'],
     ['cap', 'Capability'], ['useCaseCategory', 'UCCategory'], ['auto', 'Autonomy'],
     ['lc', 'Lifecycle'], ['pd', 'Portfolio'], ['rt', 'RiskTier'],
     ['tier', 'GovTier'], ['rev', 'Reversible'],
@@ -311,16 +313,17 @@ export interface AiTool {
   name: string;           // Title (SP-Pflichtfeld)
   vendor: string;
   category: string;
-  status: string;         // Erlaubt | Eingeschränkt erlaubt | In Prüfung | Abgelehnt | Zurückgezogen
-  justification: string;  // Begründung der aktuellen Entscheidung
+  status: string;         // Angefragt | In Prüfung | Erlaubt | Nicht erlaubt | …
+  justification: string;  // Kommentar / Begründung der aktuellen Entscheidung
   scope: string;          // Freigabe-Scope (für wen / welche Datenklassen)
   dataLocation: string;   // EU | USA | Global/Unklar
   dpa: boolean;           // AVV/DPA vorhanden
   url: string;
-  decidedBy: string;
+  decidedBy: string;      // Auto: Auth-User der Entscheidung
   decisionDate: string;   // ISO — letzte Entscheidung
   reviewDate: string;     // ISO — nächste Re-Zertifizierung
   linkedUseCases: string; // komma-separierte UC-IDs
+  approver?: string;      // Freitext: wer hat entschieden / soll entscheiden
   active: boolean;
   createdAt: string; updatedAt: string; createdBy: string; updatedBy: string;
   _spId?: string;
@@ -343,6 +346,7 @@ export function spToAiTool(spId: string, f: Record<string, unknown>): AiTool {
     decisionDate:   s(f['DecisionDate']),
     reviewDate:     s(f['ReviewDate']),
     linkedUseCases: s(f['LinkedUseCases']),
+    approver:       s(f['Approver']) || undefined,
     active:         f['Active'] !== false,
     createdAt:      s(f['Created']),
     updatedAt:      s(f['Modified']),
@@ -358,6 +362,7 @@ export function aiToolToSp(t: Partial<AiTool>): Record<string, unknown> {
     ['category', 'Category'], ['status', 'Status'], ['justification', 'Justification'],
     ['scope', 'Scope'], ['dataLocation', 'DataLocation'], ['url', 'Url'],
     ['decidedBy', 'DecidedBy'], ['linkedUseCases', 'LinkedUseCases'],
+    ['approver', 'Approver'],
     ['active', 'Active'], ['createdBy', 'CreatedBy_x'], ['updatedBy', 'UpdatedBy_x'],
   ];
   for (const [tsKey, spKey] of map) {

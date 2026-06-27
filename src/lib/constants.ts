@@ -249,8 +249,14 @@ export function calcRiskScore(data: Record<string, string | boolean>): {
 }
 
 // ── AI-Tools-Register ─────────────────────────────────────────
+// Workflow: Angefragt → In Prüfung → Erlaubt / Nicht erlaubt
 export const AITOOL_STATUS_OPTIONS = [
-  'Erlaubt', 'Eingeschränkt erlaubt', 'In Prüfung', 'Abgelehnt', 'Zurückgezogen',
+  'Angefragt', 'In Prüfung', 'Erlaubt', 'Eingeschränkt erlaubt', 'Nicht erlaubt', 'Zurückgezogen',
+] as const;
+
+// States die nur Approver/Admin setzen dürfen
+export const AITOOL_DECISION_STATES = [
+  'Erlaubt', 'Eingeschränkt erlaubt', 'Nicht erlaubt', 'Zurückgezogen',
 ] as const;
 
 export const AITOOL_CATEGORY_OPTIONS = [
@@ -262,9 +268,11 @@ export const AITOOL_DATALOCATION_OPTIONS = ['EU', 'USA', 'Global/Unklar'];
 
 // Status → Badge-CSS-Klasse (siehe global.css: .bg/.by/.bb/.br/.bgr)
 export const AITOOL_STATUS_CSS: Record<string, string> = {
+  'Angefragt':             'bb',
+  'In Prüfung':            'bb',
   'Erlaubt':               'bg',
   'Eingeschränkt erlaubt': 'by',
-  'In Prüfung':            'bb',
-  'Abgelehnt':             'br',
+  'Nicht erlaubt':         'br',
   'Zurückgezogen':         'bgr',
+  'Abgelehnt':             'br',  // backwards-compat
 };

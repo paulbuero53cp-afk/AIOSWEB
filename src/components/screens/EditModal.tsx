@@ -11,6 +11,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useTx } from '@/context/LanguageContext';
 import { artApi } from '@/lib/api';
 import { exportUcBundle } from '@/lib/exports';
+import { useAiTools } from '@/hooks/useAiTools';
+import { AITOOL_STATUS_CSS } from '@/lib/constants';
 import UcForm, { MC_LABELS } from './UcForm';
 import type { UseCase } from '@/types';
 
@@ -86,6 +88,8 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
   const { showToast } = useToast();
   const { isApprover, isAdmin } = useAuth();
   const tx = useTx();
+  const { tools } = useAiTools();
+  const linkedTool = uc?.toolRef ? tools.find(tool => tool.id === uc.toolRef) : undefined;
 
   const [submitting, setSubmitting]   = useState(false);
   const [mode, setMode]               = useState<'view' | 'edit'>('view');
@@ -216,6 +220,26 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
               })}
             </div>
           </div>
+
+          {/* System / Werkzeug */}
+          {uc.sys && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: 'var(--muted)', marginBottom: 6 }}>
+                System / Werkzeug
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13 }}>{uc.sys}</span>
+                {linkedTool && (
+                  <span
+                    className={`badge ${AITOOL_STATUS_CSS[linkedTool.status] ?? 'bb'}`}
+                    title={`${linkedTool.name} — ${linkedTool.vendor || ''}`}
+                  >
+                    {linkedTool.status}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Beschreibung */}
           {uc.desc && (
