@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAiTools } from '@/hooks/useAiTools';
+import { useUseCases } from '@/hooks/useUseCases';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import { useT, useTx } from '@/context/LanguageContext';
@@ -46,11 +47,13 @@ function reviewOverdue(reviewDate: string): boolean {
 
 // ── Modal (Details + Historie) ────────────────────────────────
 function AiToolModal({
-  open, tool, onClose,
+  open, tool, onClose, onNavToUc,
 }: {
   open: boolean; tool: AiTool | null; onClose: () => void;
+  onNavToUc?: (ucId: string) => void;
 }) {
   const { createTool, updateTool } = useAiTools();
+  const { useCases } = useUseCases();
   const { showToast } = useToast();
   const { isEditor, isApprover } = useAuth();
   const t = useT();
@@ -224,6 +227,12 @@ function AiToolModal({
           <div className="fgroup full">
             {label(t('tools.fLinkedUc'))}
             <input value={form.linkedUseCases} disabled={readOnly} onChange={e => set('linkedUseCases', e.target.value)} placeholder="UC-2026-06-001, …" />
+            <LinkedUcList
+              linkedIds={(form.linkedUseCases || '').split(',').map(s => s.trim()).filter(Boolean)}
+              byRefUcs={tool ? useCases.filter(uc => uc.toolRef === tool.id) : []}
+              allUcs={useCases}
+              onNav={onNavToUc}
+            />
           </div>
         </div>
       )}
@@ -259,12 +268,79 @@ function AiToolModal({
   );
 }
 
+// ── UC-Liste (unterhalb des Freitextfelds) ────────────────────
+function LinkedUcList({ linkedIds, byRefUcs, allUcs, onNav }: {
+  linkedIds: string[];
+  byRefUcs: import('@/types').UseCase[];
+  allUcs: import('@/types').UseCase[];
+  onNav?: (ucId: string) => void;
+}) {
+  // Alle IDs aus beiden Quellen, dedupliziert
+  const byRefIds = new Set(byRefUcs.map(uc => uc.id));
+  const allIds = Array.from(new Set([...linkedIds, ...byRefIds]));
+  if (allIds.length === 0) return null;
+
+  const ucById = new Map(allUcs.map(uc => [uc.id, uc]));
+
+  const LC_CSS: Record<string, string> = {
+    Idea: 'bb', Design: 'by', Build: 'by', Pilot: 'bb',
+    Run: 'bg', Paused: 'bgr', Retired: 'bgr',
+  };
+
+  return (
+    <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {allIds.map(id => {
+        const uc = ucById.get(id);
+        const isRef = byRefIds.has(id);
+        const clickable = !!onNav;
+        return (
+          <div
+            key={id}
+            onClick={() => onNav?.(id)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: '5px 8px',
+              borderRadius: 6, fontSize: 12,
+              background: 'var(--bg)', border: '1px solid var(--border)',
+              cursor: clickable ? 'pointer' : 'default',
+              transition: 'background .12s',
+            }}
+            onMouseEnter={e => { if (clickable) (e.currentTarget as HTMLElement).style.background = 'var(--hover)'; }}
+            onMouseLeave={e => { if (clickable) (e.currentTarget as HTMLElement).style.background = 'var(--bg)'; }}
+            title={clickable ? 'UC-Dashboard öffnen' : undefined}
+          >
+            {uc ? (
+              <>
+                <span className={`badge ${LC_CSS[uc.lc] ?? 'bb'}`} style={{ fontSize: 10 }}>{uc.lc}</span>
+                <span style={{ color: 'var(--muted)', fontFamily: 'monospace', flexShrink: 0 }}>{id}</span>
+                <span style={{ color: 'var(--text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {uc.title}
+                </span>
+                {isRef && !linkedIds.includes(id) && (
+                  <span style={{ color: 'var(--muted)', fontSize: 10 }}>↩ verknüpft</span>
+                )}
+                {clickable && <span style={{ color: 'var(--muted)', fontSize: 11 }}>↗</span>}
+              </>
+            ) : (
+              <>
+                <span style={{ color: 'var(--muted)', fontFamily: 'monospace' }}>{id}</span>
+                <span style={{ color: 'var(--muted)', fontSize: 11, fontStyle: 'italic' }}>nicht gefunden</span>
+              </>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Screen ────────────────────────────────────────────────────
-export default function AiTools() {
+export default function AiTools({ onNav }: { onNav?: (screen: string, ucId?: string) => void } = {}) {
   const { tools, loading } = useAiTools();
   const { isEditor } = useAuth();
   const t = useT();
   const tx = useTx();
+
+  const onNavToUc = onNav ? (ucId: string) => onNav('ucdashboard', ucId) : undefined;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [active, setActive]       = useState<AiTool | null>(null);
@@ -350,7 +426,7 @@ export default function AiTools() {
         {filtered.length !== tools.length ? t('tools.totalOf', { n: filtered.length, m: tools.length }) : t('tools.totalAll', { n: tools.length })}
       </div>
 
-      <AiToolModal open={modalOpen} tool={active} onClose={close} />
+      <AiToolModal open={modalOpen} tool={active} onClose={close} onNavToUc={onNavToUc} />
     </div>
   );
 }

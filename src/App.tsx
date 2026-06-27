@@ -289,7 +289,7 @@ function AppShell() {
           {screen === 'ucdashboard'&& <UcDashboard       key={selectedUcId ?? ''} initialUcId={selectedUcId} />}
           {screen === 'users'      && <UsersScreen />}
           {screen === 'auditlog'   && <AuditLogScreen />}
-          {screen === 'aitools'    && <AiToolsScreen />}
+          {screen === 'aitools'    && <AiToolsScreen onNav={(s, ucId) => { setSelectedUcId(ucId); setScreen(s as Screen); }} />}
           {screen === 'reports'    && <ReportsScreen />}
           {screen === 'info'       && <InfoScreen />}
           {screen === 'aistrategy' && <AiStrategyScreen onNav={(s) => setScreen(s as Screen)} />}
