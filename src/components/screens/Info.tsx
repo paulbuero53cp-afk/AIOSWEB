@@ -323,16 +323,27 @@ export default function Info() {
 
 // ── Provisioning Panel ────────────────────────────────────────
 type ProvState = 'idle' | 'running' | 'done' | 'error';
-interface ProvReport { list: string; column: string; status: 'added' | 'exists' | 'error'; detail?: string }
+interface ProvReport {
+  list: string; column: string; label: string;
+  status: 'added' | 'exists' | 'list_missing' | 'error';
+  detail?: string;
+}
+interface ProvResponse {
+  added: number; exists: number; listsMissing: number; errors: number; total: number;
+  report: ProvReport[];
+}
 
 function ProvisionPanel() {
-  const [state, setState]   = useState<ProvState>('idle');
-  const [report, setReport] = useState<ProvReport[]>([]);
-  const [errMsg, setErrMsg] = useState('');
+  const [state, setState]       = useState<ProvState>('idle');
+  const [report, setReport]     = useState<ProvReport[]>([]);
+  const [summary, setSummary]   = useState<Omit<ProvResponse, 'report'> | null>(null);
+  const [errMsg, setErrMsg]     = useState('');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   async function run() {
     setState('running');
     setReport([]);
+    setSummary(null);
     try {
       const res = await fetch('/api/provision', {
         method: 'POST',
@@ -340,8 +351,13 @@ function ProvisionPanel() {
       });
       const text = await res.text();
       if (!text) throw new Error(`HTTP ${res.status}: leere Serverantwort`);
-      const data = JSON.parse(text) as { report: ProvReport[]; errors: number };
+      const data = JSON.parse(text) as ProvResponse;
       setReport(data.report ?? []);
+      setSummary({ added: data.added, exists: data.exists, listsMissing: data.listsMissing, errors: data.errors, total: data.total });
+      // Auto-expand lists with new or error columns
+      const toExpand = new Set<string>();
+      (data.report ?? []).forEach(r => { if (r.status === 'added' || r.status === 'error') toExpand.add(r.list); });
+      setExpanded(toExpand);
       setState(data.errors > 0 ? 'error' : 'done');
     } catch (err) {
       setErrMsg(String(err));
@@ -349,35 +365,105 @@ function ProvisionPanel() {
     }
   }
 
-  const statusColor = (s: ProvReport['status']) =>
-    s === 'added' ? 'var(--green)' : s === 'exists' ? 'var(--muted)' : 'var(--red)';
-  const statusLabel = (s: ProvReport['status']) =>
-    s === 'added' ? '✓ angelegt' : s === 'exists' ? '– vorhanden' : '✕ Fehler';
+  function toggleList(listName: string) {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      next.has(listName) ? next.delete(listName) : next.add(listName);
+      return next;
+    });
+  }
+
+  const statusColor = (s: ProvReport['status']) => {
+    if (s === 'added')        return 'var(--green)';
+    if (s === 'exists')       return 'var(--muted)';
+    if (s === 'list_missing') return 'var(--yellow, #f59e0b)';
+    return 'var(--red)';
+  };
+  const statusLabel = (s: ProvReport['status']) => {
+    if (s === 'added')        return '✓ angelegt';
+    if (s === 'exists')       return '– vorhanden';
+    if (s === 'list_missing') return '⚠ Liste fehlt';
+    return '✕ Fehler';
+  };
+
+  // Group by list — preserve insertion order
+  const byList = new Map<string, ProvReport[]>();
+  report.forEach(r => {
+    if (!byList.has(r.list)) byList.set(r.list, []);
+    byList.get(r.list)!.push(r);
+  });
 
   return (
     <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20 }}>
       <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>SharePoint Provisioning</div>
-      <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>
-        Legt fehlende SP-Spalten an (idempotent — bereits vorhandene werden übersprungen).
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>
+        Prüft und legt alle Spalten des AIOS-Datenmodells in den SP-Listen an.
+        Idempotent — bestehende Spalten werden übersprungen.
+        Listen selbst müssen vorab manuell erstellt worden sein.
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 16 }}>
+        7 Listen · ~60 Spalten: AIOS_Usecases, AIOS_AiTools, AIOS_Incidents, AIOS_Artefakte, AIOS_AuditLog, AIOS_Users, AIOS_Config
       </div>
 
       <button className="btn" onClick={run} disabled={state === 'running'}>
         {state === 'running' ? '⏳ Läuft…' : '⚙ SP-Spalten prüfen & anlegen'}
       </button>
 
-      {report.length > 0 && (
-        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {report.map((r, i) => (
-            <div key={i} style={{ fontSize: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
-              <span style={{ color: statusColor(r.status), fontWeight: 600, width: 100, flexShrink: 0 }}>
-                {statusLabel(r.status)}
-              </span>
-              <span style={{ fontFamily: 'monospace', color: 'var(--text)' }}>
-                {r.list} → {r.column}
-              </span>
-              {r.detail && <span style={{ color: 'var(--red)', fontSize: 11 }}>{r.detail}</span>}
-            </div>
-          ))}
+      {summary && (
+        <div style={{ marginTop: 12, fontSize: 12, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <span style={{ color: 'var(--green)', fontWeight: 600 }}>✓ {summary.added} angelegt</span>
+          <span style={{ color: 'var(--muted)' }}>– {summary.exists} vorhanden</span>
+          {summary.listsMissing > 0 && <span style={{ color: 'var(--yellow, #f59e0b)', fontWeight: 600 }}>⚠ {summary.listsMissing} Listen fehlen</span>}
+          {summary.errors > 0 && <span style={{ color: 'var(--red)', fontWeight: 600 }}>✕ {summary.errors} Fehler</span>}
+          <span style={{ color: 'var(--muted)' }}>/ {summary.total} gesamt</span>
+        </div>
+      )}
+
+      {byList.size > 0 && (
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {Array.from(byList.entries()).map(([listName, rows]) => {
+            const isOpen   = expanded.has(listName);
+            const hasNew   = rows.some(r => r.status === 'added');
+            const hasErr   = rows.some(r => r.status === 'error');
+            const isMissing = rows.every(r => r.status === 'list_missing');
+            const headerColor = hasErr ? 'var(--red)' : isMissing ? 'var(--yellow, #f59e0b)' : hasNew ? 'var(--green)' : 'var(--text)';
+            const badge = hasErr
+              ? `✕ ${rows.filter(r => r.status === 'error').length} Fehler`
+              : isMissing ? '⚠ Liste fehlt'
+              : hasNew ? `✓ ${rows.filter(r => r.status === 'added').length} neu`
+              : `– alle vorhanden`;
+
+            return (
+              <div key={listName} style={{ border: '1px solid var(--border)', borderRadius: 6, overflow: 'hidden' }}>
+                <div
+                  onClick={() => toggleList(listName)}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '7px 12px', cursor: 'pointer', fontSize: 12,
+                    background: 'var(--bg)', userSelect: 'none' }}
+                >
+                  <span style={{ fontFamily: 'monospace', fontWeight: 600, color: headerColor }}>{listName}</span>
+                  <span style={{ display: 'flex', gap: 12, alignItems: 'center', color: 'var(--muted)' }}>
+                    <span style={{ color: headerColor }}>{badge}</span>
+                    <span>{rows.length} Spalten  {isOpen ? '▲' : '▼'}</span>
+                  </span>
+                </div>
+                {isOpen && (
+                  <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4, borderTop: '1px solid var(--border)' }}>
+                    {rows.map((r, i) => (
+                      <div key={i} style={{ fontSize: 11, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                        <span style={{ color: statusColor(r.status), fontWeight: 600, width: 90, flexShrink: 0 }}>
+                          {statusLabel(r.status)}
+                        </span>
+                        <span style={{ fontFamily: 'monospace', color: 'var(--text)', width: 150, flexShrink: 0 }}>{r.column}</span>
+                        <span style={{ color: 'var(--muted)' }}>{r.label}</span>
+                        {r.detail && <span style={{ color: 'var(--red)', fontSize: 10 }}>{r.detail}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
