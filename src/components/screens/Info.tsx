@@ -308,11 +308,76 @@ export default function Info() {
 
       {/* Data Exchange (Admin only) */}
       {isAdmin && (
-        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20 }}>
+        <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20, marginBottom: 24 }}>
           <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{tx('Datenaustausch')}</div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>{tx('Nur für Administratoren sichtbar')}</div>
           <ExchangePanel />
         </div>
+      )}
+
+      {/* SP Provisioning (Admin only) */}
+      {isAdmin && <ProvisionPanel />}
+    </div>
+  );
+}
+
+// ── Provisioning Panel ────────────────────────────────────────
+type ProvState = 'idle' | 'running' | 'done' | 'error';
+interface ProvReport { list: string; column: string; status: 'added' | 'exists' | 'error'; detail?: string }
+
+function ProvisionPanel() {
+  const [state, setState]   = useState<ProvState>('idle');
+  const [report, setReport] = useState<ProvReport[]>([]);
+  const [errMsg, setErrMsg] = useState('');
+
+  async function run() {
+    setState('running');
+    setReport([]);
+    try {
+      const res = await fetch('/api/admin/provision', { method: 'POST' });
+      const data = await res.json() as { report: ProvReport[]; errors: number };
+      setReport(data.report ?? []);
+      setState(data.errors > 0 ? 'error' : 'done');
+    } catch (err) {
+      setErrMsg(String(err));
+      setState('error');
+    }
+  }
+
+  const statusColor = (s: ProvReport['status']) =>
+    s === 'added' ? 'var(--green)' : s === 'exists' ? 'var(--muted)' : 'var(--red)';
+  const statusLabel = (s: ProvReport['status']) =>
+    s === 'added' ? '✓ angelegt' : s === 'exists' ? '– vorhanden' : '✕ Fehler';
+
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20 }}>
+      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>SharePoint Provisioning</div>
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>
+        Legt fehlende SP-Spalten an (idempotent — bereits vorhandene werden übersprungen).
+      </div>
+
+      <button className="btn" onClick={run} disabled={state === 'running'}>
+        {state === 'running' ? '⏳ Läuft…' : '⚙ SP-Spalten prüfen & anlegen'}
+      </button>
+
+      {report.length > 0 && (
+        <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {report.map((r, i) => (
+            <div key={i} style={{ fontSize: 12, display: 'flex', gap: 12, alignItems: 'center' }}>
+              <span style={{ color: statusColor(r.status), fontWeight: 600, width: 100, flexShrink: 0 }}>
+                {statusLabel(r.status)}
+              </span>
+              <span style={{ fontFamily: 'monospace', color: 'var(--text)' }}>
+                {r.list} → {r.column}
+              </span>
+              {r.detail && <span style={{ color: 'var(--red)', fontSize: 11 }}>{r.detail}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {state === 'error' && !report.length && (
+        <div style={{ marginTop: 10, fontSize: 12, color: 'var(--red)' }}>{errMsg}</div>
       )}
     </div>
   );

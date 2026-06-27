@@ -17,3 +17,4 @@ import './functions/users';
 import './functions/aitools';
 import './functions/exchange';
 import './functions/submit';
+import './functions/provision';
