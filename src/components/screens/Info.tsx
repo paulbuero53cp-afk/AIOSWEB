@@ -334,8 +334,13 @@ function ProvisionPanel() {
     setState('running');
     setReport([]);
     try {
-      const res = await fetch('/api/admin/provision', { method: 'POST' });
-      const data = await res.json() as { report: ProvReport[]; errors: number };
+      const res = await fetch('/api/admin/provision', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'AIOS', 'Content-Type': 'application/json' },
+      });
+      const text = await res.text();
+      if (!text) throw new Error(`HTTP ${res.status}: leere Serverantwort`);
+      const data = JSON.parse(text) as { report: ProvReport[]; errors: number };
       setReport(data.report ?? []);
       setState(data.errors > 0 ? 'error' : 'done');
     } catch (err) {
