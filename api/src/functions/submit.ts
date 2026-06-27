@@ -16,6 +16,11 @@ const MOCK = process.env['USE_MOCK_DATA'] === 'true';
 interface SubmitBody {
   title?: string;
   desc?: string;
+  problem?: string;
+  data?: string;
+  kiEinsatz?: boolean;
+  kiErstellung?: boolean;
+  kiWeissNicht?: boolean;
   cl?: string;
   own?: string;
   sys?: string;
@@ -61,9 +66,19 @@ async function handleSubmit(req: HttpRequest): Promise<HttpResponseInit> {
   const now  = new Date().toISOString();
   const id   = await generateDraftId();
 
-  // Anmerkung in die Beschreibung einbauen
-  const desc = [body.desc?.trim(), body.note?.trim() ? `Anmerkung: ${body.note.trim()}` : '']
-    .filter(Boolean).join('\n\n');
+  // KI-Typ aus Checkboxen
+  const kiType: string[] = [];
+  if (body.kiEinsatz)    kiType.push('einsatz');
+  if (body.kiErstellung) kiType.push('erstellung');
+
+  // Alle Freitext-Felder strukturiert in desc zusammenführen
+  const descParts: string[] = [];
+  if (body.desc?.trim())    descParts.push(body.desc.trim());
+  if (body.problem?.trim()) descParts.push(`Problem / Bedarf:\n${body.problem.trim()}`);
+  if (body.data?.trim())    descParts.push(`Benötigte Daten:\n${body.data.trim()}`);
+  if (body.kiWeissNicht && kiType.length === 0) descParts.push('KI-Dimension: Noch nicht bekannt');
+  if (body.note?.trim())    descParts.push(`Anmerkungen:\n${body.note.trim()}`);
+  const desc = descParts.join('\n\n');
 
   const uc = ucToSp({
     id,
@@ -74,7 +89,7 @@ async function handleSubmit(req: HttpRequest): Promise<HttpResponseInit> {
     legacy: '',
     cap:    'Generative KI',
     useCaseCategory: 'Sonstiges',
-    kiType: [],
+    kiType,
     auto:   'Empfehlung (Mensch entscheidet)',
     lc:     'Idea',
     pd:     'Backlog',
