@@ -277,7 +277,6 @@ export default function UcForm({
                 </option>
               ))}
             </select>
-            <input type="hidden" {...register('toolRef')} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <input
                 {...register('sys')}
