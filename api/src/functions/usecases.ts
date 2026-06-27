@@ -95,10 +95,8 @@ async function handlePost(
     return { status: 400, jsonBody: { error: 'title ist Pflichtfeld' } };
   }
 
-  // Link-Validierung
-  if (body.link && !/^https?:\/\//i.test(body.link)) {
-    return { status: 400, jsonBody: { error: 'link muss mit https:// beginnen' } };
-  }
+  // Link normalisieren: fehlendes Protokoll ergänzen
+  if (body.link && !/^https?:\/\//i.test(body.link)) body.link = 'https://' + body.link;
 
   const now  = new Date().toISOString();
   // ID immer serverseitig generieren — kein client-seitiges ID-Spoofing.
@@ -141,10 +139,8 @@ async function handlePatch(
   );
   if (isAuthError(principal)) return principal;
 
-  // Link-Validierung konsistent mit POST
-  if (body.link !== undefined && body.link !== '' && !/^https?:\/\//i.test(body.link)) {
-    return { status: 400, jsonBody: { error: 'link muss mit https:// beginnen' } };
-  }
+  // Link normalisieren: fehlendes Protokoll ergänzen
+  if (body.link && !/^https?:\/\//i.test(body.link)) body.link = 'https://' + body.link;
 
   if (MOCK) {
     const uc = MOCK_USECASES.find(u => u.id === ucId);
