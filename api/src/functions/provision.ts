@@ -92,10 +92,10 @@ async function handleProvision(req: HttpRequest): Promise<HttpResponseInit> {
 
 app.http('provision', {
   methods: ['POST'],
-  route: 'admin/provision',
+  route: 'provision',
   authLevel: 'anonymous',
   handler: async (req: HttpRequest, ctx: InvocationContext): Promise<HttpResponseInit> => {
-    ctx.log('POST /api/admin/provision');
+    ctx.log('POST /api/provision');
     try {
       return await handleProvision(req);
     } catch (err) {

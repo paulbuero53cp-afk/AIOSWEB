@@ -334,7 +334,7 @@ function ProvisionPanel() {
     setState('running');
     setReport([]);
     try {
-      const res = await fetch('/api/admin/provision', {
+      const res = await fetch('/api/provision', {
         method: 'POST',
         headers: { 'X-Requested-With': 'AIOS', 'Content-Type': 'application/json' },
       });
