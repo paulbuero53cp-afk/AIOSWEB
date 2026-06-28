@@ -176,7 +176,7 @@ function AppShell() {
     return (
       <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--petrol)', fontFamily: 'var(--font)' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🤖</div>
+          <img src="/favicon.svg" alt="AIOS" style={{ width: 56, height: 56, marginBottom: 14, borderRadius: 10 }} />
           <div style={{ fontSize: 14, color: 'var(--muted)' }}>{t('shell.loading')}</div>
         </div>
       </div>
@@ -199,7 +199,7 @@ function AppShell() {
     return (
       <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', fontFamily: 'var(--font)', padding: 24 }}>
         <div style={{ textAlign: 'center', maxWidth: 460 }}>
-          <div style={{ fontSize: 40, marginBottom: 16 }}>🔒</div>
+          <img src="/favicon.svg" alt="AIOS" style={{ width: 56, height: 56, marginBottom: 16, borderRadius: 10 }} />
           <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--petrol)', marginBottom: 10 }}>
             {t('access.title')}
           </div>
