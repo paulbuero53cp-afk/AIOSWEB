@@ -430,6 +430,16 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
   );
 }
 
+// ── PrintablePage — lädt eigenen Hub, nur beim Drucken sichtbar ──
+function PrintablePage({ uc, isLast }: { uc: UseCase; isLast: boolean }) {
+  const { hub } = useArtefaktHub(uc.id);
+  return (
+    <div className="ucd-print-page" style={{ pageBreakAfter: isLast ? 'auto' : 'always' }}>
+      <DashboardContent uc={uc} hub={hub as Record<string, unknown> | undefined} />
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────
 interface UcDashboardProps {
   initialUcId?: string;
@@ -437,74 +447,162 @@ interface UcDashboardProps {
 
 export default function UcDashboard({ initialUcId }: UcDashboardProps) {
   const { useCases, loading } = useUseCases();
-  const [ucId, setUcId] = useState<string>(initialUcId ?? '');
-  const { hub } = useArtefaktHub(ucId || null);
-  const tx = useTx();
+  const [ucId, setUcId]       = useState<string>(initialUcId ?? '');
+  const [multiMode, setMulti] = useState(false);
+  const [selectedIds, setSel] = useState<Set<string>>(new Set());
+  const [search, setSearch]   = useState('');
+  const { hub }               = useArtefaktHub(ucId || null);
+  const tx                    = useTx();
 
   const uc = useCases.find(u => u.id === ucId);
 
+  function toggleId(id: string) {
+    setSel(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }
+
+  const filteredUcs = search.trim()
+    ? useCases.filter(u =>
+        u.id.toLowerCase().includes(search.toLowerCase()) ||
+        u.title.toLowerCase().includes(search.toLowerCase()) ||
+        (u.cl ?? '').toLowerCase().includes(search.toLowerCase()))
+    : useCases;
+
+  const selectedUcs = useCases.filter(u => selectedIds.has(u.id));
+  const count = selectedIds.size;
+
   return (
     <div>
-      {/* ── Toolbar ────────────────────────────────────── */}
+      {/* ── Toolbar ──────────────────────────────────────── */}
       <div className="card ucd-toolbar" style={{ marginBottom: 16 }}>
         <div className="ch" style={{ flexWrap: 'wrap', gap: 8 }}>
           <span className="ch-title">📊 UC Dashboard</span>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-            <select
-              value={ucId}
-              onChange={e => setUcId(e.target.value)}
-              disabled={loading}
-              style={{ fontSize: 13, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border)', minWidth: 240 }}
-            >
-              <option value="">{tx('— Use Case wählen —')}</option>
-              {useCases.map((u: UseCase) => (
-                <option key={u.id} value={u.id}>
-                  {u.id} — {u.title}
-                </option>
-              ))}
-            </select>
-            {uc && (
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => window.print()}
-                style={{ display: 'flex', alignItems: 'center', gap: 5 }}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+
+            {/* Einzel-Modus: Dropdown */}
+            {!multiMode && (
+              <select
+                value={ucId}
+                onChange={e => setUcId(e.target.value)}
+                disabled={loading}
+                style={{ fontSize: 13, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border)', minWidth: 240 }}
               >
-                {tx('🖨️ Als PDF drucken')}
+                <option value="">{tx('— Use Case wählen —')}</option>
+                {useCases.map((u: UseCase) => (
+                  <option key={u.id} value={u.id}>{u.id} — {u.title}</option>
+                ))}
+              </select>
+            )}
+
+            {/* Einzel-Modus: Drucken */}
+            {!multiMode && uc && (
+              <button className="btn btn-primary btn-sm" onClick={() => window.print()}>
+                🖨️ {tx('Als PDF drucken')}
               </button>
             )}
+
+            {/* Multi-Modus: Drucken */}
+            {multiMode && (
+              <button
+                className="btn btn-primary btn-sm"
+                disabled={count === 0}
+                onClick={() => window.print()}
+              >
+                🖨️ {count > 0 ? `${count} UC${count !== 1 ? 's' : ''} drucken` : tx('Auswahl drucken')}
+              </button>
+            )}
+
+            {/* Toggle */}
+            <button
+              className={`btn btn-sm ${multiMode ? '' : 'btn-outline'}`}
+              style={multiMode ? { background: 'var(--petrol)', color: '#fff', border: '1px solid var(--petrol)' } : {}}
+              onClick={() => { setMulti(m => !m); setSel(new Set()); setSearch(''); }}
+            >
+              {multiMode ? '✓ Mehrfachauswahl aktiv' : '☐ Mehrere drucken'}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* ── Empty State ─────────────────────────────────── */}
-      {!ucId && (
-        <div style={{
-          background: '#fff',
-          border: '1px solid var(--border)',
-          borderRadius: 10,
-          padding: 40,
-          textAlign: 'center',
-          color: 'var(--muted)',
-        }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>📊</div>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6, color: 'var(--text)' }}>
-            UC Dashboard
+      {/* ── Multi-Modus: Auswahlliste ────────────────────── */}
+      {multiMode && (
+        <div className="ucd-multi-panel card" style={{ marginBottom: 16, padding: '16px 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>
+              Use Cases für den Druck auswählen
+              {count > 0 && (
+                <span style={{ marginLeft: 8, fontSize: 12, color: 'var(--petrol)',
+                  background: 'rgba(42,79,79,.09)', padding: '2px 8px', borderRadius: 10 }}>
+                  {count} ausgewählt
+                </span>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className="btn btn-outline btn-sm" onClick={() => setSel(new Set(useCases.map(u => u.id)))}>Alle</button>
+              <button className="btn btn-outline btn-sm" onClick={() => setSel(new Set())}>Keine</button>
+            </div>
           </div>
-          <div style={{ fontSize: 13 }}>
-            {tx('Wähle einen Use Case aus der Dropdown-Liste, um den One-Pager anzuzeigen.')}
+
+          <input
+            className="form-input"
+            placeholder="Filtern nach ID, Titel, Abteilung…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ marginBottom: 10, fontSize: 13 }}
+          />
+
+          <div style={{ maxHeight: 280, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {filteredUcs.length === 0 && (
+              <div style={{ fontSize: 13, color: 'var(--muted)', padding: '8px 4px' }}>Keine Use Cases gefunden.</div>
+            )}
+            {filteredUcs.map(u => {
+              const sel = selectedIds.has(u.id);
+              return (
+                <label key={u.id} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '7px 10px', borderRadius: 6, cursor: 'pointer',
+                  background: sel ? 'rgba(42,79,79,.07)' : 'transparent',
+                  border: `1px solid ${sel ? 'rgba(42,79,79,.2)' : 'transparent'}`,
+                  transition: 'background .1s, border .1s',
+                }}>
+                  <input type="checkbox" checked={sel} onChange={() => toggleId(u.id)} style={{ flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--muted)', width: 130, flexShrink: 0 }}>{u.id}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{u.title}</span>
+                  {u.cl && <span style={{ fontSize: 11, color: 'var(--muted)', flexShrink: 0 }}>{u.cl}</span>}
+                </label>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* ── UC not found ────────────────────────────────── */}
-      {ucId && !uc && !loading && (
+      {/* ── Einzel-Modus: Empty / Not found / Dashboard ── */}
+      {!multiMode && !ucId && (
+        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 10, padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
+          <div style={{ fontSize: 36, marginBottom: 12 }}>📊</div>
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 6, color: 'var(--text)' }}>UC Dashboard</div>
+          <div style={{ fontSize: 13 }}>{tx('Wähle einen Use Case aus der Dropdown-Liste, um den One-Pager anzuzeigen.')}</div>
+        </div>
+      )}
+      {!multiMode && ucId && !uc && !loading && (
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 10, padding: 24, color: 'var(--muted)' }}>
           {tx('Use Case nicht gefunden.')}
         </div>
       )}
+      {!multiMode && uc && <DashboardContent uc={uc} hub={hub as Record<string, unknown> | undefined} />}
 
-      {/* ── Dashboard ───────────────────────────────────── */}
-      {uc && <DashboardContent uc={uc} hub={hub as Record<string, unknown> | undefined} />}
+      {/* ── Multi-Modus: Hinweis wenn leer ────────────────── */}
+      {multiMode && count === 0 && (
+        <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 10, padding: 32, textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>
+          Wähle einen oder mehrere Use Cases aus der Liste oben aus.
+        </div>
+      )}
+
+      {/* ── Print-Pages: screen=hidden, print=sichtbar ───── */}
+      <div className="ucd-print-pages">
+        {selectedUcs.map((u, i) => (
+          <PrintablePage key={u.id} uc={u} isLast={i === selectedUcs.length - 1} />
+        ))}
+      </div>
     </div>
   );
 }

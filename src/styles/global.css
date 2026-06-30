@@ -308,15 +308,21 @@ html[lang="de"] [data-i18n-en] { display: none !important; }
 }
 
 /* ── UC Dashboard Print ────────────────────────────────────── */
+@media screen {
+  .ucd-print-pages { display: none; }
+}
 @media print {
   @page { size: A4; margin: 12mm 10mm; }
   .sidebar, .topbar, .hamburger, .sidebar-overlay { display: none !important; }
   .main { height: auto !important; overflow: visible !important; }
   .content { overflow: visible !important; padding: 0 !important; }
   .app { display: block !important; height: auto !important; }
-  /* hide toolbar card, show only dashboard content */
   .ucd-page { margin: 0 !important; max-width: 100% !important; }
-  /* hide the selector card — first .card in the UC Dashboard */
   .ucd-toolbar { display: none !important; }
+  /* Multi-print: panel ausblenden, Print-Pages einblenden */
+  .ucd-multi-panel { display: none !important; }
+  .ucd-print-pages { display: block !important; }
+  .ucd-print-page { page-break-after: always; }
+  .ucd-print-page:last-child { page-break-after: auto; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
