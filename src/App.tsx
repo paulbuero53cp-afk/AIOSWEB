@@ -24,6 +24,7 @@ import AiStrategyScreen  from '@/components/screens/AiStrategy';
 import UcDashboard       from '@/components/screens/UcDashboard';
 import UsersScreen       from '@/components/screens/Users';
 import { swrFetcher } from '@/lib/api';
+import { APP_VERSION } from '@/lib/version';
 import type { Screen, UseCase, Incident, AppConfig } from '@/types';
 import '@/styles/global.css';
 
@@ -100,6 +101,9 @@ function Sidebar({
       <div className="slogo">
         <div className="slogo-top">{config.name}</div>
         <div className="slogo-bot">{config.tag}</div>
+        <div style={{ fontSize: 10, color: 'var(--sidebar-label)', marginTop: 4, opacity: 0.6 }}>
+          v{APP_VERSION}
+        </div>
       </div>
       <nav className="snav">
         {NAV_SECTIONS.map(section => (

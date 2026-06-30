@@ -6,9 +6,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { useTx } from '@/context/LanguageContext';
 import { downloadJson } from '@/lib/exports';
+import { APP_VERSION } from '@/lib/version';
 import type { AppConfig } from '@/types';
-
-const APP_VERSION = '1.0.0';
 const REPO_URL    = 'https://github.com/paulbuero53cp-afk/AIOSWEB';
 
 // ── Config Form ───────────────────────────────────────────────
