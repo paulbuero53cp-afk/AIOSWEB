@@ -110,7 +110,7 @@ function badge(
 // ── Kachel-Komponente ─────────────────────────────────────────
 function KV({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 8 }}>
+    <div className="ucd-kv" style={{ marginBottom: 8 }}>
       <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: '#4a6b6b', marginBottom: 2 }}>
         {label}
       </div>
@@ -126,7 +126,7 @@ function ScoreChip({ label, value, max = 3 }: { label: string; value: number; ma
   const pct = Math.round((value / max) * 100);
   const color = pct >= 67 ? '#d94040' : pct >= 34 ? '#e8a020' : '#2eaa6e';
   return (
-    <div style={{
+    <div className="ucd-chip" style={{
       background: '#f4f9f9',
       border: '1px solid #d4e5e5',
       borderRadius: 8,
@@ -225,7 +225,7 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
     <div className="ucd-page" style={{ maxWidth: 900, margin: '0 auto' }}>
 
       {/* ── Header ─────────────────────────────────────────── */}
-      <div style={{
+      <div className="ucd-hdr" style={{
         background: 'var(--petrol)',
         color: '#fff',
         borderRadius: 10,
@@ -263,11 +263,11 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
       </div>
 
       {/* ── Row 1: Stammdaten + Scores ────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+      <div className="ucd-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
 
         {/* Stammdaten */}
-        <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
+        <div className="ucd-panel" style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
+          <div className="ucd-sec" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
             {tx('Stammdaten')}
           </div>
           <KV label="Business Owner"       value={uc.own} />
@@ -282,8 +282,8 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
         </div>
 
         {/* Bewertung */}
-        <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
+        <div className="ucd-panel" style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
+          <div className="ucd-sec" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
             {tx('Bewertung')}
           </div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
@@ -304,7 +304,7 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
 
       {/* ── Row 2: Reliability ───────────────────────────── */}
       {uc.rl && (
-        <div style={{
+        <div className="ucd-panel" style={{
           background: '#fff',
           border: `2px solid ${RL_COLOR[uc.rl] ?? '#4d8080'}44`,
           borderLeft: `4px solid ${RL_COLOR[uc.rl] ?? '#4d8080'}`,
@@ -312,7 +312,7 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
           padding: '16px 18px',
           marginBottom: 12,
         }}>
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
+          <div className="ucd-sec" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
             Reliability Framework
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
@@ -369,11 +369,11 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
       )}
 
       {/* ── Row 3: Checks + Trigger ──────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+      <div className="ucd-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
 
         {/* Minimum Checks */}
-        <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
+        <div className="ucd-panel" style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
+          <div className="ucd-sec" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
             Minimum Standard Checks
           </div>
           <BoolGrid
@@ -388,8 +388,8 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
         </div>
 
         {/* Governance Trigger + Sensible Bereiche */}
-        <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
+        <div className="ucd-panel" style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px' }}>
+          <div className="ucd-sec" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
             {tx('Governance Trigger & Sensible Bereiche')}
           </div>
           <BoolGrid
@@ -409,8 +409,8 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
       </div>
 
       {/* ── Row 4: Artefakt-Status ───────────────────────── */}
-      <div style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px', marginBottom: 12 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
+      <div className="ucd-panel" style={{ background: '#fff', border: '1px solid #d4e5e5', borderRadius: 10, padding: '16px 18px', marginBottom: 12 }}>
+        <div className="ucd-sec" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', color: '#1e3838', marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #d4e5e5' }}>
           {tx('Dokumentations-Status')}
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
