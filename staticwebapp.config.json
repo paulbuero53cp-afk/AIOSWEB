@@ -5,7 +5,15 @@
       "allowedRoles": ["anonymous"]
     },
     {
+      "route": "/agenthub",
+      "allowedRoles": ["anonymous"]
+    },
+    {
       "route": "/api/submit",
+      "allowedRoles": ["anonymous"]
+    },
+    {
+      "route": "/api/catalog",
       "allowedRoles": ["anonymous"]
     },
     {

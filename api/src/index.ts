@@ -18,3 +18,4 @@ import './functions/aitools';
 import './functions/exchange';
 import './functions/submit';
 import './functions/provision';
+import './functions/catalog';
