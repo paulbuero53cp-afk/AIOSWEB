@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e1116" />
+  <title>Twin — Sprachnotizen</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◐</span>
+      <div>
+        <div class="brand-name">Twin</div>
+        <div class="brand-sub">Dein digitaler Zwilling</div>
+      </div>
+    </div>
+    <button id="exportBtn" class="icon-btn" title="Daten exportieren" aria-label="Exportieren">⤓</button>
+  </header>
+
+  <main class="wrap">
+    <!-- Recorder -->
+    <section class="recorder card">
+      <div class="rec-row">
+        <button id="micBtn" class="mic" aria-label="Aufnahme starten/stoppen">
+          <span class="mic-glyph">🎙</span>
+        </button>
+        <div class="rec-info">
+          <div id="recTitle" class="rec-title">Neue Sprachnotiz</div>
+          <div id="recHint" class="rec-hint">Tippe auf das Mikrofon und sprich los.</div>
+        </div>
+        <div id="recTimer" class="rec-timer" hidden>0:00</div>
+      </div>
+
+      <textarea id="draft" class="draft" rows="4"
+        placeholder="Transkript erscheint hier — oder tippe deine Notiz direkt ein…"></textarea>
+      <div id="interim" class="interim" hidden></div>
+
+      <div id="draftTopics" class="chips draft-topics" hidden></div>
+
+      <div id="draftActions" class="draft-actions" hidden>
+        <input id="draftTitle" class="title-input" type="text"
+          placeholder="Titel (optional – wird sonst automatisch abgeleitet)" />
+        <div class="btn-row">
+          <button id="saveBtn" class="btn btn-primary">Speichern &amp; analysieren</button>
+          <button id="discardBtn" class="btn btn-ghost">Verwerfen</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="stats" class="stats" hidden>
+      <div class="stat"><div class="stat-val" id="stNotes">0</div><div class="stat-lbl">Notizen</div></div>
+      <div class="stat"><div class="stat-val" id="stTopics">0</div><div class="stat-lbl">Themen</div></div>
+      <div class="stat"><div class="stat-val" id="stMin">0</div><div class="stat-lbl">Minuten</div></div>
+    </section>
+
+    <!-- Search + filter -->
+    <section id="toolbar" class="toolbar" hidden>
+      <input id="search" class="search" type="search" placeholder="In allen Notizen suchen…" />
+      <div id="topicFilter" class="chips filter-chips"></div>
+    </section>
+
+    <!-- Notes -->
+    <section id="notes" class="notes"></section>
+    <div id="empty" class="empty">
+      <div class="empty-glyph">🎙</div>
+      <div>Noch keine Notizen.<br />Nimm deine erste Sprachnotiz auf.</div>
+    </div>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
