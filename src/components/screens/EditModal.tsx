@@ -84,7 +84,7 @@ interface EditModalProps {
 }
 
 export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditModalProps) {
-  const { updateUC } = useUseCases();
+  const { updateUC, deleteUC } = useUseCases();
   const { showToast } = useToast();
   const { isApprover, isAdmin } = useAuth();
   const tx = useTx();
@@ -95,6 +95,7 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
   const [mode, setMode]               = useState<'view' | 'edit'>('view');
   const [editTab, setEditTab]         = useState(0);
   const [exporting, setExporting]     = useState(false);
+  const [deleting, setDeleting]       = useState(false);
 
   useEffect(() => { setMode('view'); }, [uc?.id]);
 
@@ -126,6 +127,21 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
   function openEditTab(tab: number) {
     setEditTab(tab);
     setMode('edit');
+  }
+
+  async function handleDelete() {
+    if (!uc) return;
+    if (!window.confirm(`Use Case "${uc.title}" (${uc.id}) wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) return;
+    setDeleting(true);
+    try {
+      await deleteUC(uc.id);
+      showToast(`${uc.id} ${tx('gelöscht')}`, 'success');
+      onClose();
+    } catch (err) {
+      showToast(`${tx('Fehler')}: ${String(err)}`, 'error');
+    } finally {
+      setDeleting(false);
+    }
   }
 
   async function handleExport() {
@@ -290,6 +306,17 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
             <button className="btn btn-outline" onClick={onClose}>
               {tx('Schliessen')}
             </button>
+            {isAdmin && (
+              <button
+                className="btn btn-sm"
+                style={{ color: 'var(--red, #d94040)', border: '1px solid var(--red, #d94040)', background: 'transparent' }}
+                onClick={handleDelete}
+                disabled={deleting}
+                title={tx('Use Case endgültig löschen')}
+              >
+                {deleting ? tx('Lösche…') : '🗑 ' + tx('Löschen')}
+              </button>
+            )}
             {isAdmin && (
               <button
                 className="btn btn-outline btn-sm"

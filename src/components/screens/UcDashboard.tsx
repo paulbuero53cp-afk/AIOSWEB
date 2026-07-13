@@ -295,8 +295,8 @@ function DashboardContent({ uc, hub }: { uc: UseCase; hub: Record<string, unknow
           <KV label="HITL"                       value={uc.hitl === 'yes' ? '✓ Ja' : '✗ Nein'} />
           <KV label="Reversible Entscheidungen"  value={uc.rev === 'yes' ? '✓ Ja' : '✗ Nein'} />
           {uc.desc && (
-            <div style={{ marginTop: 10, fontSize: 12, color: '#4a6b6b', lineHeight: 1.5, borderTop: '1px solid #d4e5e5', paddingTop: 10 }}>
-              {uc.desc.length > 200 ? uc.desc.slice(0, 200) + '…' : uc.desc}
+            <div style={{ marginTop: 10, fontSize: 12, color: '#4a6b6b', lineHeight: 1.6, borderTop: '1px solid #d4e5e5', paddingTop: 10 }}>
+              {uc.desc}
             </div>
           )}
         </div>
