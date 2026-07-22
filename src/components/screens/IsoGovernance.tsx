@@ -140,8 +140,9 @@ function AnswerModal({
 
   if (!question) return null;
 
-  function toggleUc(id: string) {
-    setSelectedUcs(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  function handleUcSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const ids = [...e.target.selectedOptions].map(o => o.value);
+    setSelectedUcs(new Set(ids));
   }
 
   async function handleSave() {
@@ -190,25 +191,16 @@ function AnswerModal({
       </div>
 
       <div style={{ marginBottom: 14 }}>
-        <label className="fl">Verknüpfte Use Cases</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 120, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8, padding: 8 }}>
-          {useCaseOptions.length === 0 && <span style={{ fontSize: 12, color: 'var(--muted)' }}>Keine Use Cases vorhanden.</span>}
-          {useCaseOptions.map(u => {
-            const sel = selectedUcs.has(u.id);
-            return (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => toggleUc(u.id)}
-                className={`btn btn-sm ${sel ? 'btn-primary' : 'btn-outline'}`}
-                style={{ fontSize: 11 }}
-                title={u.title}
-              >
-                {u.id}
-              </button>
-            );
-          })}
-        </div>
+        <label className="fl">Verknüpfte Use Cases <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(Strg/Cmd-Klick für Mehrfachauswahl)</span></label>
+        {useCaseOptions.length === 0 ? (
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Keine Use Cases vorhanden.</div>
+        ) : (
+          <select multiple value={[...selectedUcs]} onChange={handleUcSelectChange} size={Math.min(8, Math.max(4, useCaseOptions.length))} style={{ width: '100%' }}>
+            {useCaseOptions.map(u => (
+              <option key={u.id} value={u.id}>{u.id} — {u.title}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       <div style={{ display: 'grid', gap: 10, marginBottom: 4 }}>
@@ -568,6 +560,7 @@ export default function IsoGovernance() {
       {isAdmin && tab === 'import' && <ImportPanel />}
 
       <AnswerModal
+        key={editQ?.id ?? 'none'}
         question={editQ}
         answer={editQ ? answerFor(editQ.id, answers) : DEFAULT_ANSWER}
         useCaseOptions={useCases.map(u => ({ id: u.id, title: u.title }))}
