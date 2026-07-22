@@ -64,7 +64,8 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
   const [sortField, setSortField] = useState<keyof UseCase>('id');
   const [sortDir,   setSortDir]   = useState<'asc' | 'desc'>('asc');
   const [page,      setPage]      = useState(0);
-  const [editUC,    setEditUC]    = useState<UseCase | null>(null);
+  const [editUcId,  setEditUcId]  = useState<string | null>(null);
+  const editUC = useCases.find(u => u.id === editUcId) ?? null;
 
   // ── Filtern ──────────────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -205,7 +206,7 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
                 <tr
                   key={uc.id}
                   className="clickable"
-                  onClick={() => setEditUC(uc)}
+                  onClick={() => setEditUcId(uc.id)}
                 >
                   <td>
                     <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 12, color: 'var(--muted)' }}>
@@ -303,9 +304,9 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
       {/* Edit Modal */}
       <EditModal
         uc={editUC}
-        onClose={() => setEditUC(null)}
+        onClose={() => setEditUcId(null)}
         artStatus={artStatus}
-        onNavToArt={(screen, ucId) => { setEditUC(null); onNav(screen, ucId); }}
+        onNavToArt={(screen, ucId) => { setEditUcId(null); onNav(screen, ucId); }}
       />
     </div>
   );
