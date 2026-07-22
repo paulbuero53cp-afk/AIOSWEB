@@ -269,6 +269,90 @@ export function aiosUserToSp(u: Partial<AiosUser>): Record<string, unknown> {
   return fields;
 }
 
+// ── ISO 42001 Governance ──────────────────────────────────────
+
+export interface IsoQuestion {
+  id: string;
+  domain: string;
+  section: string;
+  question: string;
+  source: string;
+  priority: string;
+  _spId?: string;
+}
+
+export function spToIsoQuestion(spId: string, f: Record<string, unknown>): IsoQuestion {
+  return {
+    _spId:    spId,
+    id:       s(f['QuestionId']),
+    domain:   s(f['Domain']),
+    section:  s(f['Section']),
+    question: s(f['QuestionText']),
+    source:   s(f['Source']),
+    priority: s(f['Priority'], 'Mittel'),
+  };
+}
+
+export function isoQuestionToSp(q: Partial<IsoQuestion>): Record<string, unknown> {
+  const fields: Record<string, unknown> = {};
+  if (q.id       !== undefined) fields['QuestionId']   = q.id;
+  if (q.domain   !== undefined) fields['Domain']       = q.domain;
+  if (q.section  !== undefined) fields['Section']      = q.section;
+  if (q.question !== undefined) fields['QuestionText'] = q.question;
+  if (q.source   !== undefined) fields['Source']       = q.source;
+  if (q.priority !== undefined) fields['Priority']     = q.priority;
+  return fields;
+}
+
+export interface IsoAnswer {
+  questionId: string;
+  status: string;
+  maturity: number;
+  answer: string;
+  evidence: string;
+  actions: string;
+  owner: string;
+  due: string;
+  usecases: string[];
+  updatedAt?: string;
+  updatedBy?: string;
+  _spId?: string;
+}
+
+export function spToIsoAnswer(spId: string, f: Record<string, unknown>): IsoAnswer {
+  const ucRaw = s(f['LinkedUseCases']);
+  return {
+    _spId:      spId,
+    questionId: s(f['QuestionId']),
+    status:     s(f['Status'], 'Offen') as IsoAnswer['status'],
+    maturity:   n(f['Maturity'], 0),
+    answer:     s(f['Answer']),
+    evidence:   s(f['Evidence']),
+    actions:    s(f['Actions']),
+    owner:      s(f['Owner']),
+    due:        s(f['Due']),
+    usecases:   ucRaw ? ucRaw.split(',').map(x => x.trim()).filter(Boolean) : [],
+    updatedAt:  s(f['Modified']),
+    updatedBy:  s(f['UpdatedBy_x']),
+  };
+}
+
+export function isoAnswerToSp(a: Partial<IsoAnswer>): Record<string, unknown> {
+  const fields: Record<string, unknown> = {};
+  if (a.questionId !== undefined) fields['QuestionId'] = a.questionId;
+  if (a.status     !== undefined) fields['Status']     = a.status;
+  if (a.maturity   !== undefined) fields['Maturity']   = a.maturity;
+  if (a.answer     !== undefined) fields['Answer']     = a.answer;
+  if (a.evidence   !== undefined) fields['Evidence']   = a.evidence;
+  if (a.actions    !== undefined) fields['Actions']    = a.actions;
+  if (a.owner      !== undefined) fields['Owner']      = a.owner;
+  if (a.usecases   !== undefined) fields['LinkedUseCases'] = a.usecases.join(', ');
+  if (a.updatedBy  !== undefined) fields['UpdatedBy_x'] = a.updatedBy;
+  // DateTime-Spalte: leeren String nicht senden — SharePoint lehnt '' ab (→ 500).
+  if (a.due) fields['Due'] = a.due;
+  return fields;
+}
+
 // ── Audit Log ─────────────────────────────────────────────────
 
 export interface AuditEntry {

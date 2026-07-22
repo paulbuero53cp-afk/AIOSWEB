@@ -341,7 +341,7 @@ export type Screen =
   | 'dashboard' | 'portfolio' | 'aistrategy' | 'usecases' | 'new'
   | 'governance' | 'incidents' | 'agenthub' | 'artefakthub'
   | 'riskassess' | 'gatechecks' | 'bizcases' | 'dsfa' | 'auditlog' | 'info'
-  | 'ucdashboard' | 'users' | 'aitools' | 'reports';
+  | 'ucdashboard' | 'users' | 'aitools' | 'reports' | 'isogov';
 
 // ── AI Tool (Register erlaubter KI-Tools) ─────────────────────
 export type AiToolStatus =
@@ -370,6 +370,35 @@ export interface AiTool {
   updatedAt: string;
   createdBy: string;
   updatedBy: string;
+  _spId?: string;
+}
+
+// ── ISO 42001 Governance ───────────────────────────────────────
+export type IsoAnswerStatus = 'Offen' | 'In Bearbeitung' | 'Beantwortet' | 'Risiko';
+export type IsoPriority = 'Hoch' | 'Mittel' | 'Niedrig';
+
+export interface IsoQuestion {
+  id: string;            // Q-001
+  domain: string;        // §4 Context of the organization
+  section: string;       // Section 4.1 - External Context
+  question: string;
+  source: string;
+  priority: string;
+  _spId?: string;
+}
+
+export interface IsoAnswer {
+  questionId: string;    // referenziert IsoQuestion.id
+  status: IsoAnswerStatus;
+  maturity: number;      // 0-5
+  answer: string;
+  evidence: string;
+  actions: string;
+  owner: string;
+  due: string;
+  usecases: string[];    // verknüpfte UseCase.id
+  updatedAt?: string;
+  updatedBy?: string;
   _spId?: string;
 }
 

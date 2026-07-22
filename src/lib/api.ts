@@ -3,7 +3,7 @@
 //  Alle Calls gehen gegen /api/* (Azure Functions via SWA-Proxy)
 //  Kein direkter Graph-Aufruf aus dem Frontend
 // ─────────────────────────────────────────────────────────────
-import type { UseCase, Incident, AuditEntry, AppConfig, AiTool } from '@/types';
+import type { UseCase, Incident, AuditEntry, AppConfig, AiTool, IsoQuestion, IsoAnswer } from '@/types';
 
 const BASE = '/api';
 
@@ -136,6 +136,23 @@ export const exchangeApi = {
       method: 'POST',
       body: JSON.stringify(bundle),
     }),
+};
+
+// ── ISO 42001 Governance ──────────────────────────────────────
+export interface IsoImportResult { imported: number; updated: number; errors: string[] }
+
+export const isoApi = {
+  questions: () => apiFetch<IsoQuestion[]>('/iso/questions'),
+  answers:   () => apiFetch<IsoAnswer[]>('/iso/answers'),
+
+  saveAnswer: (questionId: string, patch: Partial<IsoAnswer>) =>
+    apiFetch<IsoAnswer>(`/iso/answers/${questionId}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+
+  importQuestions: (rows: Partial<IsoQuestion>[]) =>
+    apiFetch<IsoImportResult>('/iso/questions/import', { method: 'POST', body: JSON.stringify({ rows }) }),
+
+  importAnswers: (rows: Partial<IsoAnswer>[]) =>
+    apiFetch<IsoImportResult>('/iso/answers/import', { method: 'POST', body: JSON.stringify({ rows }) }),
 };
 
 // ── SWR Fetcher (kompatibel mit useSWR) ──────────────────────

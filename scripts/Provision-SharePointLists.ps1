@@ -271,6 +271,49 @@ foreach ($f in $toolFields) {
     EnsureField -ListTitle "AIOS_AiTools" -InternalName $f.N -DisplayName $f.D -Type $f.T -Extra $extra
 }
 
+# ════════════════════════════════════════════════════════════════
+# 8. AIOS_ISOQuestions (ISO 42001 Fragenkatalog)
+# ════════════════════════════════════════════════════════════════
+Write-Host "`n[8] AIOS_ISOQuestions" -ForegroundColor Cyan
+EnsureList -Title "AIOS_ISOQuestions" -Description "ISO 42001 Governance-Fragenkatalog (per CSV-Import befuellt)" | Out-Null
+
+$isoQFields = @(
+    @{ N="QuestionId";   D="Frage-ID";       T="Text" },
+    @{ N="Domain";       D="Domäne (§)";      T="Text" },
+    @{ N="Section";      D="Abschnitt";       T="Text" },
+    @{ N="QuestionText"; D="Fragetext";       T="Note" },
+    @{ N="Source";       D="Quelle";          T="Text" },
+    @{ N="Priority";     D="Priorität";       T="Choice"; Extra=@{Choices=@("Hoch","Mittel","Niedrig")} }
+)
+foreach ($f in $isoQFields) {
+    $extra = if ($f.Extra) { $f.Extra } else { @{} }
+    EnsureField -ListTitle "AIOS_ISOQuestions" -InternalName $f.N -DisplayName $f.D -Type $f.T -Extra $extra
+}
+Write-Host "  → Fragenkatalog via App: Admin → ISO 42001 Governance → Import" -ForegroundColor DarkGray
+
+# ════════════════════════════════════════════════════════════════
+# 9. AIOS_ISOAnswers (ISO 42001 Antworten/Bewertungen)
+# ════════════════════════════════════════════════════════════════
+Write-Host "`n[9] AIOS_ISOAnswers" -ForegroundColor Cyan
+EnsureList -Title "AIOS_ISOAnswers" -Description "ISO 42001 Antworten, Reifegrad, Evidenz, Massnahmen je Frage" | Out-Null
+
+$isoAFields = @(
+    @{ N="QuestionId";     D="Frage-ID";              T="Text" },
+    @{ N="Status";         D="Status";                T="Choice"; Extra=@{Choices=@("Offen","In Bearbeitung","Beantwortet","Risiko")} },
+    @{ N="Maturity";       D="Reifegrad (0-5)";       T="Number" },
+    @{ N="Answer";         D="Antwort";               T="Note" },
+    @{ N="Evidence";       D="Evidenz";               T="Note" },
+    @{ N="Actions";        D="Maßnahmen";             T="Note" },
+    @{ N="Owner";          D="Verantwortlich";        T="Text" },
+    @{ N="Due";            D="Fällig am";             T="DateTime" },
+    @{ N="LinkedUseCases"; D="Verknüpfte Use Cases";  T="Note" },
+    @{ N="UpdatedBy_x";    D="Geändert von (Actor)";  T="Text" }
+)
+foreach ($f in $isoAFields) {
+    $extra = if ($f.Extra) { $f.Extra } else { @{} }
+    EnsureField -ListTitle "AIOS_ISOAnswers" -InternalName $f.N -DisplayName $f.D -Type $f.T -Extra $extra
+}
+
 # ── Zusammenfassung ───────────────────────────────────────────
 Write-Host "`n════════════════════════════════════" -ForegroundColor Cyan
 Write-Host "✓ Provisioning abgeschlossen" -ForegroundColor Green

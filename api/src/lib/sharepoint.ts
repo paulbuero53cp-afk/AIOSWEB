@@ -70,9 +70,11 @@ async function getSiteId(): Promise<string> {
 }
 
 // ── List-Namen aus ENV ────────────────────────────────────────
-function listName(key: 'USECASES' | 'INCIDENTS' | 'ARTEFAKTE' | 'AUDITLOG' | 'CONFIG' | 'USERS' | 'AITOOLS'): string {
-  if (key === 'USERS')   return process.env['LIST_USERS']   ?? 'AIOS_Users';
-  if (key === 'AITOOLS') return process.env['LIST_AITOOLS'] ?? 'AIOS_AiTools';
+function listName(key: 'USECASES' | 'INCIDENTS' | 'ARTEFAKTE' | 'AUDITLOG' | 'CONFIG' | 'USERS' | 'AITOOLS' | 'ISOQUESTIONS' | 'ISOANSWERS'): string {
+  if (key === 'USERS')        return process.env['LIST_USERS']        ?? 'AIOS_Users';
+  if (key === 'AITOOLS')      return process.env['LIST_AITOOLS']      ?? 'AIOS_AiTools';
+  if (key === 'ISOQUESTIONS') return process.env['LIST_ISOQUESTIONS'] ?? 'AIOS_ISOQuestions';
+  if (key === 'ISOANSWERS')   return process.env['LIST_ISOANSWERS']   ?? 'AIOS_ISOAnswers';
   return process.env[`LIST_${key}`] ?? `AIOS_${key.charAt(0) + key.slice(1).toLowerCase()}`;
 }
 

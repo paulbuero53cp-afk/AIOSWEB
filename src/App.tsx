@@ -23,6 +23,7 @@ import InfoScreen        from '@/components/screens/Info';
 import AiStrategyScreen  from '@/components/screens/AiStrategy';
 import UcDashboard       from '@/components/screens/UcDashboard';
 import UsersScreen       from '@/components/screens/Users';
+import IsoGovernance     from '@/components/screens/IsoGovernance';
 import { swrFetcher } from '@/lib/api';
 import { APP_VERSION } from '@/lib/version';
 import type { Screen, UseCase, Incident, AppConfig } from '@/types';
@@ -57,6 +58,7 @@ const NAV_SECTIONS: NavSection[] = [
       { id: 'governance',  labelKey: 'nav.governance',  icon: '🛡' },
       { id: 'aitools',     labelKey: 'nav.aitools',     icon: '✅' },
       { id: 'incidents',   labelKey: 'nav.incidents',   icon: '⚠️' },
+      { id: 'isogov',      labelKey: 'nav.isogov',      icon: '📐' },
     ],
   },
   {
@@ -295,6 +297,7 @@ function AppShell() {
           {screen === 'auditlog'   && <AuditLogScreen />}
           {screen === 'aitools'    && <AiToolsScreen onNav={(s, ucId) => { setSelectedUcId(ucId); setScreen(s as Screen); }} />}
           {screen === 'reports'    && <ReportsScreen />}
+          {screen === 'isogov'     && <IsoGovernance />}
           {screen === 'info'       && <InfoScreen />}
           {screen === 'aistrategy' && <AiStrategyScreen onNav={(s) => setScreen(s as Screen)} />}
         </div>

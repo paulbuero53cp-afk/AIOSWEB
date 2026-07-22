@@ -11,7 +11,7 @@ import type { SpItem, SpPageResult } from './sharepoint';
 
 export type { SpItem, SpPageResult };
 
-type ListKey = 'USECASES' | 'INCIDENTS' | 'ARTEFAKTE' | 'AUDITLOG' | 'CONFIG';
+type ListKey = 'USECASES' | 'INCIDENTS' | 'ARTEFAKTE' | 'AUDITLOG' | 'CONFIG' | 'USERS' | 'AITOOLS' | 'ISOQUESTIONS' | 'ISOANSWERS';
 
 interface DbRow {
   sp_id:      string;

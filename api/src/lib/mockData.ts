@@ -1,7 +1,7 @@
 // Mock data for local development (USE_MOCK_DATA=true)
 // Simulates SharePoint data without real Azure credentials
 
-import type { UseCase, Incident, AuditEntry, AiosUser } from './mappers';
+import type { UseCase, Incident, AuditEntry, AiosUser, IsoQuestion, IsoAnswer } from './mappers';
 
 const NOW = new Date().toISOString();
 const ADMIN = 'admin@demo.local';
@@ -257,3 +257,13 @@ export const MOCK_ARTEFAKTE: Record<string, Record<string, Record<string, unknow
     dsfa: {},
   },
 };
+
+// ── ISO 42001 Governance (Mock) ────────────────────────────────
+export const MOCK_ISO_QUESTIONS: IsoQuestion[] = [
+  { id: 'Q-001', domain: '§4 Context of the organization', section: 'Section 4.1 - External Context', question: 'Understand how the external environment shapes AI opportunities and constraints.', source: 'Dokumentbasis', priority: 'Mittel' },
+  { id: 'Q-021', domain: '§5 Leadership', section: 'Section 5.1 - Leadership Commitment to AI', question: 'Clarify how leadership views AI and the level of ambition.', source: 'Dokumentbasis', priority: 'Mittel' },
+  { id: 'Q-135', domain: '§8 Operation', section: '8.1 - Definition and Control of AI Use Cases', question: 'How AI systems are operationally framed and bounded.', source: 'Dokumentbasis', priority: 'Mittel' },
+];
+export const MOCK_ISO_ANSWERS: IsoAnswer[] = [
+  { questionId: 'Q-001', status: 'Beantwortet', maturity: 4, answer: 'Mock-Antwort', evidence: 'Mock-Evidenz', actions: '', owner: 'AI Owner', due: '', usecases: [] },
+];
