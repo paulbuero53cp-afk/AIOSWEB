@@ -8,6 +8,7 @@
 //  Abgedeckte Listen:
 //    AIOS_Usecases · AIOS_AiTools · AIOS_Incidents
 //    AIOS_Artefakte · AIOS_AuditLog · AIOS_Users · AIOS_Config
+//    AIOS_ISOQuestions · AIOS_ISOAnswers
 // ─────────────────────────────────────────────────────────────
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
@@ -15,13 +16,14 @@ import { requireRole, isAuthError } from '../lib/auth';
 import { getGraphClient } from '../lib/graphClient';
 import { serverError } from '../lib/http';
 
-type ColType = 'text' | 'note' | 'boolean' | 'number';
+type ColType = 'text' | 'note' | 'boolean' | 'number' | 'choice' | 'datetime';
 
 interface ColumnSpec {
-  list: string;     // SP-Listenname (display name)
-  name: string;     // SP-Spaltenname (StaticName)
+  list: string;       // SP-Listenname (display name)
+  name: string;       // SP-Spaltenname (StaticName)
   type: ColType;
-  label?: string;   // Lesbare Beschreibung fürs Report
+  label?: string;     // Lesbare Beschreibung fürs Report
+  choices?: string[]; // nur bei type 'choice'
 }
 
 // ── Listennamen (ENV-Override analog zu sharepoint.ts) ────────
@@ -37,6 +39,8 @@ const L = {
   AUDIT:    listName('AUDITLOG',  'AIOS_AuditLog'),
   USERS:    listName('USERS',     'AIOS_Users'),
   CONFIG:   listName('CONFIG',    'AIOS_Config'),
+  ISOQ:     listName('ISOQUESTIONS', 'AIOS_ISOQuestions'),
+  ISOA:     listName('ISOANSWERS',   'AIOS_ISOAnswers'),
 };
 
 // ── Vollständige Spalten-Spezifikation ────────────────────────
@@ -157,6 +161,26 @@ const ALL_COLUMNS: ColumnSpec[] = [
 
   // ── AIOS_Config ────────────────────────────────────────────
   { list: L.CONFIG, name: 'ConfigValue', type: 'note',   label: 'Konfigurationswert (JSON)' },
+
+  // ── AIOS_ISOQuestions ──────────────────────────────────────
+  { list: L.ISOQ, name: 'QuestionId',   type: 'text',   label: 'Frage-ID (Q-NNN)' },
+  { list: L.ISOQ, name: 'Domain',       type: 'text',   label: 'Domäne (§)' },
+  { list: L.ISOQ, name: 'Section',      type: 'text',   label: 'Abschnitt' },
+  { list: L.ISOQ, name: 'QuestionText', type: 'note',   label: 'Fragetext' },
+  { list: L.ISOQ, name: 'Source',       type: 'text',   label: 'Quelle' },
+  { list: L.ISOQ, name: 'Priority',     type: 'choice', label: 'Priorität', choices: ['Hoch', 'Mittel', 'Niedrig'] },
+
+  // ── AIOS_ISOAnswers ────────────────────────────────────────
+  { list: L.ISOA, name: 'QuestionId',     type: 'text',    label: 'Frage-ID (Q-NNN)' },
+  { list: L.ISOA, name: 'Status',         type: 'choice',  label: 'Status', choices: ['Offen', 'In Bearbeitung', 'Beantwortet', 'Risiko'] },
+  { list: L.ISOA, name: 'Maturity',       type: 'number',  label: 'Reifegrad (0-5)' },
+  { list: L.ISOA, name: 'Answer',         type: 'note',    label: 'Antwort' },
+  { list: L.ISOA, name: 'Evidence',       type: 'note',    label: 'Evidenz' },
+  { list: L.ISOA, name: 'Actions',        type: 'note',    label: 'Maßnahmen' },
+  { list: L.ISOA, name: 'Owner',          type: 'text',    label: 'Verantwortlich' },
+  { list: L.ISOA, name: 'Due',            type: 'datetime',label: 'Fällig am' },
+  { list: L.ISOA, name: 'LinkedUseCases', type: 'note',    label: 'Verknüpfte Use Cases (kommagetrennt)' },
+  { list: L.ISOA, name: 'UpdatedBy_x',    type: 'text',    label: 'Geändert von (UPN)' },
 ];
 
 // ── Graph-Helpers ─────────────────────────────────────────────
@@ -192,10 +216,12 @@ async function createColumn(siteId: string, listDisplayName: string, col: Column
     name: col.name,
     description: col.label ?? '',
   };
-  if (col.type === 'text')    body['text']    = { allowMultipleLines: false, maxLength: 255 };
-  if (col.type === 'note')    body['text']    = { allowMultipleLines: true,  maxLength: 0 };
-  if (col.type === 'boolean') body['boolean'] = {};
-  if (col.type === 'number')  body['number']  = {};
+  if (col.type === 'text')     body['text']     = { allowMultipleLines: false, maxLength: 255 };
+  if (col.type === 'note')     body['text']     = { allowMultipleLines: true,  maxLength: 0 };
+  if (col.type === 'boolean')  body['boolean']  = {};
+  if (col.type === 'number')   body['number']   = {};
+  if (col.type === 'choice')   body['choice']   = { allowTextEntry: false, choices: col.choices ?? [], displayAs: 'dropDownMenu' };
+  if (col.type === 'datetime') body['dateTime'] = { displayAs: 'default', format: 'dateOnly' };
 
   await getGraphClient()
     .api(`/sites/${siteId}/lists/${listDisplayName}/columns`)
