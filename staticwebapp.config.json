@@ -36,7 +36,7 @@
     }
   },
   "globalHeaders": {
-    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors https://handsonaiowl771.sharepoint.com",
+    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://*.azurestaticapps.net; font-src 'self' https://fonts.gstatic.com https://*.azurestaticapps.net; img-src 'self' data:; connect-src 'self' https://*.azurestaticapps.net; frame-ancestors https://handsonaiowl771.sharepoint.com",
     "X-Content-Type-Options": "nosniff",
     "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
     "Referrer-Policy": "strict-origin-when-cross-origin"

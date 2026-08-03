@@ -17,6 +17,14 @@ export async function apiFetch<T>(
     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'AIOS', ...options?.headers },
   });
 
+  // Session abgelaufen: SWA leitet 401 → /.auth/login/aad um, fetch() folgt dem
+  // Redirect automatisch und landet auf der Login-Seite (HTML statt JSON).
+  // Sauberer Re-Login statt kryptischem "Unexpected token '<'" JSON-Parse-Fehler.
+  if (res.redirected) {
+    window.location.href = '/.auth/login/aad';
+    return new Promise<T>(() => {}); // Navigation läuft — Promise löst absichtlich nie auf
+  }
+
   if (!res.ok) {
     const body = await res.text().catch(() => '');
     throw new Error(`API ${res.status}: ${body || res.statusText}`);
