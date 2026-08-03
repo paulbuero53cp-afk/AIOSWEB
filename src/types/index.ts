@@ -162,6 +162,7 @@ export interface BusinessCase {
   i_umsatz: number;            // €/Jahr
   i_kundenzuf: number;         // NPS-Punkte
   i_sonstige: number;          // €/Jahr
+  i_einmalig: number;          // €, einmalig — wirkt nur im ersten Jahr (z.B. Alt-Lizenz-Ablöse, Einmalbonus)
   // Kosten
   c_entwicklung: number;       // einmalig €
   c_lizenz: number;            // €/Jahr
@@ -175,7 +176,8 @@ export interface BusinessCase {
 
 export interface BcCalculation {
   monetZeit: number;
-  gesamtNutzen: number;
+  gesamtNutzen: number;       // laufender (jährlicher) Nutzen — OHNE Einmalposition
+  einmaligerNutzen: number;   // i_einmalig, wirkt nur in Jahr 1
   einmal: number;
   jaehrlich: number;
   roi3: number;

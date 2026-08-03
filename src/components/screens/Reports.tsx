@@ -173,9 +173,10 @@ export default function Reports() {
   const totalInvest        = rowSum(realizedRows, r => r.calc.einmal);
   const totalAnnualCost    = rowSum(realizedRows, r => r.calc.jaehrlich);
   const totalAnnualBenefit = rowSum(realizedRows, r => r.calc.gesamtNutzen);
+  const totalOnetime       = rowSum(realizedRows, r => r.calc.einmaligerNutzen);
   const netAnnual          = totalAnnualBenefit - totalAnnualCost;
   const totalCost3y        = totalInvest + totalAnnualCost * 3;
-  const totalBenefit3y     = totalAnnualBenefit * 3;
+  const totalBenefit3y     = totalAnnualBenefit * 3 + totalOnetime;
   const portfolioRoi3      = totalCost3y > 0 ? Math.round(((totalBenefit3y - totalCost3y) / totalCost3y) * 100) : 0;
 
   const pipelineInvest  = rowSum(pipelineRows, r => r.calc.einmal);
@@ -203,7 +204,7 @@ export default function Reports() {
     let cum = 0;
     for (let d = new Date(earliest); d <= nowStart; d = addMonths(d, 1)) {
       rowsWithStart.forEach(r => {
-        if (d.getTime() === r.start.getTime()) cum -= r.calc.einmal;
+        if (d.getTime() === r.start.getTime()) cum += r.calc.einmaligerNutzen - r.calc.einmal;
         if (d >= r.start) cum += (r.calc.gesamtNutzen - r.calc.jaehrlich) / 12;
       });
       points.push({ month: monthKey(d), cum: Math.round(cum) });
@@ -389,16 +390,17 @@ export default function Reports() {
                 <strong style={{ color: 'var(--text)' }}>{realizedRows.length}</strong> {t('rep.roiKCount')}
               </div>
               <div style={{ flex: 1 }} />
-              <button className="btn btn-outline btn-sm" onClick={() => exportRoiCSV(bcRows.map(r => ({ id: r.uc.id, title: r.uc.title, lc: r.uc.lc, invest: r.calc.einmal, annualCost: r.calc.jaehrlich, annualBenefit: r.calc.gesamtNutzen, netAnnual: r.calc.gesamtNutzen - r.calc.jaehrlich, breakeven: r.calc.breakeven })))}>⬇ {t('common.csv')}</button>
+              <button className="btn btn-outline btn-sm" onClick={() => exportRoiCSV(bcRows.map(r => ({ id: r.uc.id, title: r.uc.title, lc: r.uc.lc, invest: r.calc.einmal, annualCost: r.calc.jaehrlich, annualBenefit: r.calc.gesamtNutzen, onetimeBenefit: r.calc.einmaligerNutzen, netAnnual: r.calc.gesamtNutzen - r.calc.jaehrlich, breakeven: r.calc.breakeven })))}>⬇ {t('common.csv')}</button>
             </div>
 
             <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)', marginBottom: 8 }}>
               {t('rep.roiRealizedTitle')}
             </div>
-            <div className="kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12, marginBottom: 18 }}>
+            <div className="kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 12, marginBottom: 18 }}>
               <div className="kc"><div className="kc-label">{t('rep.roiKInvest')}</div><div className="kc-value" style={{ fontSize: 20 }}>{eur(totalInvest)}</div></div>
               <div className="kc"><div className="kc-label">{t('rep.roiKAnnualCost')}</div><div className="kc-value" style={{ fontSize: 20 }}>{eur(totalAnnualCost)}</div></div>
               <div className="kc green"><div className="kc-label">{t('rep.roiKAnnualBenefit')}</div><div className="kc-value" style={{ fontSize: 20 }}>{eur(totalAnnualBenefit)}</div></div>
+              <div className="kc green"><div className="kc-label">{t('rep.roiKOnetime')}</div><div className="kc-value" style={{ fontSize: 20 }}>{eur(totalOnetime)}</div></div>
               <div className={`kc ${netAnnual >= 0 ? 'green' : 'red'}`}><div className="kc-label">{t('rep.roiKNetAnnual')}</div><div className="kc-value" style={{ fontSize: 20 }}>{eur(netAnnual)}</div></div>
               <div className={`kc ${portfolioRoi3 >= 0 ? 'green' : 'red'}`}><div className="kc-label">{t('rep.roiKRoi3')}</div><div className="kc-value" style={{ fontSize: 20 }}>{portfolioRoi3}%</div></div>
             </div>
@@ -430,6 +432,7 @@ export default function Reports() {
                   <tr>
                     <th>{t('rep.roiColUc')}</th><th>{t('rep.roiColStatus')}</th>
                     <th>{t('rep.roiColInvest')}</th><th>{t('rep.roiColAnnualBenefit')}</th>
+                    <th>{t('rep.roiKOnetime')}</th>
                     <th>{t('rep.roiColNetAnnual')}</th><th>{t('rep.roiColBreakeven')}</th>
                   </tr>
                 </thead>
@@ -442,6 +445,7 @@ export default function Reports() {
                         <td><span className={`badge ${r.uc.lc === 'Run' ? 'bg' : 'bgr'}`}>{r.uc.lc}</span></td>
                         <td>{eur(r.calc.einmal)}</td>
                         <td>{eur(r.calc.gesamtNutzen)}</td>
+                        <td>{eur(r.calc.einmaligerNutzen)}</td>
                         <td style={{ color: netA >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>{eur(netA)}</td>
                         <td>{r.calc.breakeven >= 999 ? 'n/a' : `${r.calc.breakeven} Mon.`}</td>
                       </tr>

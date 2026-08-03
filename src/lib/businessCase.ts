@@ -12,6 +12,7 @@ export function calcBC(d: Partial<BusinessCase>): BcCalculation {
   const ums   = Number(d.i_umsatz        ?? 0);
   const kuf   = Number(d.i_kundenzuf     ?? 0);
   const sonsN = Number(d.i_sonstige      ?? 0);
+  const einmalN = Number(d.i_einmalig    ?? 0);   // wirkt nur in Jahr 1, nicht laufend
 
   const monetZeit = zeit * 12 * lohn;
   const monetFq   = fq * 500;        // Pauschal €500 Einsparung pro % Fehlerreduktion p.a.
@@ -27,20 +28,24 @@ export function calcBC(d: Partial<BusinessCase>): BcCalculation {
   const einmal    = cEntw + cSch;
   const jaehrlich = cLiz + cBetr + cSonsK;
 
-  // ROI über 3 Jahre
-  const totalNutzen = gesamtNutzen * 3;
+  // ROI über 3 Jahre — Einmalnutzen zählt nur einmal, nicht ×3
+  const totalNutzen = gesamtNutzen * 3 + einmalN;
   const totalKosten = einmal + jaehrlich * 3;
   const roi3 = totalKosten > 0
     ? Math.round(((totalNutzen - totalKosten) / totalKosten) * 100)
     : 0;
 
-  // Breakeven in Monaten
+  // Breakeven in Monaten — Einmalnutzen wirkt sofort (Jahr 1) und senkt die
+  // effektiv zu amortisierende Investition entsprechend.
+  const nettoInvestition = Math.max(0, einmal - einmalN);
   const monatlichNetto = gesamtNutzen / 12 - jaehrlich / 12;
-  const breakeven = monatlichNetto > 0
-    ? Math.ceil(einmal / monatlichNetto)
-    : 999;
+  const breakeven = nettoInvestition === 0
+    ? 0
+    : monatlichNetto > 0
+      ? Math.ceil(nettoInvestition / monatlichNetto)
+      : 999;
 
-  return { monetZeit, gesamtNutzen, einmal, jaehrlich, roi3, breakeven };
+  return { monetZeit, gesamtNutzen, einmaligerNutzen: einmalN, einmal, jaehrlich, roi3, breakeven };
 }
 
 export function eur(v: number): string {

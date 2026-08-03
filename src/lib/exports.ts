@@ -230,14 +230,14 @@ export function exportManagementCSV(rows: [string, string | number][]) {
 // ── ROI / Business-Nutzen-Report ──────────────────────────────
 export interface RoiRow {
   id: string; title: string; lc: string;
-  invest: number; annualCost: number; annualBenefit: number;
+  invest: number; annualCost: number; annualBenefit: number; onetimeBenefit: number;
   netAnnual: number; breakeven: number;
 }
 export function exportRoiCSV(rows: RoiRow[]) {
-  const header = ['id', 'title', 'lifecycle', 'investition_einmalig', 'kosten_pa', 'nutzen_pa', 'netto_nutzen_pa', 'breakeven_monate'];
+  const header = ['id', 'title', 'lifecycle', 'investition_einmalig', 'kosten_pa', 'nutzen_pa', 'einmaliger_nutzen', 'netto_nutzen_pa', 'breakeven_monate'];
   const out = [header.join(',')];
   rows.forEach(r => out.push([
-    r.id, r.title, r.lc, r.invest, r.annualCost, r.annualBenefit, r.netAnnual,
+    r.id, r.title, r.lc, r.invest, r.annualCost, r.annualBenefit, r.onetimeBenefit, r.netAnnual,
     r.breakeven >= 999 ? 'n/a' : r.breakeven,
   ].map(csvCell).join(',')));
   downloadBlob(BOM + out.join('\n'), 'roi-business-nutzen.csv');

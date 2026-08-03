@@ -154,6 +154,18 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
                     onChange={v => set('i_sonstige', v)}
                   />
                 </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', margin: '16px 0 10px' }}>
+                  {t('bc.onetimeBenefit')}
+                </div>
+                <div className="fg">
+                  <NumField
+                    label={t('bc.fEinmalig')}
+                    suffix="€"
+                    value={Number(local.i_einmalig ?? 0)}
+                    onChange={v => set('i_einmalig', v)}
+                    hint={t('bc.einmaligHint')}
+                  />
+                </div>
               </div>
             </div>
 
@@ -197,10 +209,15 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
             {/* Ergebnisse */}
             <div className="card" style={{ marginBottom: 14 }}>
               <div className="ch"><span className="ch-title">{t('bc.calcTitle')}</span></div>
-              <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
                 <ResultKpi
                   label={t('bc.kBenefitYear')}
                   value={eur(calc.gesamtNutzen)}
+                  color="var(--green)"
+                />
+                <ResultKpi
+                  label={t('bc.kOnetime')}
+                  value={eur(calc.einmaligerNutzen)}
                   color="var(--green)"
                 />
                 <ResultKpi
