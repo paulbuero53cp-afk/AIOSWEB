@@ -107,7 +107,19 @@ async function handleExport(req: HttpRequest): Promise<HttpResponseInit> {
   const principal = await requireRole(req, ['AIOS.Admin']);
   if (isAuthError(principal)) return principal;
 
-  if (MOCK) return { status: 200, jsonBody: MOCK_ARTEFAKTE };
+  // MOCK_ARTEFAKTE ist ucId-first ({ [ucId]: { ra, gc, bc, dsfa } }) —
+  // die reale SharePoint-Variante unten ist type-first ({ ra: { [ucId]: … } }).
+  // Hier auf dieselbe Form transponieren, damit Reports.tsx (artExport.bc?.[ucId])
+  // in Mock und Produktion identisch funktioniert.
+  if (MOCK) {
+    const artDB: Record<string, Record<string, Record<string, unknown>>> = { ra: {}, gc: {}, bc: {}, dsfa: {} };
+    for (const [ucId, arts] of Object.entries(MOCK_ARTEFAKTE)) {
+      for (const [type, payload] of Object.entries(arts)) {
+        if (artDB[type]) artDB[type][ucId] = payload as Record<string, unknown>;
+      }
+    }
+    return { status: 200, jsonBody: artDB };
+  }
 
   const items = await listItems('ARTEFAKTE');
   const artDB: Record<string, Record<string, Record<string, unknown>>> = {
