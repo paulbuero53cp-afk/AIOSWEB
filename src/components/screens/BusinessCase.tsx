@@ -109,6 +109,20 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
       ) : loading ? (
         <div className="empty">{t('common.loadingShort')}</div>
       ) : (
+        <div>
+          <div className="card" style={{ marginBottom: 18, padding: '14px 20px', display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+            <div className="fgroup" style={{ maxWidth: 220 }}>
+              <label className="fl">{t('bc.fGoLive')}</label>
+              <input
+                type="date"
+                value={local.goLiveDate ?? ''}
+                onChange={e => set('goLiveDate', e.target.value)}
+              />
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--muted)', lineHeight: 1.5, flex: 1, minWidth: 220 }}>
+              {t('bc.goLiveHint')}
+            </div>
+          </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
           {/* Linke Spalte: Nutzen */}
           <div>
@@ -255,6 +269,7 @@ export default function BusinessCaseScreen({ initialUcId }: { initialUcId?: stri
               </div>
             </div>
           </div>
+        </div>
         </div>
       )}
     </div>

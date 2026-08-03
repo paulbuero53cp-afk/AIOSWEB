@@ -181,10 +181,12 @@ export default function Reports() {
 
   const pipelineInvest  = rowSum(pipelineRows, r => r.calc.einmal);
   const pipelineBenefit = rowSum(pipelineRows, r => r.calc.gesamtNutzen);
+  const approxDateCount = realizedRows.filter(r => !r.bc.goLiveDate).length;
 
-  // Kumulierter Netto-Cashflow seit Erfassung, monatlich — nur realisierte (Run) Use Cases,
-  // da nur diese tatsächlich Ertrag/Kosten erzeugen. Zeitbasis: UC-Erfassungsdatum (kein
-  // separates Go-Live-Datum vorhanden) — im UI transparent als Annäherung ausgewiesen.
+  // Kumulierter Netto-Cashflow seit Wertstart, monatlich — nur realisierte (Run) Use Cases,
+  // da nur diese tatsächlich Ertrag/Kosten erzeugen. Zeitbasis: Business-Case-Feld
+  // goLiveDate; fehlt es (ältere/nicht gepflegte Business Cases), UC-Erfassungsdatum als
+  // Annäherung — im UI transparent ausgewiesen (siehe rep.roiTimelineHint).
   const timeline = useMemo(() => {
     if (realizedRows.length === 0) return [] as { month: string; cum: number }[];
 
@@ -195,7 +197,11 @@ export default function Reports() {
       return new Date(d.getFullYear(), d.getMonth(), 1);
     };
 
-    const rowsWithStart = realizedRows.map(r => ({ ...r, start: monthStart(r.uc.createdAt || r.uc.updatedAt) }));
+    const rowsWithStart = realizedRows.map(r => ({
+      ...r,
+      start: monthStart(r.bc.goLiveDate || r.uc.createdAt || r.uc.updatedAt),
+      isApprox: !r.bc.goLiveDate,
+    }));
     const earliest = rowsWithStart.reduce((a, b) => (a.start < b.start ? a : b)).start;
     const now = new Date();
     const nowStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -420,6 +426,11 @@ export default function Reports() {
                   <>
                     <TimelineChart data={timeline} />
                     <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 8 }}>{t('rep.roiTimelineHint')}</div>
+                    {approxDateCount > 0 && (
+                      <div style={{ fontSize: 11, color: 'var(--yellow)', marginTop: 4 }}>
+                        ⚠ {t('rep.roiApproxWarning', { n: approxDateCount, m: realizedRows.length })}
+                      </div>
+                    )}
                   </>
                 )}
               </div>

@@ -155,6 +155,8 @@ export interface GateChecks {
 // ── Business Case ─────────────────────────────────────────────
 export interface BusinessCase {
   ucId: string;
+  goLiveDate?: string;         // ISO-Date — ab wann Nutzen/Kosten wertmäßig anfallen (Reports-Zeitleiste).
+                                // Fallback ohne Angabe: UseCase.createdAt (Erfassungsdatum, ungenauer Proxy).
   lohnkosten: number;          // €/h, default 65
   // Nutzen
   i_zeitersparnis: number;     // h/Monat

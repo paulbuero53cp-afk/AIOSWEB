@@ -253,8 +253,9 @@ const de: Dict = {
   'rep.roiRealizedTitle': 'Realisierter Nutzen — Use Cases im Betrieb (Run)',
   'rep.roiPipelineTitle': 'Geplanter Nutzen — Pipeline (Idea/Build)',
   'rep.roiPipelineInfo': '{n} Use Case(s) in Vorbereitung mit geplanter Investition {inv} und geplantem Jahresnutzen {ben} — noch nicht realisiert.',
-  'rep.roiTimelineTitle': 'Kumulierter Netto-Cashflow seit Erfassung',
-  'rep.roiTimelineHint': 'Zeitbasis: Erfassungsdatum je Use Case (kein separates Go-Live-Datum verfügbar). Fläche über der Nulllinie = kumulierter Ertrag übersteigt die Investition.',
+  'rep.roiTimelineTitle': 'Kumulierter Netto-Cashflow seit Go-Live',
+  'rep.roiTimelineHint': 'Zeitbasis: Go-Live-Datum aus dem Business Case. Fläche über der Nulllinie = kumulierter Ertrag übersteigt die Investition.',
+  'rep.roiApproxWarning': '{n} von {m} Use Cases ohne gepflegtes Go-Live-Datum — Erfassungsdatum als Näherung verwendet. Im Business Case nachtragen für eine präzisere Zeitleiste.',
   'rep.roiTableTitle': 'Business Cases im Detail',
   'rep.roiColUc': 'Use Case',
   'rep.roiColStatus': 'Status',
@@ -424,6 +425,8 @@ const de: Dict = {
 
   // ── Business Case ──
   'bc.benefitTitle': 'Nutzen (€/Jahr)',
+  'bc.fGoLive': 'Go-Live-Datum (Wertstart)',
+  'bc.goLiveHint': 'Ab wann fallen Nutzen und laufende Kosten wertmäßig an? Bestimmt die Zeitbasis der ROI-Zeitleiste in Berichte. Ohne Angabe wird ersatzweise das Erfassungsdatum des Use Case verwendet (ungenauer Proxy).',
   'bc.fLohn': 'Lohnkostensatz',
   'bc.fZeit': 'Zeitersparnis',
   'bc.suffixHMonth': 'h/Monat',
@@ -744,8 +747,9 @@ const en: Dict = {
   'rep.roiRealizedTitle': 'Realized value — use cases in operation (Run)',
   'rep.roiPipelineTitle': 'Planned value — pipeline (Idea/Build)',
   'rep.roiPipelineInfo': '{n} use case(s) in preparation with planned investment {inv} and planned annual benefit {ben} — not yet realized.',
-  'rep.roiTimelineTitle': 'Cumulative net cash flow since capture',
-  'rep.roiTimelineHint': 'Time basis: use-case capture date (no separate go-live date is tracked). Area above the zero line = cumulative return exceeds the investment.',
+  'rep.roiTimelineTitle': 'Cumulative net cash flow since go-live',
+  'rep.roiTimelineHint': 'Time basis: go-live date from the business case. Area above the zero line = cumulative return exceeds the investment.',
+  'rep.roiApproxWarning': '{n} of {m} use cases have no go-live date set — using the capture date as an approximation. Add it in the Business Case for a more precise timeline.',
   'rep.roiTableTitle': 'Business cases in detail',
   'rep.roiColUc': 'Use Case',
   'rep.roiColStatus': 'Status',
@@ -915,6 +919,8 @@ const en: Dict = {
 
   // ── Business Case ──
   'bc.benefitTitle': 'Benefit (€/year)',
+  'bc.fGoLive': 'Go-live date (value start)',
+  'bc.goLiveHint': 'When do benefit and running costs actually start? Determines the time basis of the ROI timeline in Reports. If left empty, the use case’s capture date is used as a fallback (a less precise proxy).',
   'bc.fLohn': 'Labour cost rate',
   'bc.fZeit': 'Time saved',
   'bc.suffixHMonth': 'h/month',
