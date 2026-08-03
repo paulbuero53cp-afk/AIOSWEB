@@ -263,6 +263,7 @@ const de: Dict = {
   'rep.roiColAnnualBenefit': 'Nutzen p.a.',
   'rep.roiColNetAnnual': 'Netto p.a.',
   'rep.roiColBreakeven': 'Break-even',
+  'rep.roiOpenBc': 'Business Case öffnen',
 
   // ── Incident Log ──
   'inc.loading': 'Lade Incidents…',
@@ -757,6 +758,7 @@ const en: Dict = {
   'rep.roiColAnnualBenefit': 'Benefit p.a.',
   'rep.roiColNetAnnual': 'Net p.a.',
   'rep.roiColBreakeven': 'Break-even',
+  'rep.roiOpenBc': 'Open Business Case',
 
   // ── Incident Log ──
   'inc.loading': 'Loading incidents…',

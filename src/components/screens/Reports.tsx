@@ -106,7 +106,7 @@ function Dist({ title, order, counts, total }: {
   );
 }
 
-export default function Reports() {
+export default function Reports({ onNav }: { onNav: (screen: string, ucId?: string) => void }) {
   const { useCases, loading } = useUseCases();
   const { incidents }         = useIncidents();
   const { tools }             = useAiTools();
@@ -445,13 +445,14 @@ export default function Reports() {
                     <th>{t('rep.roiColInvest')}</th><th>{t('rep.roiColAnnualBenefit')}</th>
                     <th>{t('rep.roiKOnetime')}</th>
                     <th>{t('rep.roiColNetAnnual')}</th><th>{t('rep.roiColBreakeven')}</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   {bcRows.map(r => {
                     const netA = r.calc.gesamtNutzen - r.calc.jaehrlich;
                     return (
-                      <tr key={r.uc.id}>
+                      <tr key={r.uc.id} className="clickable" onClick={() => onNav('bizcases', r.uc.id)}>
                         <td><div style={{ fontWeight: 600 }}>{r.uc.title}</div><div style={{ fontSize: 11, color: 'var(--muted)' }}>{r.uc.cl} · {r.uc.id}</div></td>
                         <td><span className={`badge ${r.uc.lc === 'Run' ? 'bg' : 'bgr'}`}>{r.uc.lc}</span></td>
                         <td>{eur(r.calc.einmal)}</td>
@@ -459,6 +460,16 @@ export default function Reports() {
                         <td>{eur(r.calc.einmaligerNutzen)}</td>
                         <td style={{ color: netA >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>{eur(netA)}</td>
                         <td>{r.calc.breakeven >= 999 ? 'n/a' : `${r.calc.breakeven} Mon.`}</td>
+                        <td onClick={e => e.stopPropagation()}>
+                          <button
+                            className="btn btn-outline btn-sm"
+                            style={{ fontSize: 11 }}
+                            onClick={() => onNav('bizcases', r.uc.id)}
+                            title={t('rep.roiOpenBc')}
+                          >
+                            ✎ {t('rep.roiOpenBc')}
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}

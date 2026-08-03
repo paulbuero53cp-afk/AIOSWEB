@@ -296,7 +296,7 @@ function AppShell() {
           {screen === 'users'      && <UsersScreen />}
           {screen === 'auditlog'   && <AuditLogScreen />}
           {screen === 'aitools'    && <AiToolsScreen onNav={(s, ucId) => { setSelectedUcId(ucId); setScreen(s as Screen); }} />}
-          {screen === 'reports'    && <ReportsScreen />}
+          {screen === 'reports'    && <ReportsScreen onNav={(s, ucId) => { setSelectedUcId(ucId); setScreen(s as Screen); }} />}
           {screen === 'isogov'     && <IsoGovernance />}
           {screen === 'info'       && <InfoScreen />}
           {screen === 'aistrategy' && <AiStrategyScreen onNav={(s) => setScreen(s as Screen)} />}
