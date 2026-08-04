@@ -30,7 +30,12 @@ import type { Screen, UseCase, Incident, AppConfig } from '@/types';
 import '@/styles/global.css';
 
 // ── Sidebar Navigation Structure ─────────────────────────────
-type NavItem = { id: Screen; labelKey: string; icon: string };
+// minRole: kleinste Rolle, die den Punkt sehen darf. Fehlt es, sehen ihn
+// alle angemeldeten/autorisierten Nutzer (mind. Viewer). Die Backend-API
+// erzwingt die Rollen ohnehin serverseitig (requireRole) — das hier ist
+// reine Sidebar-Sichtbarkeit, keine zusätzliche Sicherheitsgrenze.
+type NavRole = 'editor' | 'approver' | 'admin';
+type NavItem = { id: Screen; labelKey: string; icon: string; minRole?: NavRole };
 type NavSection = { titleKey: string; items: NavItem[] };
 
 const NAV_SECTIONS: NavSection[] = [
@@ -56,33 +61,41 @@ const NAV_SECTIONS: NavSection[] = [
     titleKey: 'sec.governance',
     items: [
       { id: 'governance',  labelKey: 'nav.governance',  icon: '🛡' },
-      { id: 'aitools',     labelKey: 'nav.aitools',     icon: '✅' },
-      { id: 'incidents',   labelKey: 'nav.incidents',   icon: '⚠️' },
+      { id: 'aitools',     labelKey: 'nav.aitools',     icon: '✅', minRole: 'editor' },
+      { id: 'incidents',   labelKey: 'nav.incidents',   icon: '⚠️', minRole: 'approver' },
       { id: 'isogov',      labelKey: 'nav.isogov',      icon: '📐' },
     ],
   },
   {
     titleKey: 'sec.documents',
     items: [
-      { id: 'artefakthub', labelKey: 'nav.artefakthub', icon: '📄' },
-      { id: 'riskassess',  labelKey: 'nav.riskassess',  icon: '⚠' },
-      { id: 'gatechecks',  labelKey: 'nav.gatechecks',  icon: '✓' },
-      { id: 'bizcases',    labelKey: 'nav.bizcases',    icon: '📈' },
-      { id: 'dsfa',        labelKey: 'nav.dsfa',        icon: '🔒' },
+      { id: 'artefakthub', labelKey: 'nav.artefakthub', icon: '📄', minRole: 'editor' },
+      { id: 'riskassess',  labelKey: 'nav.riskassess',  icon: '⚠', minRole: 'editor' },
+      { id: 'gatechecks',  labelKey: 'nav.gatechecks',  icon: '✓', minRole: 'editor' },
+      { id: 'bizcases',    labelKey: 'nav.bizcases',    icon: '📈', minRole: 'editor' },
+      { id: 'dsfa',        labelKey: 'nav.dsfa',        icon: '🔒', minRole: 'editor' },
     ],
   },
   {
     titleKey: 'sec.admin',
     items: [
-      { id: 'users',       labelKey: 'nav.users',       icon: '👥' },
-      { id: 'auditlog',    labelKey: 'nav.auditlog',    icon: '📋' },
-      { id: 'info',        labelKey: 'nav.info',        icon: 'ℹ️' },
+      { id: 'users',       labelKey: 'nav.users',       icon: '👥', minRole: 'admin' },
+      { id: 'auditlog',    labelKey: 'nav.auditlog',    icon: '📋', minRole: 'admin' },
+      { id: 'info',        labelKey: 'nav.info',        icon: 'ℹ️', minRole: 'admin' },
     ],
   },
 ];
 
 // Flat list for topbar title lookup
 const NAV_ITEMS: NavItem[] = NAV_SECTIONS.flatMap(s => s.items);
+
+function hasNavAccess(minRole: NavRole | undefined, auth: { isEditor: boolean; isApprover: boolean; isAdmin: boolean }): boolean {
+  if (!minRole) return true;
+  if (minRole === 'editor')   return auth.isEditor;
+  if (minRole === 'approver') return auth.isApprover;
+  if (minRole === 'admin')    return auth.isAdmin;
+  return true;
+}
 
 function Sidebar({
   active,
@@ -98,6 +111,14 @@ function Sidebar({
   config: AppConfig;
 }) {
   const { lang, toggle, t } = useLang();
+  const { isEditor, isApprover, isAdmin } = useAuth();
+  const visibleSections = NAV_SECTIONS
+    .map(section => ({
+      ...section,
+      items: section.items.filter(item => hasNavAccess(item.minRole, { isEditor, isApprover, isAdmin })),
+    }))
+    .filter(section => section.items.length > 0);
+
   return (
     <div className="sidebar">
       <div className="slogo">
@@ -108,7 +129,7 @@ function Sidebar({
         </div>
       </div>
       <nav className="snav">
-        {NAV_SECTIONS.map(section => (
+        {visibleSections.map(section => (
           <div key={section.titleKey}>
             <div className="nsec">{t(section.titleKey)}</div>
             {section.items.map(item => (
