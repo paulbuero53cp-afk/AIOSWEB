@@ -4,7 +4,7 @@
 
 ## 1. Verantwortlicher
 
-Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website und der zugehörigen AIOS-Plattform ist:
+Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist:
 
 Christian Paul
 Bohlenweg 5a
@@ -22,45 +22,25 @@ Diese Website wird bei IONOS gehostet. Beim Aufruf der Website werden automatisc
 
 ## 4. Kontaktformular
 
-Wenn Sie das Kontaktformular nutzen, werden Name, E-Mail-Adresse, Unternehmen (optional), ausgewähltes Thema und Nachrichtentext erhoben. Diese Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage verwendet und nicht an Dritte weitergegeben. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Kommunikation) bzw. Art. 6 Abs. 1 lit. f DSGVO.
+Wenn Sie das Kontaktformular nutzen, werden Name, E-Mail-Adresse, Unternehmen (optional), ausgewähltes Thema und Nachrichtentext erhoben. Diese Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage verwendet und nicht an Dritte weitergegeben. Die Speicherung erfolgt in unserer Datenbank bei Supabase (siehe Abschnitt 7). Nach abschließender Bearbeitung Ihrer Anfrage werden die Daten gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Kommunikation) bzw. Art. 6 Abs. 1 lit. f DSGVO.
 
 ## 5. KI-Readiness-Check
 
-Der freiwillige KI-Schnellcheck läuft vollständig im Browser. Die eingegebenen Antworten werden standardmäßig nicht an einen Server übermittelt. Wenn Sie freiwillig Ihre Kontaktdaten angeben und der Datenverarbeitung zustimmen, werden diese Daten zusammen mit dem anonymisierten Ergebnis zur internen Auswertung gespeichert. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO. Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen (Art. 7 Abs. 3 DSGVO).
+Der freiwillige KI-Schnellcheck läuft vollständig im Browser. Die eingegebenen Antworten werden standardmäßig nicht an einen Server übermittelt. Wenn Sie freiwillig Ihre Kontaktdaten angeben und der Datenverarbeitung zustimmen, werden diese Daten zusammen mit dem anonymisierten Ergebnis zur internen Auswertung in unserer Datenbank bei Supabase (siehe Abschnitt 7) gespeichert. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO. Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen (Art. 7 Abs. 3 DSGVO); die gespeicherten Daten werden dann gelöscht.
 
-## 6. AIOS-Plattform (AI Management System)
+## 6. Newsletter
 
-Ergänzend zu dieser Website betreiben wir die Webanwendung **AIOS** (AI Management System) zur Verwaltung und Governance von KI-Use-Cases. Für die Nutzung der Plattform gilt Folgendes:
+Wenn Sie sich für unseren Newsletter anmelden, verarbeiten wir Ihre E-Mail-Adresse sowie den Zeitpunkt Ihrer Anmeldung, um Ihnen regelmäßig Informationen rund um unsere Angebote und Themen zu Künstlicher Intelligenz zuzusenden. Die Anmeldedaten werden in unserer Datenbank bei Supabase (siehe Abschnitt 7) gespeichert. Rechtsgrundlage ist Ihre Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO. Sie können den Newsletter jederzeit abbestellen — über den Abmeldelink in jeder E-Mail oder formlos per Nachricht an info@handsonai-owl.de. Nach der Abmeldung wird Ihre E-Mail-Adresse aus dem Verteiler gelöscht.
 
-### 6.1 Hosting bei Microsoft Azure
+## 7. Datenspeicherung bei Supabase
 
-Die AIOS-Anwendung wird als Azure Static Web App mit Azure Functions bei Microsoft (Microsoft Ireland Operations Ltd., Dublin, Irland) betrieben. Beim Aufruf der Anwendung verarbeitet Microsoft technisch notwendige Verbindungsdaten (u. a. IP-Adresse, Zeitpunkt des Zugriffs, aufgerufene URL) in Server-Logs. Die Verarbeitung erfolgt auf Grundlage eines Auftragsverarbeitungsvertrags nach Art. 28 DSGVO. Microsoft ist unter dem EU-U.S. Data Privacy Framework zertifiziert. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
+Für die Speicherung der über das Kontaktformular, den KI-Readiness-Check und die Newsletter-Anmeldung erhobenen Daten nutzen wir den Datenbankdienst Supabase (Supabase Inc., 970 Toa Payoh North #07-04, Singapur / Supabase Inc., USA). Unser Supabase-Projekt wird in einem Rechenzentrum innerhalb der Europäischen Union (Frankfurt am Main, Deutschland) betrieben; die Daten verbleiben dort. Mit Supabase besteht ein Auftragsverarbeitungsvertrag nach Art. 28 DSGVO. Rechtsgrundlage der Verarbeitung ist die jeweils im zugehörigen Abschnitt genannte Rechtsgrundlage.
 
-### 6.2 Anmeldung über Microsoft Entra ID
+## 8. Google Fonts
 
-Der Zugang zum internen Bereich der AIOS-Plattform erfolgt über Microsoft Entra ID (Single Sign-on). Dabei verarbeiten wir Ihren Namen, Ihre E-Mail-Adresse, Ihre Benutzerkennung sowie die Ihnen zugewiesene Rolle (Viewer, Editor, Approver, Admin). Zur Aufrechterhaltung der Sitzung werden technisch notwendige Authentifizierungs-Cookies gesetzt. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Nutzungsverhältnis) bzw. Art. 6 Abs. 1 lit. f DSGVO (Zugriffsschutz).
+Diese Website lädt Schriftarten über Google Fonts (Google LLC, Mountain View, CA, USA). Dabei wird beim ersten Seitenaufruf eine Verbindung zu Google-Servern hergestellt und Ihre IP-Adresse übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Weitere Informationen: policies.google.com/privacy
 
-### 6.3 Datenspeicherung in Microsoft 365 / SharePoint
-
-Die in AIOS erfassten Inhalte (Use Cases, Bewertungen, Vorfälle, Benutzerkonten) werden in SharePoint-Listen innerhalb unserer Microsoft-365-Umgebung gespeichert. Soweit dabei personenbezogene Daten verarbeitet werden (z. B. Name oder E-Mail-Adresse der fachlich verantwortlichen Person eines Use Cases), dienen diese ausschließlich der internen Organisation und Governance. Rechtsgrundlage: Art. 6 Abs. 1 lit. b und f DSGVO.
-
-### 6.4 Öffentliches Einreichungsformular für KI-Use-Cases
-
-Über das öffentlich zugängliche Einreichungsformular können Ideen für KI-Use-Cases vorgeschlagen werden. Erhoben werden die Angaben zum Use Case (u. a. Titel, Beschreibung, Problemstellung, eingesetzte Systeme) sowie — optional — Name und E-Mail-Adresse der verantwortlichen Person. Diese Angaben werden ausschließlich zur Prüfung und Bearbeitung des Vorschlags verwendet und nicht an Dritte weitergegeben. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (freiwillige Angabe) bzw. Art. 6 Abs. 1 lit. f DSGVO.
-
-### 6.5 Agent Hub (öffentlicher Katalog)
-
-Im öffentlich einsehbaren Agent Hub werden ausschließlich freigegebene, produktive KI-Use-Cases mit allgemeinen Informationen (Titel, Beschreibung, Einsatzbereich, System, fachliche Ansprechperson) veröffentlicht. Namen von Ansprechpersonen werden nur nach interner Freigabe angezeigt. Betroffene können der Veröffentlichung jederzeit widersprechen (Art. 21 DSGVO); die Angabe wird dann entfernt. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
-
-### 6.6 Audit-Protokollierung
-
-Änderungen an Datensätzen der AIOS-Plattform (z. B. Anlegen, Bearbeiten, Freigeben oder Löschen von Use Cases) werden in einem Audit-Log protokolliert. Gespeichert werden die Benutzerkennung bzw. E-Mail-Adresse der handelnden Person, Zeitpunkt, Aktion und geänderte Felder. Das Audit-Log dient der Nachvollziehbarkeit, Governance und IT-Sicherheit; der Zugriff ist auf Administratoren beschränkt. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
-
-## 7. Google Fonts
-
-Diese Website und die AIOS-Plattform laden Schriftarten über Google Fonts (Google LLC, Mountain View, CA, USA). Dabei wird beim ersten Seitenaufruf eine Verbindung zu Google-Servern hergestellt und Ihre IP-Adresse übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Weitere Informationen: policies.google.com/privacy
-
-## 8. Ihre Rechte
+## 9. Ihre Rechte
 
 **Auskunft (Art. 15 DSGVO)**
 Sie können jederzeit Auskunft darüber verlangen, welche Daten wir über Sie gespeichert haben.
@@ -82,6 +62,6 @@ Sie haben das Recht, sich bei der Landesbeauftragten für Datenschutz und Inform
 
 Zur Ausübung Ihrer Rechte wenden Sie sich an: info@handsonai-owl.de
 
-## 9. Änderungen dieser Erklärung
+## 10. Änderungen dieser Erklärung
 
-Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf zu aktualisieren, insbesondere bei funktionalen Erweiterungen der Website oder der AIOS-Plattform. Die jeweils aktuelle Version ist auf dieser Seite abrufbar.
+Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf zu aktualisieren, insbesondere wenn neue Funktionen oder Dienste auf der Website eingebunden werden. Die jeweils aktuelle Version ist auf dieser Seite abrufbar.
