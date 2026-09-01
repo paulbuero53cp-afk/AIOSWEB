@@ -27,9 +27,9 @@ Wenn Sie das Kontaktformular nutzen, werden Name, E-Mail-Adresse, Unternehmen (o
 
 Auf dieser Website bieten wir freiwillige, KI-gestützte Selbsttests an. Ihre Antworten — beim Reifegrad-Interview auch Ihr angegebener Name und Ihre Chat-Nachrichten — werden zur Auswertung über einen von uns betriebenen technischen Proxy (Cloudflare Workers; Cloudflare Inc., USA) an die KI-Schnittstelle von Anthropic (Anthropic PBC, San Francisco, USA) übermittelt und dort ausschließlich zur Erstellung Ihrer Auswertung verarbeitet. Eine dauerhafte Speicherung Ihrer Antworten durch uns findet nicht statt; Anthropic nutzt über die API übermittelte Inhalte standardmäßig nicht zum Training seiner Modelle. Bitte geben Sie in Freitextfeldern keine sensiblen Daten und keine personenbezogenen Daten Dritter ein. Optional angegebene Kontaktdaten (Name, E-Mail im KI-Readiness-Check) verbleiben in Ihrem Browser und werden nicht an uns oder Dritte übermittelt. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (die Nutzung ist freiwillig); für die technische Bereitstellung Art. 6 Abs. 1 lit. f DSGVO.
 
-## 6. Google Fonts
+## 6. Keine Cookies, kein Tracking, keine externen Schriften
 
-Diese Website lädt Schriftarten über Google Fonts (Google LLC, Mountain View, CA, USA). Dabei wird beim ersten Seitenaufruf eine Verbindung zu Google-Servern hergestellt und Ihre IP-Adresse übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Weitere Informationen: policies.google.com/privacy
+Diese Website setzt keine Cookies, verwendet keine Analyse- oder Tracking-Dienste und lädt keine Schriftarten oder sonstigen Ressourcen von Google. Alle Schriften werden lokal aus den Systemschriften Ihres Geräts dargestellt.
 
 ## 7. Ihre Rechte
 

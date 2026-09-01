@@ -6,9 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HandsOnAI OWL – KI-Beratung für den Mittelstand</title>
 <meta name="description" content="Praxisnahe KI-Beratung, Workshops und Implementierung für KMU in OWL und der DACH-Region. Ohne Buzzwords, ohne Vendor-Lock-in.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<!-- Keine externen Schriften — Systemschriften, keine Verbindung zu Google -->
 <style>
 /* ── RESET & VARS ─────────────────────────────────────── */
 :root{
@@ -20,8 +18,8 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;font-size:16px}
-body{font-family:'Asap',sans-serif;color:var(--text);background:var(--off);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-h1,h2,h3,h4{font-family:'Asap',sans-serif;line-height:1.2;letter-spacing:-.02em}
+body{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;color:var(--text);background:var(--off);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;line-height:1.2;letter-spacing:-.02em}
 a{color:inherit;text-decoration:none}
 img{max-width:100%;display:block}
 
@@ -34,12 +32,12 @@ img{max-width:100%;display:block}
   padding:0 2rem;transition:box-shadow .3s;
 }
 #nav.scrolled{box-shadow:var(--sh)}
-.nav-logo{font-family:'Asap',sans-serif;font-weight:800;font-size:1.05rem;color:var(--navy);display:flex;align-items:center;gap:8px;cursor:pointer}
+.nav-logo{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:800;font-size:1.05rem;color:var(--navy);display:flex;align-items:center;gap:8px;cursor:pointer}
 .nav-logo span{background:var(--blue);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
 .nav-links{display:flex;align-items:center;gap:1.75rem}
 .nav-links a{font-size:.84rem;font-weight:500;color:var(--muted);transition:color .2s;cursor:pointer}
 .nav-links a:hover{color:var(--navy)}
-.nav-cta{background:var(--navy);color:#fff!important;font-family:'Asap',sans-serif;font-weight:700;font-size:.82rem!important;padding:7px 16px;border-radius:8px;transition:background .2s!important}
+.nav-cta{background:var(--navy);color:#fff!important;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.82rem!important;padding:7px 16px;border-radius:8px;transition:background .2s!important}
 .nav-cta:hover{background:var(--blue)!important}
 .nav-burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
 .nav-burger span{width:22px;height:2px;background:var(--navy);border-radius:2px;transition:all .3s}
@@ -92,7 +90,7 @@ section{padding:5rem 0}
 .btn-primary{
   display:inline-flex;align-items:center;gap:8px;
   background:linear-gradient(51deg,#63b32e 20%,#27bf5a 75%,#1e9947 100%);color:#fff;
-  font-family:'Asap',sans-serif;font-weight:700;font-size:.92rem;
+  font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.92rem;
   padding:13px 26px;border-radius:10px;border:none;cursor:pointer;
   transition:all .2s;box-shadow:0 4px 20px rgba(99,179,46,.3);
 }
@@ -100,13 +98,13 @@ section{padding:5rem 0}
 .btn-outline{
   display:inline-flex;align-items:center;gap:8px;
   background:transparent;color:#fff;
-  font-family:'Asap',sans-serif;font-weight:700;font-size:.92rem;
+  font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.92rem;
   padding:13px 26px;border-radius:10px;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;
   transition:all .2s;
 }
 .btn-outline:hover{border-color:#fff;background:rgba(255,255,255,.08)}
 .hero-stats{display:flex;gap:2.5rem;flex-wrap:wrap}
-.hero-stat strong{display:block;font-family:'Asap',sans-serif;font-size:1.8rem;font-weight:800;color:#fff}
+.hero-stat strong{display:block;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.8rem;font-weight:800;color:#fff}
 .hero-stat span{font-size:.78rem;color:rgba(255,255,255,.5);font-weight:400}
 
 /* ── AUDIT BANNER ─────────────────────────────────────── */
@@ -117,12 +115,12 @@ section{padding:5rem 0}
   max-width:1140px;margin:0 auto;padding:0 1.5rem;
   display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;
 }
-#audit-banner h2{font-family:'Asap',sans-serif;font-size:1.35rem;font-weight:800;color:#fff;margin-bottom:.3rem}
+#audit-banner h2{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.35rem;font-weight:800;color:#fff;margin-bottom:.3rem}
 #audit-banner p{color:rgba(255,255,255,.65);font-size:.88rem}
 .audit-right{display:flex;gap:.75rem;flex-wrap:wrap;flex-shrink:0}
-.btn-pri{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(51deg,#63b32e 20%,#27bf5a 75%,#1e9947 100%);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.85rem;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;transition:all .2s}
+.btn-pri{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(51deg,#63b32e 20%,#27bf5a 75%,#1e9947 100%);color:#fff;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.85rem;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;transition:all .2s}
 .btn-pri:hover{background:#55a325;transform:translateY(-1px)}
-.btn-sec{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.85rem;padding:10px 20px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s}
+.btn-sec{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);color:#fff;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.85rem;padding:10px 20px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s}
 .btn-sec:hover{background:rgba(255,255,255,.25)}
 
 /* ── LEISTUNGEN ───────────────────────────────────────── */
@@ -140,14 +138,14 @@ section{padding:5rem 0}
 .leistung-card.featured h3,.leistung-card.featured p,.leistung-card.featured .leistung-features li{color:rgba(255,255,255,.85)}
 .leistung-card.featured h3{color:#fff}
 .leistung-icon{font-size:1.6rem;margin-bottom:.25rem}
-.leistung-card h3{font-family:'Asap',sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy)}
+.leistung-card h3{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy)}
 .leistung-card p{font-size:.88rem;color:var(--muted);line-height:1.6}
 .leistung-features{list-style:none;display:flex;flex-direction:column;gap:.35rem;flex:1}
 .leistung-features li{font-size:.82rem;color:var(--muted);padding-left:1.1rem;position:relative;line-height:1.5}
 .leistung-features li::before{content:'✓';position:absolute;left:0;color:var(--blue);font-weight:700;font-size:.75rem}
 .leistung-card.featured .leistung-features li::before{color:var(--accent)}
 .btn-card{
-  display:inline-flex;align-items:center;font-family:'Asap',sans-serif;font-weight:700;font-size:.8rem;
+  display:inline-flex;align-items:center;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.8rem;
   color:var(--blue);margin-top:.5rem;transition:gap .2s;gap:5px;
 }
 .btn-card:hover{gap:10px}
@@ -161,7 +159,7 @@ section{padding:5rem 0}
   background:var(--navy);border-radius:var(--rlg);padding:2rem;
   margin-bottom:1rem;box-shadow:var(--sh-lg);
 }
-.ueber-card-main h3{font-family:'Asap',sans-serif;font-size:1.15rem;font-weight:800;color:#fff;margin-bottom:.2rem}
+.ueber-card-main h3{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.15rem;font-weight:800;color:#fff;margin-bottom:.2rem}
 .ueber-card-main .title{font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1.25rem;font-weight:400}
 .expertise-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.25rem}
 .expertise-tags span{background:rgba(99,179,46,.3);border:1px solid rgba(99,179,46,.4);color:#9edb74;font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:100px}
@@ -174,7 +172,7 @@ section{padding:5rem 0}
 .ueber-value{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.1rem;transition:border-color .2s}
 .ueber-value:hover{border-color:var(--blue)}
 .v-icon{font-size:1.2rem;margin-bottom:.35rem}
-.ueber-value h4{font-family:'Asap',sans-serif;font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.2rem}
+.ueber-value h4{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.2rem}
 .ueber-value p{font-size:.78rem;color:var(--muted);margin:0;line-height:1.5}
 
 /* ── KI-CHECK (INLINE) ────────────────────────────────── */
@@ -187,7 +185,7 @@ section{padding:5rem 0}
 .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(99,179,46,.25);border:1px solid rgba(99,179,46,.4);color:#9edb74;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:100px}
 .progress-wrap{margin-bottom:1.75rem}
 .progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;font-size:.8rem;color:var(--muted)}
-.progress-meta strong{color:var(--navy);font-family:'Asap',sans-serif}
+.progress-meta strong{color:var(--navy);font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif}
 .pbar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
 .pbar-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:3px;transition:width .4s ease}
 .section-card{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;display:none}
@@ -202,7 +200,7 @@ section{padding:5rem 0}
 .field label{font-size:.82rem;font-weight:600;color:var(--navy)}
 .field .req{color:#c0392b;font-size:.75rem}
 .field .hint{font-size:.74rem;color:var(--muted);line-height:1.4}
-.field input[type="text"],.field input[type="email"],.field textarea,.field select{width:100%;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'Asap',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s,background .2s;resize:vertical}
+.field input[type="text"],.field input[type="email"],.field textarea,.field select{width:100%;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s,background .2s;resize:vertical}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue);background:#fff}
 .field textarea{min-height:70px}
 .field.has-err input,.field.has-err textarea,.field.has-err select{border-color:#e74c3c}
@@ -221,12 +219,12 @@ section{padding:5rem 0}
 .scale-row{display:flex;align-items:center;gap:.5rem;margin-top:.7rem}
 .scale-lbl{font-size:.68rem;color:var(--muted);white-space:nowrap;line-height:1.2;flex-shrink:0}
 .scale-nums{display:flex;gap:.35rem;flex:1;justify-content:center}
-.scale-num{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.scale-num{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.88rem;color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .scale-num:hover{border-color:var(--blue);color:var(--navy);background:var(--sky)}
 .scale-num.sel{background:var(--navy);border-color:var(--navy);color:#fff}
 .scale-err{font-size:.74rem;color:#c0392b;margin-top:.35rem;display:none}
 .scale-q.has-err .scale-err{display:block}
-.btn-nav{font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;padding:10px 22px;border-radius:8px;cursor:pointer;border:none;transition:all .2s}
+.btn-nav{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.88rem;padding:10px 22px;border-radius:8px;cursor:pointer;border:none;transition:all .2s}
 .btn-back{background:#fff;color:var(--muted);border:1.5px solid var(--border)!important}
 .btn-back:hover:not(:disabled){border-color:var(--navy)!important;color:var(--navy)}
 .btn-back:disabled{opacity:.35;cursor:not-allowed}
@@ -240,15 +238,15 @@ section{padding:5rem 0}
 .gdpr-row input{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--navy);cursor:pointer}
 .gdpr-row label{font-size:.76rem;color:var(--muted);line-height:1.5;cursor:pointer}
 .gdpr-row label a{color:var(--blue)}
-.btn-start{width:100%;background:var(--navy);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.97rem;padding:13px;border-radius:9px;border:none;cursor:pointer;transition:background .2s}
+.btn-start{width:100%;background:var(--navy);color:#fff;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.97rem;padding:13px;border-radius:9px;border:none;cursor:pointer;transition:background .2s}
 .btn-start:hover{background:var(--blue)}
 .skip{display:block;text-align:center;margin-top:.8rem;font-size:.76rem;color:var(--muted);cursor:pointer;text-decoration:underline}
 .skip:hover{color:var(--navy)}
 #check-result{display:none;background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:2.5rem 2rem;text-align:center}
-.result-ring{width:120px;height:120px;border-radius:50%;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#fff;font-family:'Asap',sans-serif}
+.result-ring{width:120px;height:120px;border-radius:50%;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#fff;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif}
 .result-ring .rnum{font-size:2.2rem;font-weight:800;line-height:1}
 .result-ring .rlbl{font-size:.6rem;opacity:.6;letter-spacing:.05em}
-.result-level{font-family:'Asap',sans-serif;font-size:1.45rem;font-weight:800;color:var(--navy);margin-bottom:.5rem}
+.result-level{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.45rem;font-weight:800;color:var(--navy);margin-bottom:.5rem}
 .result-desc{color:var(--muted);font-size:.92rem;max-width:500px;margin:0 auto 2rem;line-height:1.7}
 .dim-section{margin:1.75rem 0}
 .dim-section h4{font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1.1rem}
@@ -256,7 +254,7 @@ section{padding:5rem 0}
 .dim-item{display:flex;flex-direction:column;align-items:center;gap:5px}
 .bar-track{width:34px;height:76px;background:var(--sky);border-radius:17px;position:relative;overflow:hidden}
 .bar-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,var(--blue),var(--navy));border-radius:17px;transition:height .8s cubic-bezier(.4,0,.2,1)}
-.bar-pct{font-family:'Asap',sans-serif;font-size:.7rem;font-weight:700;color:var(--navy)}
+.bar-pct{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.7rem;font-weight:700;color:var(--navy)}
 .bar-name{font-size:.63rem;font-weight:600;color:var(--muted);text-align:center;line-height:1.3}
 .qual-box{background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem 1.5rem;margin:1.5rem 0;text-align:left}
 .qual-box h4{font-size:.75rem;font-weight:700;color:var(--navy);margin-bottom:.75rem;letter-spacing:.05em;text-transform:uppercase}
@@ -268,7 +266,7 @@ section{padding:5rem 0}
 .reco-card h4{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.2rem}
 .reco-card p{font-size:.78rem;color:var(--muted);margin:0;line-height:1.5}
 .result-cta{display:flex;gap:.85rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
-.btn-r{display:inline-flex;align-items:center;gap:7px;font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;padding:11px 22px;border-radius:9px;text-decoration:none;cursor:pointer;border:none;transition:all .2s}
+.btn-r{display:inline-flex;align-items:center;gap:7px;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.88rem;padding:11px 22px;border-radius:9px;text-decoration:none;cursor:pointer;border:none;transition:all .2s}
 .btn-rp{background:var(--navy);color:#fff}.btn-rp:hover{background:var(--blue)}
 .btn-rs{background:var(--sky);color:var(--navy)}.btn-rs:hover{background:var(--border)}
 .section-card.shake{animation:shake .35s}
@@ -282,17 +280,17 @@ section{padding:5rem 0}
 .kiv2-card{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--sh);padding:2.5rem;width:100%;max-width:640px;animation:kiv2Up .4s ease both}
 @keyframes kiv2Up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .kiv2-lbl{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
-.kiv2-h1{font-family:'Asap',sans-serif;font-size:clamp(1.6rem,3vw,2.1rem);line-height:1.15;font-weight:800;margin-bottom:.5rem;color:var(--navy)}
-.kiv2-h2{font-family:'Asap',sans-serif;font-size:1.35rem;font-weight:800;line-height:1.2;margin-bottom:1rem;color:var(--navy)}
-.kiv2-h3{font-family:'Asap',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.75rem;color:var(--navy)}
+.kiv2-h1{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:clamp(1.6rem,3vw,2.1rem);line-height:1.15;font-weight:800;margin-bottom:.5rem;color:var(--navy)}
+.kiv2-h2{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.35rem;font-weight:800;line-height:1.2;margin-bottom:1rem;color:var(--navy)}
+.kiv2-h3{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1rem;font-weight:700;margin-bottom:.75rem;color:var(--navy)}
 .kiv2-sub{font-size:.92rem;color:var(--muted);line-height:1.7;margin-bottom:1.75rem}
 .kiv2-lbl-t{display:block;font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:.35rem}
-.kiv2-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:'Asap',sans-serif;font-size:.92rem;color:var(--text);background:var(--off);transition:border-color .2s,background .2s;outline:none;margin-bottom:1.1rem}
+.kiv2-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.92rem;color:var(--text);background:var(--off);transition:border-color .2s,background .2s;outline:none;margin-bottom:1.1rem}
 .kiv2-input:focus{border-color:var(--blue);background:#fff}
-.kiv2-ta{width:100%;min-height:85px;resize:vertical;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:'Asap',sans-serif;font-size:.92rem;color:var(--text);background:var(--off);outline:none;margin-bottom:1.1rem;transition:border-color .2s,background .2s}
+.kiv2-ta{width:100%;min-height:85px;resize:vertical;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.92rem;color:var(--text);background:var(--off);outline:none;margin-bottom:1.1rem;transition:border-color .2s,background .2s}
 .kiv2-ta:focus{border-color:var(--blue);background:#fff}
 .kiv2-choices{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1.5rem}
-.kiv2-choice{display:flex;align-items:flex-start;gap:10px;padding:.8rem 1rem;border:1.5px solid var(--border);border-radius:9px;cursor:pointer;transition:all .15s;font-size:.88rem;color:var(--text);background:#fff;text-align:left;width:100%;font-family:'Asap',sans-serif;line-height:1.4}
+.kiv2-choice{display:flex;align-items:flex-start;gap:10px;padding:.8rem 1rem;border:1.5px solid var(--border);border-radius:9px;cursor:pointer;transition:all .15s;font-size:.88rem;color:var(--text);background:#fff;text-align:left;width:100%;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;line-height:1.4}
 .kiv2-choice:hover{border-color:var(--blue);background:var(--sky)}
 .kiv2-choice.kiv2-sel{border-color:var(--navy);background:var(--sky);font-weight:500;color:var(--navy)}
 .kiv2-dot{width:17px;height:17px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;margin-top:2px;transition:all .15s}
@@ -300,8 +298,8 @@ section{padding:5rem 0}
 .kiv2-scale{margin-bottom:1.5rem}
 .kiv2-sl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:.5rem}
 .kiv2-range{width:100%;accent-color:var(--navy);cursor:pointer;display:block}
-.kiv2-sv{text-align:center;font-size:1.5rem;font-weight:800;font-family:'Asap',sans-serif;color:var(--navy);margin-top:.5rem}
-.kiv2-btn{display:inline-flex;align-items:center;gap:8px;font-family:'Asap',sans-serif;font-weight:700;font-size:.92rem;padding:11px 24px;border-radius:10px;border:none;cursor:pointer;transition:all .2s}
+.kiv2-sv{text-align:center;font-size:1.5rem;font-weight:800;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;color:var(--navy);margin-top:.5rem}
+.kiv2-btn{display:inline-flex;align-items:center;gap:8px;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.92rem;padding:11px 24px;border-radius:10px;border:none;cursor:pointer;transition:all .2s}
 .kiv2-btnp{background:var(--navy);color:#fff;box-shadow:0 4px 16px rgba(26,31,35,.18)}
 .kiv2-btnp:hover{background:var(--blue);transform:translateY(-1px)}
 .kiv2-btng{background:#fff;color:var(--muted);border:1.5px solid var(--border)!important}
@@ -319,9 +317,9 @@ section{padding:5rem 0}
 .kiv2-ring circle{fill:none;stroke-width:10}
 .kiv2-rt{stroke:var(--border)}
 .kiv2-rf{stroke:var(--navy);stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
-.kiv2-rnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Asap',sans-serif;font-size:2rem;font-weight:800;color:var(--navy);line-height:1}
-.kiv2-rnum small{font-family:'Asap',sans-serif;font-size:.6rem;color:var(--muted);font-weight:400;letter-spacing:.05em}
-.kiv2-rlvl{display:inline-block;padding:4px 13px;border-radius:100px;font-family:'Asap',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.75rem}
+.kiv2-rnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:2rem;font-weight:800;color:var(--navy);line-height:1}
+.kiv2-rnum small{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.6rem;color:var(--muted);font-weight:400;letter-spacing:.05em}
+.kiv2-rlvl{display:inline-block;padding:4px 13px;border-radius:100px;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.75rem}
 .kiv2-low{background:var(--sky);color:var(--blue)}
 .kiv2-mid{background:#fff8e6;color:#b07500}
 .kiv2-high{background:#e8f7ee;color:#1e7e45}
@@ -363,24 +361,24 @@ section{padding:5rem 0}
 .kontakt-items{display:flex;flex-direction:column;gap:.9rem}
 .kontakt-item{display:flex;align-items:flex-start;gap:.9rem}
 .k-icon{font-size:1.2rem;flex-shrink:0;margin-top:2px}
-.kontakt-item h4{font-family:'Asap',sans-serif;font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.15rem}
+.kontakt-item h4{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.15rem}
 .kontakt-item p{font-size:.84rem;color:var(--muted);line-height:1.5}
 .kontakt-item a{color:var(--blue)}
 .kontakt-form-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:2rem}
 .kform-group{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
 .kform-group label{font-size:.8rem;font-weight:600;color:var(--navy)}
-.kform-group input,.kform-group select,.kform-group textarea{width:100%;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'Asap',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s}
+.kform-group input,.kform-group select,.kform-group textarea{width:100%;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s}
 .kform-group input:focus,.kform-group select:focus,.kform-group textarea:focus{border-color:var(--blue);background:#fff}
 .kform-group textarea{min-height:100px;resize:vertical}
 .kform-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .kform-gdpr{display:flex;align-items:flex-start;gap:9px;margin:.75rem 0 1.25rem;font-size:.76rem;color:var(--muted);line-height:1.5}
 .kform-gdpr input{width:15px;height:15px;margin-top:2px;accent-color:var(--navy);flex-shrink:0;cursor:pointer}
 .kform-gdpr a{color:var(--blue)}
-.btn-submit{width:100%;background:var(--navy);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.97rem;padding:13px;border-radius:9px;border:none;cursor:pointer;transition:background .2s}
+.btn-submit{width:100%;background:var(--navy);color:#fff;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.97rem;padding:13px;border-radius:9px;border:none;cursor:pointer;transition:background .2s}
 .btn-submit:hover{background:var(--blue)}
 .form-success{display:none;text-align:center;padding:2rem}
 .form-success .success-icon{font-size:2.5rem;margin-bottom:.75rem}
-.form-success h4{font-family:'Asap',sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:.5rem}
+.form-success h4{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:.5rem}
 .form-success p{font-size:.88rem;color:var(--muted)}
 
 /* ── IMPRESSUM / DATENSCHUTZ ──────────────────────────── */
@@ -393,7 +391,7 @@ section{padding:5rem 0}
 .legal-card ul{margin:.4rem 0 .6rem 1.2rem;font-size:.9rem;color:var(--muted);line-height:1.8}
 .legal-card a{color:var(--blue)}
 .legal-tabs{display:flex;gap:.75rem;margin-bottom:2rem;border-bottom:2px solid var(--border);padding-bottom:0}
-.legal-tab{font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;color:var(--muted);padding:.6rem 1rem;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:all .2s}
+.legal-tab{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.88rem;color:var(--muted);padding:.6rem 1rem;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:all .2s}
 .legal-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
 .legal-pane{display:none}
 .legal-pane.active{display:block}
@@ -404,7 +402,7 @@ section{padding:5rem 0}
 /* ── FOOTER ───────────────────────────────────────────── */
 footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .footer-inner{max-width:1140px;margin:0 auto}
-.footer-logo{font-family:'Asap',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:.35rem;display:flex;align-items:center;justify-content:center;gap:8px}
+.footer-logo{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:.35rem;display:flex;align-items:center;justify-content:center;gap:8px}
 .footer-logo span{background:var(--blue);color:#fff;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px}
 .footer-tagline{font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:1.75rem}
 .footer-links{display:flex;gap:1.5rem;list-style:none;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
@@ -446,7 +444,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .crit-opt{display:flex;align-items:flex-start;gap:12px;padding:1rem 1.1rem;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s}
 .crit-opt:hover{border-color:var(--blue);background:var(--sky)}
 .crit-opt.sel{border-color:var(--navy);background:var(--sky)}
-.crit-marker{width:28px;height:28px;border-radius:8px;background:var(--off);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;transition:all .15s;font-family:'Asap',sans-serif;font-weight:700;color:var(--muted)}
+.crit-marker{width:28px;height:28px;border-radius:8px;background:var(--off);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;transition:all .15s;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;color:var(--muted)}
 .crit-opt.sel .crit-marker{background:var(--navy);border-color:var(--navy);color:#fff}
 .crit-text strong{display:block;font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:2px}
 .crit-text span{font-size:.78rem;color:var(--muted);line-height:1.4}
@@ -467,7 +465,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 #best-practices{background:#fff}
 .bp-tabs{display:flex;gap:.5rem;border-bottom:2px solid var(--border);margin-bottom:2.5rem;overflow-x:auto;padding-bottom:0}
 .bp-tab{
-  font-family:'Asap',sans-serif;font-weight:700;font-size:.84rem;
+  font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.84rem;
   color:var(--muted);padding:.7rem 1.25rem;cursor:pointer;white-space:nowrap;
   border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;border-radius:6px 6px 0 0;
 }
@@ -480,15 +478,15 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .agent-intro-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-bottom:2.5rem;align-items:start}
 .agent-flow{background:var(--navy);border-radius:var(--rlg);padding:2rem 1.5rem;text-align:center}
 .agent-flow-step{margin-bottom:1.1rem}
-.agent-flow-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(99,179,46,.4);border:1.5px solid rgba(99,179,46,.6);color:#9edb74;font-family:'Asap',sans-serif;font-weight:800;font-size:.85rem;margin-bottom:.4rem}
-.agent-flow-val{font-family:'Asap',sans-serif;font-weight:800;font-size:1.6rem;color:var(--accent);line-height:1}
+.agent-flow-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(99,179,46,.4);border:1.5px solid rgba(99,179,46,.6);color:#9edb74;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:800;font-size:.85rem;margin-bottom:.4rem}
+.agent-flow-val{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:800;font-size:1.6rem;color:var(--accent);line-height:1}
 .agent-flow-lbl{font-size:.78rem;color:rgba(255,255,255,.65);margin-top:.2rem}
 .agent-flow-arrow{color:rgba(99,179,46,.6);font-size:1.1rem;margin:.4rem 0;display:block}
 .agent-tagline{font-size:.82rem;color:rgba(255,255,255,.5);margin-top:1rem;font-style:italic;border-top:1px solid rgba(255,255,255,.1);padding-top:.8rem}
 
 .flywheel-card{background:var(--off);border:1.5px solid var(--border);border-radius:var(--rlg);padding:1.75rem;display:flex;flex-direction:column;align-items:center;gap:0}
 .flywheel-center{background:var(--navy);border-radius:50%;width:130px;height:130px;display:flex;align-items:center;justify-content:center;text-align:center;margin:1rem auto;flex-shrink:0}
-.flywheel-center p{font-family:'Asap',sans-serif;font-size:.72rem;font-weight:800;color:#fff;line-height:1.3;padding:0 .5rem}
+.flywheel-center p{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.72rem;font-weight:800;color:#fff;line-height:1.3;padding:0 .5rem}
 .fw-nodes{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;width:100%}
 .fw-node{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:.7rem .85rem;text-align:center;font-size:.75rem;font-weight:600;color:var(--navy);line-height:1.35;transition:border-color .2s}
 .fw-node:hover{border-color:var(--blue)}
@@ -498,7 +496,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .fit-card{border-radius:var(--rlg);padding:1.5rem}
 .fit-card.fit-yes{background:var(--sky);border:1.5px solid #c9e7b3}
 .fit-card.fit-no{background:#fff4f0;border:1.5px solid #f5c9bb}
-.fit-card h4{font-family:'Asap',sans-serif;font-size:.88rem;font-weight:800;margin-bottom:.85rem}
+.fit-card h4{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.88rem;font-weight:800;margin-bottom:.85rem}
 .fit-card.fit-yes h4{color:var(--navy)}
 .fit-card.fit-no h4{color:#b03a2e}
 .fit-list{list-style:none;display:flex;flex-direction:column;gap:.45rem}
@@ -510,8 +508,8 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .bauplan-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.85rem;margin-top:2rem}
 .bauplan-card{background:var(--blue);border-radius:var(--r);padding:1.1rem 1rem;display:flex;flex-direction:column;gap:.5rem}
 .bauplan-card:first-child{background:var(--navy)}
-.bauplan-phase{font-family:'Asap',sans-serif;font-size:.72rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase}
-.bauplan-title{font-family:'Asap',sans-serif;font-size:.88rem;font-weight:800;color:#fff;line-height:1.25}
+.bauplan-phase{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.72rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase}
+.bauplan-title{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.88rem;font-weight:800;color:#fff;line-height:1.25}
 .bauplan-items{list-style:none;margin-top:.35rem;display:flex;flex-direction:column;gap:.3rem}
 .bauplan-items li{font-size:.74rem;color:rgba(255,255,255,.8);padding-left:.85rem;position:relative;line-height:1.4}
 .bauplan-items li::before{content:'–';position:absolute;left:0;opacity:.6}
@@ -529,7 +527,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .prompt-copy-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(99,179,46,.25);border:1px solid rgba(99,179,46,.4);color:#9edb74;font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:6px;cursor:pointer;transition:all .2s;border-width:1px}
 .prompt-copy-btn:hover{background:rgba(99,179,46,.45)}
 .prompt-copy-btn.copied{background:rgba(0,180,80,.25);border-color:rgba(0,180,80,.5);color:#4ecb6e}
-.prompt-placeholder{font-family:'Asap',monospace;color:var(--accent);font-weight:600}
+.prompt-placeholder{font-family:ui-monospace,'Cascadia Code',Consolas,'Courier New',monospace;color:var(--accent);font-weight:600}
 
 /* Copilot personalisieren */
 .copilot-pers-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:1.75rem}
@@ -537,7 +535,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .pers-card:hover{border-color:var(--blue);box-shadow:var(--sh)}
 .pers-card-head{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
 .pers-icon{font-size:1.4rem}
-.pers-card h4{font-family:'Asap',sans-serif;font-size:.95rem;font-weight:800;color:var(--navy)}
+.pers-card h4{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.95rem;font-weight:800;color:var(--navy)}
 .pers-status{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:100px;margin-left:auto;flex-shrink:0}
 .pers-status.on{background:#e6f9ee;color:#1a7a3c;border:1px solid #a3dbb7}
 .pers-status.neutral{background:var(--sky);color:var(--navy);border:1px solid var(--border)}
@@ -566,12 +564,12 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .rg-card{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--sh);padding:2.5rem;width:100%;max-width:680px;animation:kiv2Up .4s ease both;position:relative;overflow:hidden}
 .rg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--blue))}
 .rg-lbl{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
-.rg-h1{font-family:'Asap',sans-serif;font-size:clamp(1.6rem,3vw,2rem);font-weight:800;line-height:1.15;margin-bottom:.5rem;color:var(--navy)}
+.rg-h1{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:clamp(1.6rem,3vw,2rem);font-weight:800;line-height:1.15;margin-bottom:.5rem;color:var(--navy)}
 .rg-sub{font-size:.92rem;color:var(--muted);line-height:1.7;margin-bottom:1.75rem}
 .rg-pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2rem}
 .rg-pill{display:flex;align-items:center;gap:5px;background:rgba(99,179,46,.12);border:1px solid rgba(99,179,46,.25);color:var(--blue);font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:100px}
 .rg-lbl-t{display:block;font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:.35rem}
-.rg-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:'Asap',sans-serif;font-size:.92rem;color:var(--text);background:var(--off);outline:none;margin-bottom:1rem;transition:border-color .2s,background .2s}
+.rg-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.92rem;color:var(--text);background:var(--off);outline:none;margin-bottom:1rem;transition:border-color .2s,background .2s}
 .rg-input:focus{border-color:var(--blue);background:#fff}
 .rg-chat{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem;max-height:400px;overflow-y:auto;padding-right:.25rem;scroll-behavior:smooth}
 .rg-chat::-webkit-scrollbar{width:3px}
@@ -580,7 +578,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .rg-msg-ai{align-items:flex-start}
 .rg-msg-user{flex-direction:row-reverse}
-.rg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Asap',sans-serif;font-size:.75rem;font-weight:800;flex-shrink:0}
+.rg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.75rem;font-weight:800;flex-shrink:0}
 .rg-av-ai{background:var(--navy);color:#fff}
 .rg-av-user{background:var(--sky);color:var(--navy);border:1px solid var(--border)}
 .rg-bubble{max-width:82%;padding:.85rem 1.1rem;border-radius:12px;font-size:.9rem;line-height:1.65}
@@ -592,26 +590,26 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 .rg-typing span:nth-child(3){animation-delay:.4s}
 @keyframes rgblink{0%,80%,100%{opacity:.3}40%{opacity:1}}
 .rg-input-row{display:flex;gap:.75rem;align-items:flex-end}
-.rg-ta{flex:1;background:var(--off);border:1.5px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-family:'Asap',sans-serif;font-size:.9rem;color:var(--text);resize:none;min-height:50px;max-height:130px;outline:none;transition:border-color .2s,background .2s}
+.rg-ta{flex:1;background:var(--off);border:1.5px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.9rem;color:var(--text);resize:none;min-height:50px;max-height:130px;outline:none;transition:border-color .2s,background .2s}
 .rg-ta:focus{border-color:var(--blue);background:#fff}
 .rg-send{width:44px;height:44px;border-radius:50%;border:none;background:var(--navy);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
 .rg-send:hover{background:var(--blue);transform:scale(1.08)}
 .rg-send:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .rg-res-section{margin-bottom:1.75rem}
-.rg-res-section h3{font-family:'Asap',sans-serif;font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
-.rg-badge{display:inline-flex;align-items:center;gap:.5rem;padding:4px 13px;border-radius:100px;font-family:'Asap',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1rem}
+.rg-res-section h3{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.rg-badge{display:inline-flex;align-items:center;gap:.5rem;padding:4px 13px;border-radius:100px;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1rem}
 .rg-badge-anf{background:var(--sky);color:var(--blue)}
 .rg-badge-fort{background:#fff8e6;color:#b07500}
 .rg-badge-exp{background:#e8f7ee;color:#1e7e45}
 .rg-pfad{background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem;margin-bottom:.75rem}
-.rg-pfad h4{font-family:'Asap',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:.35rem;color:var(--navy)}
+.rg-pfad h4{font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.9rem;font-weight:700;margin-bottom:.35rem;color:var(--navy)}
 .rg-pfad p{font-size:.85rem;color:var(--muted);line-height:1.6}
 .rg-pfad .rg-tag{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:4px;background:var(--sky);color:var(--blue);font-weight:700;margin-bottom:.35rem}
 .rg-sbar-wrap{margin:.5rem 0 1rem}
 .rg-sbar-lbl{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.3rem}
 .rg-sbar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
 .rg-sbar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--navy),var(--blue));transition:width 1.2s ease}
-.rg-btn{display:inline-flex;align-items:center;gap:8px;font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;padding:10px 22px;border-radius:9px;border:none;cursor:pointer;transition:all .2s}
+.rg-btn{display:inline-flex;align-items:center;gap:8px;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.88rem;padding:10px 22px;border-radius:9px;border:none;cursor:pointer;transition:all .2s}
 .rg-btnp{background:var(--navy);color:#fff}.rg-btnp:hover{background:var(--blue)}
 .rg-btng{background:#fff;color:var(--muted);border:1.5px solid var(--border)!important}.rg-btng:hover{border-color:var(--navy)!important;color:var(--navy)}
 @media(max-width:480px){.rg-card{padding:1.5rem 1.1rem}.rg-chat{max-height:260px}}
@@ -801,7 +799,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 
           <!-- Flywheel -->
           <div class="flywheel-card">
-            <p style="font-family:'Asap',sans-serif;font-size:.8rem;font-weight:800;color:var(--navy);text-align:center;margin-bottom:.25rem">Das Flywheel-Prinzip</p>
+            <p style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.8rem;font-weight:800;color:var(--navy);text-align:center;margin-bottom:.25rem">Das Flywheel-Prinzip</p>
             <p style="font-size:.76rem;color:var(--muted);text-align:center;margin-bottom:.5rem">Gesparte Zeit baut den nächsten Agenten</p>
             <div class="fw-nodes">
               <div class="fw-node"><span>⏱️</span>Zeit<br>sparen</div>
@@ -839,7 +837,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
 
         <!-- Bauplan -->
         <div class="fade-in" style="margin-top:2rem">
-          <p style="font-family:'Asap',sans-serif;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">Der 30-Minuten-Bauplan</p>
+          <p style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">Der 30-Minuten-Bauplan</p>
           <div class="bauplan-grid">
             <div class="bauplan-card">
               <div class="bauplan-phase">Min 0–5</div>
@@ -892,7 +890,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
         <!-- CTA -->
         <div class="fade-in" style="margin-top:2rem;background:var(--sky);border:1.5px solid var(--border);border-radius:var(--rlg);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
           <div>
-            <p style="font-family:'Asap',sans-serif;font-weight:800;color:var(--navy);margin-bottom:.25rem">Eigenen Agenten bauen lassen?</p>
+            <p style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:800;color:var(--navy);margin-bottom:.25rem">Eigenen Agenten bauen lassen?</p>
             <p style="font-size:.84rem;color:var(--muted)">Im AI Tool Onboarding bauen wir gemeinsam Ihren ersten produktiven Agenten.</p>
           </div>
           <button class="btn-pri" onclick="navTo('#kontakt')" style="flex-shrink:0">Jetzt anfragen →</button>
@@ -1053,7 +1051,7 @@ footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
         <div class="fade-in" style="margin-top:2rem">
           <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.9rem">
             <div style="background:var(--accent);color:#fff;font-size:.65rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:100px">Best Practice</div>
-            <p style="font-family:'Asap',sans-serif;font-size:.95rem;font-weight:800;color:var(--navy)">Fertiger Personalisierungs-Prompt</p>
+            <p style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.95rem;font-weight:800;color:var(--navy)">Fertiger Personalisierungs-Prompt</p>
           </div>
           <p style="font-size:.84rem;color:var(--muted);margin-bottom:1rem;max-width:620px">Diesen Prompt direkt in <strong style="color:var(--navy)">Chateinstellungen → Personalisierung → Anweisungen bearbeiten</strong> eintragen — als dauerhafter Kontext für Copilot:</p>
           <div class="prompt-card" onclick="copyPrompt(this)" style="background:#23282c;border-radius:var(--rlg);padding:1.5rem 1.75rem;cursor:pointer;max-width:100%">
@@ -1076,7 +1074,7 @@ Mein Ziel ist es, besser zu denken – nicht bestätigt zu werden.</p>
         <!-- CTA -->
         <div class="fade-in" style="margin-top:2rem;background:var(--sky);border:1.5px solid var(--border);border-radius:var(--rlg);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
           <div>
-            <p style="font-family:'Asap',sans-serif;font-weight:800;color:var(--navy);margin-bottom:.25rem">Copilot-Einführung im Team?</p>
+            <p style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:800;color:var(--navy);margin-bottom:.25rem">Copilot-Einführung im Team?</p>
             <p style="font-size:.84rem;color:var(--muted)">Wir richten Copilot gemeinsam ein — mit echten Prompts aus Ihrem Arbeitsalltag.</p>
           </div>
           <button class="btn-pri" onclick="navTo('#kontakt')" style="flex-shrink:0">Jetzt anfragen →</button>
@@ -1209,7 +1207,7 @@ Mein Ziel ist es, besser zu denken – nicht bestätigt zu werden.</p>
       <div class="hero-grid"></div>
       <div style="position:relative;z-index:1">
         <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,179,46,.2);border:1px solid rgba(99,179,46,.4);color:#9edb74;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:100px;margin-bottom:1.25rem">🗺️ AI Use-Case Canvas</div>
-        <h2 style="font-family:'Asap',sans-serif;font-size:clamp(1.5rem,3vw,2.1rem);color:#fff;font-weight:800;margin-bottom:.75rem">Welches KI-Tool passt zu Ihrem Use Case?</h2>
+        <h2 style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:clamp(1.5rem,3vw,2.1rem);color:#fff;font-weight:800;margin-bottom:.75rem">Welches KI-Tool passt zu Ihrem Use Case?</h2>
         <p style="color:rgba(255,255,255,.65);font-size:.92rem;max-width:560px;font-weight:300;line-height:1.7;margin-bottom:1.5rem">Beschreiben Sie Ihren Anwendungsfall und bewerten Sie 8 Kriterien. Das Canvas leitet Sie zur passenden KI-Toolklasse — strukturiert, nicht zufällig.</p>
         <div class="chips">
           <span class="chip">🧩 8 Kriterien</span>
@@ -1236,7 +1234,7 @@ Mein Ziel ist es, besser zu denken – nicht bestätigt zu werden.</p>
         <p>Worum geht es? Eine kurze Beschreibung hilft, die Bewertung einzuordnen — und erscheint am Ende in Ihrer Empfehlung.</p>
       </div>
       <div class="section-body">
-        <textarea class="field" id="uc-desc" style="min-height:90px;border:1.5px solid var(--border);border-radius:8px;padding:14px 16px;font-family:'Asap',sans-serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s;resize:none;background:var(--off);width:100%" placeholder="z. B. „Wir wollen eingehende Support-E-Mails automatisch klassifizieren und an die richtige Abteilung weiterleiten.""></textarea>
+        <textarea class="field" id="uc-desc" style="min-height:90px;border:1.5px solid var(--border);border-radius:8px;padding:14px 16px;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s;resize:none;background:var(--off);width:100%" placeholder="z. B. „Wir wollen eingehende Support-E-Mails automatisch klassifizieren und an die richtige Abteilung weiterleiten.""></textarea>
         <div>
           <div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem;font-weight:500">Beispiele zur Orientierung:</div>
           <div style="display:flex;gap:.5rem;flex-wrap:wrap">
@@ -1271,14 +1269,14 @@ Mein Ziel ist es, besser zu denken – nicht bestätigt zu werden.</p>
         <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 90% at 50% 50%,rgba(99,179,46,.3),transparent 70%);pointer-events:none"></div>
         <div style="position:relative;z-index:1">
           <div style="width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:2.2rem" id="cr-icon">🤖</div>
-          <div style="font-family:'Asap',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:.4rem" id="cr-toolclass">–</div>
+          <div style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:.4rem" id="cr-toolclass">–</div>
           <p style="color:rgba(255,255,255,.6);font-size:.9rem;max-width:480px;margin:0 auto" id="cr-desc">Basierend auf Ihren Angaben</p>
         </div>
       </div>
 
       <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:1.75rem;margin-bottom:1.25rem">
         <div style="font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Ihre Use-Case-Kategorie</div>
-        <div style="font-family:'Asap',sans-serif;font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:.4rem" id="cr-catname">–</div>
+        <div style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:.4rem" id="cr-catname">–</div>
         <p style="font-size:.9rem;color:var(--muted);margin-bottom:1rem" id="cr-catdesc">–</p>
         <div style="display:flex;flex-wrap:wrap;gap:.5rem" id="cr-cattasks"></div>
       </div>
@@ -1286,7 +1284,7 @@ Mein Ziel ist es, besser zu denken – nicht bestätigt zu werden.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
         <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:1.75rem">
           <div style="font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Empfohlene Toolklasse &amp; Tools</div>
-          <div style="display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.9rem;padding:7px 16px;border-radius:100px;margin-bottom:.75rem" id="cr-toolpill"></div>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.9rem;padding:7px 16px;border-radius:100px;margin-bottom:.75rem" id="cr-toolpill"></div>
           <div id="cr-tools"></div>
         </div>
         <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:1.75rem">
@@ -1297,10 +1295,10 @@ Mein Ziel ist es, besser zu denken – nicht bestätigt zu werden.</p>
 
       <div style="background:var(--navy);border-radius:var(--rlg);padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
         <div>
-          <h3 style="font-family:'Asap',sans-serif;font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:.3rem">Möchten Sie den Use Case konkret umsetzen?</h3>
+          <h3 style="font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:.3rem">Möchten Sie den Use Case konkret umsetzen?</h3>
           <p style="font-size:.88rem;color:rgba(255,255,255,.6)">Im Erstgespräch klären wir, welches Tool wirklich zu Ihrem Betrieb passt.</p>
         </div>
-        <button onclick="showPage('main');navTo('#kontakt')" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.9rem;padding:12px 24px;border-radius:9px;border:none;cursor:pointer;flex-shrink:0;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">Erstgespräch buchen →</button>
+        <button onclick="showPage('main');navTo('#kontakt')" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-family:system-ui,'Segoe UI',-apple-system,'Helvetica Neue',Arial,sans-serif;font-weight:700;font-size:.9rem;padding:12px 24px;border-radius:9px;border:none;cursor:pointer;flex-shrink:0;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">Erstgespräch buchen →</button>
       </div>
       <div style="text-align:center;margin-top:1rem">
         <button class="btn-r btn-rs" onclick="restartCanvas()">↺ Neuen Use Case bewerten</button>
@@ -1342,7 +1340,7 @@ Mein Ziel ist es, besser zu denken – nicht bestätigt zu werden.</p>
         <div class="legal-card"><h2>3. Hosting & Server-Logs</h2><p>Diese Website wird bei IONOS gehostet. Beim Aufruf der Website werden automatisch IP-Adresse (anonymisiert), Datum und Uhrzeit des Zugriffs, aufgerufene URL sowie Browser und Betriebssystem protokolliert. Diese Daten werden nach spätestens 7 Tagen gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einem sicheren und stabilen Betrieb).</p></div>
         <div class="legal-card"><h2>4. Kontaktformular (Formspree)</h2><p>Wenn Sie das Kontaktformular nutzen, werden Name, E-Mail-Adresse, Unternehmen (optional), ausgewähltes Thema und Nachrichtentext erhoben. Für die technische Übermittlung nutzen wir den Formulardienst Formspree (Formspree Inc., USA): Ihre Angaben werden an Formspree übertragen und uns von dort per E-Mail zugestellt. Formspree verarbeitet die Daten in unserem Auftrag (Art. 28 DSGVO); die Übermittlung in die USA wird über die EU-Standardvertragsklauseln abgesichert. Die Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage verwendet, nicht zu Werbezwecken weitergegeben und nach abschließender Bearbeitung gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Rechtsgrundlage: Art. 6 Abs. 1 lit. a und b DSGVO.</p></div>
         <div class="legal-card"><h2>5. KI-Readiness-Check & KI-Reifegrad-Interview</h2><p>Auf dieser Website bieten wir freiwillige, KI-gestützte Selbsttests an. Ihre Antworten — beim Reifegrad-Interview auch Ihr angegebener Name und Ihre Chat-Nachrichten — werden zur Auswertung über einen von uns betriebenen technischen Proxy (Cloudflare Workers; Cloudflare Inc., USA) an die KI-Schnittstelle von Anthropic (Anthropic PBC, San Francisco, USA) übermittelt und dort ausschließlich zur Erstellung Ihrer Auswertung verarbeitet. Eine dauerhafte Speicherung Ihrer Antworten durch uns findet nicht statt; Anthropic nutzt über die API übermittelte Inhalte standardmäßig nicht zum Training seiner Modelle. Bitte geben Sie in Freitextfeldern keine sensiblen Daten und keine personenbezogenen Daten Dritter ein. Optional angegebene Kontaktdaten (Name, E-Mail im KI-Readiness-Check) verbleiben in Ihrem Browser und werden nicht an uns oder Dritte übermittelt. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (die Nutzung ist freiwillig); für die technische Bereitstellung Art. 6 Abs. 1 lit. f DSGVO.</p></div>
-        <div class="legal-card"><h2>6. Google Fonts</h2><p>Diese Website lädt Schriftarten über Google Fonts (Google LLC, Mountain View, CA, USA). Dabei wird beim ersten Seitenaufruf eine Verbindung zu Google-Servern hergestellt und Ihre IP-Adresse übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a></p></div>
+        <div class="legal-card"><h2>6. Keine Cookies, kein Tracking, keine externen Schriften</h2><p>Diese Website setzt keine Cookies, verwendet keine Analyse- oder Tracking-Dienste und lädt keine Schriftarten oder sonstigen Ressourcen von Google. Alle Schriften werden lokal aus den Systemschriften Ihres Geräts dargestellt.</p></div>
         <div class="legal-card"><h2>7. Ihre Rechte</h2><h3>Auskunft (Art. 15 DSGVO)</h3><p>Sie können jederzeit Auskunft darüber verlangen, welche Daten wir über Sie gespeichert haben.</p><h3>Berichtigung, Löschung, Einschränkung</h3><p>Sie haben das Recht auf Berichtigung unrichtiger Daten, Löschung Ihrer Daten sowie Einschränkung der Verarbeitung gemäß Art. 16–18 DSGVO.</p><h3>Datenübertragbarkeit (Art. 20 DSGVO)</h3><p>Sie haben das Recht, die Sie betreffenden Daten in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten.</p><h3>Widerspruch (Art. 21 DSGVO)</h3><p>Sie können der Verarbeitung Ihrer Daten, die auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO erfolgt, jederzeit widersprechen.</p><h3>Widerruf von Einwilligungen (Art. 7 Abs. 3 DSGVO)</h3><p>Erteilte Einwilligungen können Sie jederzeit mit Wirkung für die Zukunft widerrufen.</p><h3>Beschwerderecht</h3><p>Sie haben das Recht, sich bei der Landesbeauftragten für Datenschutz und Informationsfreiheit NRW zu beschweren: <a href="https://www.ldi.nrw.de" target="_blank" rel="noopener">ldi.nrw.de</a></p><p>Zur Ausübung Ihrer Rechte: <a href="mailto:info@handsonai-owl.de">info@handsonai-owl.de</a></p></div>
         <div class="legal-card"><h2>8. Änderungen dieser Erklärung</h2><p>Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf zu aktualisieren, insbesondere wenn neue Funktionen oder Dienste auf der Website eingebunden werden. Die jeweils aktuelle Version ist auf dieser Seite abrufbar.</p></div>
       </div>
@@ -2124,11 +2122,11 @@ function rgRenderResult(r) {
     + '<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">'
     + '<div style="flex:1;min-width:140px;background:var(--sky);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">'
     + '<div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:.3rem">Kenntnisse</div>'
-    + '<div style="font-family:Asap,sans-serif;font-size:1.3rem;font-weight:800;color:var(--navy)">' + kLevel + '</div>'
+    + '<div style="font-family:system-ui,sans-serif;font-size:1.3rem;font-weight:800;color:var(--navy)">' + kLevel + '</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-top:.3rem">' + (r.kenntnisse_begruendung || '') + '</div></div>'
     + '<div style="flex:1;min-width:140px;background:var(--sky);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">'
     + '<div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:.3rem">Explorer-Level</div>'
-    + '<div style="font-family:Asap,sans-serif;font-size:1.3rem;font-weight:800;color:var(--navy)">' + eLevel + '</div>'
+    + '<div style="font-family:system-ui,sans-serif;font-size:1.3rem;font-weight:800;color:var(--navy)">' + eLevel + '</div>'
     + '<div style="font-size:.8rem;color:var(--muted);margin-top:.3rem">' + (r.explorer_begruendung || '') + '</div></div></div>'
     + '<div class="rg-res-section"><h3>Einordnung im KI-Kompetenzprofil</h3>'
     + matrix + '</div>'
