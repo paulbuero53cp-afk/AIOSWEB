@@ -1,0 +1,2190 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HandsOnAI OWL – KI-Beratung für den Mittelstand</title>
+<meta name="description" content="Praxisnahe KI-Beratung, Workshops und Implementierung für KMU in OWL und der DACH-Region. Ohne Buzzwords, ohne Vendor-Lock-in.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & VARS ─────────────────────────────────────── */
+:root{
+  --navy:#1a1f23;--blue:#63b32e;--sky:#eef7e6;--accent:#63b32e;
+  --white:#FFF;--off:#f7f8fc;--text:#1a1f23;--muted:#6D6D6D;
+  --border:#e5e9ed;--r:12px;--rlg:20px;
+  --sh:0 4px 24px rgba(26,31,35,.09);
+  --sh-lg:0 12px 48px rgba(26,31,35,.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Asap',sans-serif;color:var(--text);background:var(--off);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Asap',sans-serif;line-height:1.2;letter-spacing:-.02em}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ── NAV ──────────────────────────────────────────────── */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  height:60px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;transition:box-shadow .3s;
+}
+#nav.scrolled{box-shadow:var(--sh)}
+.nav-logo{font-family:'Asap',sans-serif;font-weight:800;font-size:1.05rem;color:var(--navy);display:flex;align-items:center;gap:8px;cursor:pointer}
+.nav-logo span{background:var(--blue);color:#fff;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.04em}
+.nav-links{display:flex;align-items:center;gap:1.75rem}
+.nav-links a{font-size:.84rem;font-weight:500;color:var(--muted);transition:color .2s;cursor:pointer}
+.nav-links a:hover{color:var(--navy)}
+.nav-cta{background:var(--navy);color:#fff!important;font-family:'Asap',sans-serif;font-weight:700;font-size:.82rem!important;padding:7px 16px;border-radius:8px;transition:background .2s!important}
+.nav-cta:hover{background:var(--blue)!important}
+.nav-burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.nav-burger span{width:22px;height:2px;background:var(--navy);border-radius:2px;transition:all .3s}
+.nav-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-burger.open span:nth-child(2){opacity:0}
+.nav-burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;top:60px;left:0;right:0;background:#fff;border-bottom:1px solid var(--border);padding:1.5rem 2rem;z-index:199;flex-direction:column;gap:1rem;box-shadow:var(--sh)}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:.95rem;font-weight:500;color:var(--muted);padding:.4rem 0;border-bottom:1px solid var(--off);cursor:pointer}
+
+/* ── LAYOUT ───────────────────────────────────────────── */
+.container{max-width:1140px;margin:0 auto;padding:0 1.5rem}
+section{padding:5rem 0}
+.section-label{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.section-title{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:var(--navy);margin-bottom:.85rem}
+.section-sub{font-size:.95rem;color:var(--muted);max-width:540px;line-height:1.7}
+
+/* ── FADE-IN ANIMATION ────────────────────────────────── */
+.fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* ── HERO ─────────────────────────────────────────────── */
+#hero{
+  min-height:100vh;display:flex;align-items:center;position:relative;
+  background:var(--navy);overflow:hidden;padding-top:60px;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 60% at 80% 40%,rgba(99,179,46,.35),transparent 65%),
+             radial-gradient(ellipse 40% 50% at 10% 80%,rgba(70,212,170,.12),transparent 60%);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.hero-inner{position:relative;z-index:1;padding:5rem 1.5rem;max-width:1140px;margin:0 auto;width:100%}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(99,179,46,.25);border:1px solid rgba(99,179,46,.4);
+  color:#9edb74;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:5px 14px;border-radius:100px;margin-bottom:1.5rem;
+}
+.hero-badge::before{content:'';width:6px;height:6px;background:#9edb74;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+#hero h1{font-size:clamp(2.4rem,6vw,4rem);color:#fff;font-weight:800;margin-bottom:1.25rem;line-height:1.1}
+#hero h1 em{font-style:normal;color:var(--accent)}
+.hero-sub{font-size:1.05rem;color:rgba(255,255,255,.65);max-width:520px;margin-bottom:2.25rem;line-height:1.7;font-weight:300}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(51deg,#63b32e 20%,#27bf5a 75%,#1e9947 100%);color:#fff;
+  font-family:'Asap',sans-serif;font-weight:700;font-size:.92rem;
+  padding:13px 26px;border-radius:10px;border:none;cursor:pointer;
+  transition:all .2s;box-shadow:0 4px 20px rgba(99,179,46,.3);
+}
+.btn-primary:hover{background:linear-gradient(51deg,#55a325 20%,#1fa04c 75%,#1a843d 100%);transform:translateY(-1px);box-shadow:0 6px 24px rgba(99,179,46,.4)}
+.btn-outline{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:#fff;
+  font-family:'Asap',sans-serif;font-weight:700;font-size:.92rem;
+  padding:13px 26px;border-radius:10px;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;
+  transition:all .2s;
+}
+.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.hero-stats{display:flex;gap:2.5rem;flex-wrap:wrap}
+.hero-stat strong{display:block;font-family:'Asap',sans-serif;font-size:1.8rem;font-weight:800;color:#fff}
+.hero-stat span{font-size:.78rem;color:rgba(255,255,255,.5);font-weight:400}
+
+/* ── AUDIT BANNER ─────────────────────────────────────── */
+#audit-banner{
+  background:var(--blue);padding:3rem 0;
+}
+.audit-inner{
+  max-width:1140px;margin:0 auto;padding:0 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;
+}
+#audit-banner h2{font-family:'Asap',sans-serif;font-size:1.35rem;font-weight:800;color:#fff;margin-bottom:.3rem}
+#audit-banner p{color:rgba(255,255,255,.65);font-size:.88rem}
+.audit-right{display:flex;gap:.75rem;flex-wrap:wrap;flex-shrink:0}
+.btn-pri{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(51deg,#63b32e 20%,#27bf5a 75%,#1e9947 100%);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.85rem;padding:10px 20px;border-radius:8px;border:none;cursor:pointer;transition:all .2s}
+.btn-pri:hover{background:#55a325;transform:translateY(-1px)}
+.btn-sec{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.85rem;padding:10px 20px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);cursor:pointer;transition:all .2s}
+.btn-sec:hover{background:rgba(255,255,255,.25)}
+
+/* ── LEISTUNGEN ───────────────────────────────────────── */
+#leistungen{background:#fff}
+.section-head{text-align:center;margin-bottom:3rem}
+.section-head .section-sub{margin:0 auto}
+.leistungen-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
+.leistung-card{
+  background:var(--off);border:1.5px solid var(--border);border-radius:var(--rlg);
+  padding:2rem;display:flex;flex-direction:column;gap:.75rem;
+  transition:all .25s;
+}
+.leistung-card:hover{border-color:var(--blue);box-shadow:var(--sh-lg);transform:translateY(-3px)}
+.leistung-card.featured{background:var(--navy);border-color:var(--navy)}
+.leistung-card.featured h3,.leistung-card.featured p,.leistung-card.featured .leistung-features li{color:rgba(255,255,255,.85)}
+.leistung-card.featured h3{color:#fff}
+.leistung-icon{font-size:1.6rem;margin-bottom:.25rem}
+.leistung-card h3{font-family:'Asap',sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy)}
+.leistung-card p{font-size:.88rem;color:var(--muted);line-height:1.6}
+.leistung-features{list-style:none;display:flex;flex-direction:column;gap:.35rem;flex:1}
+.leistung-features li{font-size:.82rem;color:var(--muted);padding-left:1.1rem;position:relative;line-height:1.5}
+.leistung-features li::before{content:'✓';position:absolute;left:0;color:var(--blue);font-weight:700;font-size:.75rem}
+.leistung-card.featured .leistung-features li::before{color:var(--accent)}
+.btn-card{
+  display:inline-flex;align-items:center;font-family:'Asap',sans-serif;font-weight:700;font-size:.8rem;
+  color:var(--blue);margin-top:.5rem;transition:gap .2s;gap:5px;
+}
+.btn-card:hover{gap:10px}
+.leistung-card.featured .btn-card{color:var(--accent)}
+.featured-badge{display:inline-flex;background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:100px;align-self:flex-start}
+
+/* ── ÜBER UNS ─────────────────────────────────────────── */
+#ueber-uns{background:var(--off)}
+.ueber-grid{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:center}
+.ueber-card-main{
+  background:var(--navy);border-radius:var(--rlg);padding:2rem;
+  margin-bottom:1rem;box-shadow:var(--sh-lg);
+}
+.ueber-card-main h3{font-family:'Asap',sans-serif;font-size:1.15rem;font-weight:800;color:#fff;margin-bottom:.2rem}
+.ueber-card-main .title{font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1.25rem;font-weight:400}
+.expertise-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.25rem}
+.expertise-tags span{background:rgba(99,179,46,.3);border:1px solid rgba(99,179,46,.4);color:#9edb74;font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:100px}
+.ueber-quote{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.65;font-style:italic;border-left:2px solid var(--accent);padding-left:.8rem}
+.ueber-badges{display:flex;flex-direction:column;gap:.5rem}
+.ueber-badge{display:flex;align-items:center;gap:.6rem;font-size:.8rem;color:var(--muted);font-weight:500}
+.ueber-badge .dot{width:8px;height:8px;background:var(--blue);border-radius:50%;flex-shrink:0}
+.ueber-content p{font-size:.92rem;color:var(--muted);line-height:1.75;margin-bottom:1rem}
+.ueber-values{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-top:1.75rem}
+.ueber-value{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.1rem;transition:border-color .2s}
+.ueber-value:hover{border-color:var(--blue)}
+.v-icon{font-size:1.2rem;margin-bottom:.35rem}
+.ueber-value h4{font-family:'Asap',sans-serif;font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.2rem}
+.ueber-value p{font-size:.78rem;color:var(--muted);margin:0;line-height:1.5}
+
+/* ── KI-CHECK (INLINE) ────────────────────────────────── */
+#ki-check-section{background:#fff;padding:5rem 0}
+.check-wrap{max-width:720px;margin:0 auto;padding:0 1.5rem}
+.check-hero{background:var(--navy);border-radius:var(--rlg);padding:2.25rem 2.5rem;margin-bottom:2rem}
+.check-hero h2{font-size:1.6rem;color:#fff;font-weight:800;margin-bottom:.4rem}
+.check-hero p{color:rgba(255,255,255,.65);font-size:.88rem;font-weight:300;margin-bottom:1.25rem}
+.chips{display:flex;gap:.6rem;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;background:rgba(99,179,46,.25);border:1px solid rgba(99,179,46,.4);color:#9edb74;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:100px}
+.progress-wrap{margin-bottom:1.75rem}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;font-size:.8rem;color:var(--muted)}
+.progress-meta strong{color:var(--navy);font-family:'Asap',sans-serif}
+.pbar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.pbar-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:3px;transition:width .4s ease}
+.section-card{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden;display:none}
+.section-card.active{display:block}
+.section-header{padding:1.75rem 2rem 0}
+.section-badge{display:inline-flex;align-items:center;background:var(--sky);color:var(--navy);font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 11px;border-radius:100px;margin-bottom:.9rem}
+.section-header h3{font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:.35rem}
+.section-header p{font-size:.87rem;color:var(--muted);margin-bottom:1.25rem}
+.section-body{padding:.5rem 2rem 2rem;display:flex;flex-direction:column;gap:1.2rem}
+.section-footer{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2rem;border-top:1px solid var(--border);background:var(--off)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.82rem;font-weight:600;color:var(--navy)}
+.field .req{color:#c0392b;font-size:.75rem}
+.field .hint{font-size:.74rem;color:var(--muted);line-height:1.4}
+.field input[type="text"],.field input[type="email"],.field textarea,.field select{width:100%;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'Asap',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s,background .2s;resize:vertical}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue);background:#fff}
+.field textarea{min-height:70px}
+.field.has-err input,.field.has-err textarea,.field.has-err select{border-color:#e74c3c}
+.err-msg{font-size:.76rem;color:#c0392b;display:none}
+.field.has-err .err-msg{display:block}
+.radio-group{display:flex;flex-direction:column;gap:.45rem}
+.radio-opt{display:flex;align-items:flex-start;gap:10px;padding:.8rem 1rem;border:1.5px solid var(--border);border-radius:9px;cursor:pointer;transition:all .15s;font-size:.88rem;color:var(--text);line-height:1.4}
+.radio-opt:hover{border-color:var(--blue);background:var(--sky)}
+.radio-opt.sel{border-color:var(--navy);background:var(--sky);font-weight:500;color:var(--navy)}
+.radio-dot{width:17px;height:17px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;margin-top:2px;transition:all .15s}
+.radio-opt.sel .radio-dot{border-color:var(--navy);background:var(--navy);box-shadow:inset 0 0 0 3px #fff}
+.scale-q{background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem .9rem}
+.scale-q.has-err{border-color:#e74c3c}
+.sq-text{font-size:.9rem;font-weight:600;color:var(--navy);margin-bottom:.2rem;line-height:1.4}
+.sq-hint{font-size:.74rem;color:var(--muted);margin-bottom:.75rem;font-style:italic;line-height:1.4}
+.scale-row{display:flex;align-items:center;gap:.5rem;margin-top:.7rem}
+.scale-lbl{font-size:.68rem;color:var(--muted);white-space:nowrap;line-height:1.2;flex-shrink:0}
+.scale-nums{display:flex;gap:.35rem;flex:1;justify-content:center}
+.scale-num{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.scale-num:hover{border-color:var(--blue);color:var(--navy);background:var(--sky)}
+.scale-num.sel{background:var(--navy);border-color:var(--navy);color:#fff}
+.scale-err{font-size:.74rem;color:#c0392b;margin-top:.35rem;display:none}
+.scale-q.has-err .scale-err{display:block}
+.btn-nav{font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;padding:10px 22px;border-radius:8px;cursor:pointer;border:none;transition:all .2s}
+.btn-back{background:#fff;color:var(--muted);border:1.5px solid var(--border)!important}
+.btn-back:hover:not(:disabled){border-color:var(--navy)!important;color:var(--navy)}
+.btn-back:disabled{opacity:.35;cursor:not-allowed}
+.btn-fwd{background:var(--navy);color:#fff}
+.btn-fwd:hover{background:var(--blue)}
+#gate{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:2rem 2rem 2.25rem}
+#gate h3{font-size:1.15rem;font-weight:800;color:var(--navy);margin-bottom:.4rem}
+#gate>p{font-size:.87rem;color:var(--muted);margin-bottom:1.5rem}
+.form-row-check{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.gdpr-row{display:flex;align-items:flex-start;gap:9px;margin:1.1rem 0 1.5rem}
+.gdpr-row input{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--navy);cursor:pointer}
+.gdpr-row label{font-size:.76rem;color:var(--muted);line-height:1.5;cursor:pointer}
+.gdpr-row label a{color:var(--blue)}
+.btn-start{width:100%;background:var(--navy);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.97rem;padding:13px;border-radius:9px;border:none;cursor:pointer;transition:background .2s}
+.btn-start:hover{background:var(--blue)}
+.skip{display:block;text-align:center;margin-top:.8rem;font-size:.76rem;color:var(--muted);cursor:pointer;text-decoration:underline}
+.skip:hover{color:var(--navy)}
+#check-result{display:none;background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:2.5rem 2rem;text-align:center}
+.result-ring{width:120px;height:120px;border-radius:50%;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1.5rem;color:#fff;font-family:'Asap',sans-serif}
+.result-ring .rnum{font-size:2.2rem;font-weight:800;line-height:1}
+.result-ring .rlbl{font-size:.6rem;opacity:.6;letter-spacing:.05em}
+.result-level{font-family:'Asap',sans-serif;font-size:1.45rem;font-weight:800;color:var(--navy);margin-bottom:.5rem}
+.result-desc{color:var(--muted);font-size:.92rem;max-width:500px;margin:0 auto 2rem;line-height:1.7}
+.dim-section{margin:1.75rem 0}
+.dim-section h4{font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1.1rem}
+.dim-bars{display:grid;grid-template-columns:repeat(6,1fr);gap:.7rem;max-width:540px;margin:0 auto}
+.dim-item{display:flex;flex-direction:column;align-items:center;gap:5px}
+.bar-track{width:34px;height:76px;background:var(--sky);border-radius:17px;position:relative;overflow:hidden}
+.bar-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,var(--blue),var(--navy));border-radius:17px;transition:height .8s cubic-bezier(.4,0,.2,1)}
+.bar-pct{font-family:'Asap',sans-serif;font-size:.7rem;font-weight:700;color:var(--navy)}
+.bar-name{font-size:.63rem;font-weight:600;color:var(--muted);text-align:center;line-height:1.3}
+.qual-box{background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem 1.5rem;margin:1.5rem 0;text-align:left}
+.qual-box h4{font-size:.75rem;font-weight:700;color:var(--navy);margin-bottom:.75rem;letter-spacing:.05em;text-transform:uppercase}
+.qual-row{display:flex;gap:8px;margin-bottom:.45rem;font-size:.84rem;color:var(--muted);align-items:flex-start}
+.qual-row strong{color:var(--navy);min-width:100px;flex-shrink:0}
+.reco-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin:1.25rem 0;text-align:left}
+.reco-card{background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem}
+.reco-card .ri{font-size:1.3rem;margin-bottom:.35rem}
+.reco-card h4{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.2rem}
+.reco-card p{font-size:.78rem;color:var(--muted);margin:0;line-height:1.5}
+.result-cta{display:flex;gap:.85rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
+.btn-r{display:inline-flex;align-items:center;gap:7px;font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;padding:11px 22px;border-radius:9px;text-decoration:none;cursor:pointer;border:none;transition:all .2s}
+.btn-rp{background:var(--navy);color:#fff}.btn-rp:hover{background:var(--blue)}
+.btn-rs{background:var(--sky);color:var(--navy)}.btn-rs:hover{background:var(--border)}
+.section-card.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+/* Ki-Check V2 — aligned with main site design */
+#page-ki-check .kiv2{min-height:calc(100vh - 60px);background:var(--off);display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem}
+.kiv2-pw{width:100%;max-width:640px;margin-bottom:2rem}
+.kiv2-pm{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-bottom:.5rem;font-weight:500}
+.kiv2-pt{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.kiv2-pf{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%}
+.kiv2-card{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--sh);padding:2.5rem;width:100%;max-width:640px;animation:kiv2Up .4s ease both}
+@keyframes kiv2Up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.kiv2-lbl{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.kiv2-h1{font-family:'Asap',sans-serif;font-size:clamp(1.6rem,3vw,2.1rem);line-height:1.15;font-weight:800;margin-bottom:.5rem;color:var(--navy)}
+.kiv2-h2{font-family:'Asap',sans-serif;font-size:1.35rem;font-weight:800;line-height:1.2;margin-bottom:1rem;color:var(--navy)}
+.kiv2-h3{font-family:'Asap',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.75rem;color:var(--navy)}
+.kiv2-sub{font-size:.92rem;color:var(--muted);line-height:1.7;margin-bottom:1.75rem}
+.kiv2-lbl-t{display:block;font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:.35rem}
+.kiv2-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:'Asap',sans-serif;font-size:.92rem;color:var(--text);background:var(--off);transition:border-color .2s,background .2s;outline:none;margin-bottom:1.1rem}
+.kiv2-input:focus{border-color:var(--blue);background:#fff}
+.kiv2-ta{width:100%;min-height:85px;resize:vertical;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:'Asap',sans-serif;font-size:.92rem;color:var(--text);background:var(--off);outline:none;margin-bottom:1.1rem;transition:border-color .2s,background .2s}
+.kiv2-ta:focus{border-color:var(--blue);background:#fff}
+.kiv2-choices{display:flex;flex-direction:column;gap:.45rem;margin-bottom:1.5rem}
+.kiv2-choice{display:flex;align-items:flex-start;gap:10px;padding:.8rem 1rem;border:1.5px solid var(--border);border-radius:9px;cursor:pointer;transition:all .15s;font-size:.88rem;color:var(--text);background:#fff;text-align:left;width:100%;font-family:'Asap',sans-serif;line-height:1.4}
+.kiv2-choice:hover{border-color:var(--blue);background:var(--sky)}
+.kiv2-choice.kiv2-sel{border-color:var(--navy);background:var(--sky);font-weight:500;color:var(--navy)}
+.kiv2-dot{width:17px;height:17px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;margin-top:2px;transition:all .15s}
+.kiv2-choice.kiv2-sel .kiv2-dot{border-color:var(--navy);background:var(--navy);box-shadow:inset 0 0 0 3px #fff}
+.kiv2-scale{margin-bottom:1.5rem}
+.kiv2-sl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:.5rem}
+.kiv2-range{width:100%;accent-color:var(--navy);cursor:pointer;display:block}
+.kiv2-sv{text-align:center;font-size:1.5rem;font-weight:800;font-family:'Asap',sans-serif;color:var(--navy);margin-top:.5rem}
+.kiv2-btn{display:inline-flex;align-items:center;gap:8px;font-family:'Asap',sans-serif;font-weight:700;font-size:.92rem;padding:11px 24px;border-radius:10px;border:none;cursor:pointer;transition:all .2s}
+.kiv2-btnp{background:var(--navy);color:#fff;box-shadow:0 4px 16px rgba(26,31,35,.18)}
+.kiv2-btnp:hover{background:var(--blue);transform:translateY(-1px)}
+.kiv2-btng{background:#fff;color:var(--muted);border:1.5px solid var(--border)!important}
+.kiv2-btng:hover{border-color:var(--navy)!important;color:var(--navy)}
+.kiv2-brow{display:flex;gap:.75rem;justify-content:flex-end;align-items:center;margin-top:1rem}
+.kiv2-pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.75rem}
+.kiv2-pill{display:flex;align-items:center;gap:5px;background:rgba(99,179,46,.12);border:1px solid rgba(99,179,46,.25);color:var(--blue);font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:100px}
+.kiv2-priv{font-size:.75rem;color:var(--muted);margin-top:.5rem;display:flex;align-items:center;gap:.4rem}
+.kiv2-spin-w{display:flex;align-items:center;gap:.75rem;color:var(--muted);font-size:.9rem;padding:1rem 0}
+.kiv2-spinner{width:20px;height:20px;border:2.5px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:kiv2spin .7s linear infinite;flex-shrink:0}
+@keyframes kiv2spin{to{transform:rotate(360deg)}}
+.kiv2-res-hero{text-align:center;padding:1rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+.kiv2-ring{width:120px;height:120px;margin:0 auto 1rem;position:relative}
+.kiv2-ring svg{transform:rotate(-90deg)}
+.kiv2-ring circle{fill:none;stroke-width:10}
+.kiv2-rt{stroke:var(--border)}
+.kiv2-rf{stroke:var(--navy);stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+.kiv2-rnum{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Asap',sans-serif;font-size:2rem;font-weight:800;color:var(--navy);line-height:1}
+.kiv2-rnum small{font-family:'Asap',sans-serif;font-size:.6rem;color:var(--muted);font-weight:400;letter-spacing:.05em}
+.kiv2-rlvl{display:inline-block;padding:4px 13px;border-radius:100px;font-family:'Asap',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.75rem}
+.kiv2-low{background:var(--sky);color:var(--blue)}
+.kiv2-mid{background:#fff8e6;color:#b07500}
+.kiv2-high{background:#e8f7ee;color:#1e7e45}
+.kiv2-dimlist{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem}
+.kiv2-dimbar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:.25rem}
+.kiv2-dimfill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--navy),var(--blue));transition:width 1s ease;width:0%}
+.kiv2-cta-box{background:var(--sky);border:1px solid var(--border);border-radius:var(--rlg);padding:1.75rem;text-align:center;margin-top:1rem}
+.kiv2-list{list-style:none;margin-bottom:1.5rem}
+.kiv2-list li{padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.9rem;color:var(--text)}
+@media(max-width:480px){.kiv2-card{padding:1.75rem 1.25rem}.kiv2-h1{font-size:1.5rem}}
+
+/* Nav dropdown */
+.nav-dropdown{position:relative;display:inline-flex;align-items:center}
+.nav-dropdown > a{display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none}
+.nav-dropdown > a::after{content:'▾';font-size:.65rem;opacity:.7;transition:transform .2s}
+.nav-dropdown.open > a::after{transform:rotate(180deg)}
+.nav-sub{
+  display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  box-shadow:var(--sh-lg);min-width:230px;z-index:300;overflow:hidden
+}
+.nav-dropdown.open .nav-sub{display:block}
+.nav-sub a{
+  display:block;padding:.75rem 1.1rem;font-size:.84rem;font-weight:500;
+  color:var(--muted);transition:background .15s;cursor:pointer;border:none
+}
+.nav-sub a:hover{background:var(--sky);color:var(--navy)}
+.nav-sub .sub-label{
+  display:block;font-size:.68rem;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--blue);padding:.6rem 1.1rem .25rem;
+  opacity:.8
+}
+
+
+/* ── KONTAKT ──────────────────────────────────────────── */
+#kontakt{background:var(--off)}
+.kontakt-grid{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:start}
+.kontakt-info p{font-size:.92rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem}
+.kontakt-items{display:flex;flex-direction:column;gap:.9rem}
+.kontakt-item{display:flex;align-items:flex-start;gap:.9rem}
+.k-icon{font-size:1.2rem;flex-shrink:0;margin-top:2px}
+.kontakt-item h4{font-family:'Asap',sans-serif;font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.15rem}
+.kontakt-item p{font-size:.84rem;color:var(--muted);line-height:1.5}
+.kontakt-item a{color:var(--blue)}
+.kontakt-form-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:2rem}
+.kform-group{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
+.kform-group label{font-size:.8rem;font-weight:600;color:var(--navy)}
+.kform-group input,.kform-group select,.kform-group textarea{width:100%;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'Asap',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s}
+.kform-group input:focus,.kform-group select:focus,.kform-group textarea:focus{border-color:var(--blue);background:#fff}
+.kform-group textarea{min-height:100px;resize:vertical}
+.kform-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.kform-gdpr{display:flex;align-items:flex-start;gap:9px;margin:.75rem 0 1.25rem;font-size:.76rem;color:var(--muted);line-height:1.5}
+.kform-gdpr input{width:15px;height:15px;margin-top:2px;accent-color:var(--navy);flex-shrink:0;cursor:pointer}
+.kform-gdpr a{color:var(--blue)}
+.btn-submit{width:100%;background:var(--navy);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.97rem;padding:13px;border-radius:9px;border:none;cursor:pointer;transition:background .2s}
+.btn-submit:hover{background:var(--blue)}
+.form-success{display:none;text-align:center;padding:2rem}
+.form-success .success-icon{font-size:2.5rem;margin-bottom:.75rem}
+.form-success h4{font-family:'Asap',sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:.5rem}
+.form-success p{font-size:.88rem;color:var(--muted)}
+
+/* ── IMPRESSUM / DATENSCHUTZ ──────────────────────────── */
+#legal-section{display:none;background:#fff;padding:5rem 0}
+.legal-content{max-width:720px;margin:0 auto;padding:0 1.5rem}
+.legal-card{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:2rem 2.5rem;margin-bottom:1.25rem}
+.legal-card h2{font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.legal-card h3{font-size:.9rem;font-weight:700;color:var(--navy);margin:1rem 0 .3rem}
+.legal-card p{font-size:.9rem;color:var(--muted);line-height:1.7;margin-bottom:.6rem}
+.legal-card ul{margin:.4rem 0 .6rem 1.2rem;font-size:.9rem;color:var(--muted);line-height:1.8}
+.legal-card a{color:var(--blue)}
+.legal-tabs{display:flex;gap:.75rem;margin-bottom:2rem;border-bottom:2px solid var(--border);padding-bottom:0}
+.legal-tab{font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;color:var(--muted);padding:.6rem 1rem;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:all .2s}
+.legal-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.legal-pane{display:none}
+.legal-pane.active{display:block}
+.legal-hero{background:var(--navy);border-radius:var(--rlg);padding:2.25rem 2.5rem;margin-bottom:2rem}
+.legal-hero h1{font-size:clamp(1.6rem,3vw,2.2rem);color:#fff;font-weight:800;margin-bottom:.4rem}
+.legal-hero p{color:rgba(255,255,255,.55);font-size:.88rem;font-weight:300}
+
+/* ── FOOTER ───────────────────────────────────────────── */
+footer{background:var(--navy);padding:3rem 1.5rem 2rem;text-align:center}
+.footer-inner{max-width:1140px;margin:0 auto}
+.footer-logo{font-family:'Asap',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;margin-bottom:.35rem;display:flex;align-items:center;justify-content:center;gap:8px}
+.footer-logo span{background:var(--blue);color:#fff;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:4px}
+.footer-tagline{font-size:.8rem;color:rgba(255,255,255,.4);margin-bottom:1.75rem}
+.footer-links{display:flex;gap:1.5rem;list-style:none;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
+.footer-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:.82rem;transition:color .2s;cursor:pointer}
+.footer-links a:hover{color:#fff}
+.footer-copy{font-size:.75rem;color:rgba(255,255,255,.25)}
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media(max-width:900px){
+  .leistungen-grid{grid-template-columns:1fr}
+  .ueber-grid{grid-template-columns:1fr}
+  .kontakt-grid{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .nav-links{display:none}
+  .nav-burger{display:flex}
+  section{padding:3.5rem 0}
+  .hero-inner{padding:3rem 1.5rem}
+  .audit-inner{flex-direction:column;text-align:center}
+  .dim-bars{grid-template-columns:repeat(3,1fr)}
+  .reco-grid{grid-template-columns:1fr}
+  .section-body,.section-header{padding-left:1.25rem;padding-right:1.25rem}
+  .section-footer{padding:1rem 1.25rem}
+  .scale-lbl{display:none}
+  .check-hero{padding:1.75rem 1.5rem}
+  #gate{padding:1.5rem 1.25rem}
+  .form-row-check{grid-template-columns:1fr}
+  .kform-row{grid-template-columns:1fr}
+  .legal-card{padding:1.5rem 1.25rem}
+  .legal-hero{padding:1.75rem 1.5rem}
+}
+
+/* ── PAGE TRANSITIONS ─────────────────────────────────── */
+.page-section{display:block}
+.page-section.hidden{display:none}
+
+/* ── CANVAS ───────────────────────────────────────────── */
+.criteria-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.crit-opt{display:flex;align-items:flex-start;gap:12px;padding:1rem 1.1rem;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s}
+.crit-opt:hover{border-color:var(--blue);background:var(--sky)}
+.crit-opt.sel{border-color:var(--navy);background:var(--sky)}
+.crit-marker{width:28px;height:28px;border-radius:8px;background:var(--off);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;transition:all .15s;font-family:'Asap',sans-serif;font-weight:700;color:var(--muted)}
+.crit-opt.sel .crit-marker{background:var(--navy);border-color:var(--navy);color:#fff}
+.crit-text strong{display:block;font-size:.88rem;font-weight:600;color:var(--navy);margin-bottom:2px}
+.crit-text span{font-size:.78rem;color:var(--muted);line-height:1.4}
+.crit-err{font-size:.78rem;color:#c0392b;display:none;margin-top:.4rem}
+.example-pill{display:inline-flex;align-items:center;gap:5px;background:var(--sky);border:1px solid var(--border);color:var(--navy);font-size:.75rem;font-weight:500;padding:4px 11px;border-radius:100px;cursor:pointer;transition:all .15s}
+.example-pill:hover{background:var(--border);border-color:var(--blue)}
+.canvas-tool-item{display:flex;align-items:center;gap:10px;padding:.7rem 1rem;background:var(--off);border:1px solid var(--border);border-radius:9px;font-size:.88rem;font-weight:500;color:var(--navy);margin-bottom:.5rem}
+.canvas-tool-item .ti-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0}
+.canvas-tool-item .ti-tag{margin-left:auto;font-size:.7rem;color:var(--muted);background:var(--sky);padding:2px 8px;border-radius:100px}
+.canvas-cat-task{background:var(--sky);color:var(--navy);font-size:.78rem;font-weight:500;padding:4px 12px;border-radius:100px}
+.canvas-cs-row{display:flex;align-items:flex-start;gap:10px;font-size:.84rem;margin-bottom:.6rem}
+.canvas-cs-key{color:var(--muted);min-width:110px;flex-shrink:0;font-size:.78rem}
+.canvas-cs-bar{height:4px;flex:1;background:var(--sky);border-radius:2px;margin-top:.35rem}
+.canvas-cs-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--navy),var(--blue));transition:width .6s ease}
+@media(max-width:620px){.criteria-grid{grid-template-columns:1fr}}
+
+/* ── BEST PRACTICES ───────────────────────────────────── */
+#best-practices{background:#fff}
+.bp-tabs{display:flex;gap:.5rem;border-bottom:2px solid var(--border);margin-bottom:2.5rem;overflow-x:auto;padding-bottom:0}
+.bp-tab{
+  font-family:'Asap',sans-serif;font-weight:700;font-size:.84rem;
+  color:var(--muted);padding:.7rem 1.25rem;cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;border-radius:6px 6px 0 0;
+}
+.bp-tab:hover{color:var(--navy);background:var(--sky)}
+.bp-tab.bp-active{color:var(--navy);border-bottom-color:var(--navy);background:transparent}
+.bp-pane{display:none}
+.bp-pane.bp-active{display:block}
+
+/* Agent Flywheel */
+.agent-intro-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-bottom:2.5rem;align-items:start}
+.agent-flow{background:var(--navy);border-radius:var(--rlg);padding:2rem 1.5rem;text-align:center}
+.agent-flow-step{margin-bottom:1.1rem}
+.agent-flow-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(99,179,46,.4);border:1.5px solid rgba(99,179,46,.6);color:#9edb74;font-family:'Asap',sans-serif;font-weight:800;font-size:.85rem;margin-bottom:.4rem}
+.agent-flow-val{font-family:'Asap',sans-serif;font-weight:800;font-size:1.6rem;color:var(--accent);line-height:1}
+.agent-flow-lbl{font-size:.78rem;color:rgba(255,255,255,.65);margin-top:.2rem}
+.agent-flow-arrow{color:rgba(99,179,46,.6);font-size:1.1rem;margin:.4rem 0;display:block}
+.agent-tagline{font-size:.82rem;color:rgba(255,255,255,.5);margin-top:1rem;font-style:italic;border-top:1px solid rgba(255,255,255,.1);padding-top:.8rem}
+
+.flywheel-card{background:var(--off);border:1.5px solid var(--border);border-radius:var(--rlg);padding:1.75rem;display:flex;flex-direction:column;align-items:center;gap:0}
+.flywheel-center{background:var(--navy);border-radius:50%;width:130px;height:130px;display:flex;align-items:center;justify-content:center;text-align:center;margin:1rem auto;flex-shrink:0}
+.flywheel-center p{font-family:'Asap',sans-serif;font-size:.72rem;font-weight:800;color:#fff;line-height:1.3;padding:0 .5rem}
+.fw-nodes{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;width:100%}
+.fw-node{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:.7rem .85rem;text-align:center;font-size:.75rem;font-weight:600;color:var(--navy);line-height:1.35;transition:border-color .2s}
+.fw-node:hover{border-color:var(--blue)}
+.fw-node span{display:block;font-size:1rem;margin-bottom:.2rem}
+
+.agent-fit-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fit-card{border-radius:var(--rlg);padding:1.5rem}
+.fit-card.fit-yes{background:var(--sky);border:1.5px solid #c9e7b3}
+.fit-card.fit-no{background:#fff4f0;border:1.5px solid #f5c9bb}
+.fit-card h4{font-family:'Asap',sans-serif;font-size:.88rem;font-weight:800;margin-bottom:.85rem}
+.fit-card.fit-yes h4{color:var(--navy)}
+.fit-card.fit-no h4{color:#b03a2e}
+.fit-list{list-style:none;display:flex;flex-direction:column;gap:.45rem}
+.fit-list li{font-size:.83rem;padding-left:1.1rem;position:relative;color:var(--text);line-height:1.5}
+.fit-card.fit-yes .fit-list li::before{content:'✓';position:absolute;left:0;color:var(--blue);font-weight:700}
+.fit-card.fit-no .fit-list li::before{content:'✗';position:absolute;left:0;color:#c0392b;font-weight:700}
+
+/* Bauplan */
+.bauplan-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.85rem;margin-top:2rem}
+.bauplan-card{background:var(--blue);border-radius:var(--r);padding:1.1rem 1rem;display:flex;flex-direction:column;gap:.5rem}
+.bauplan-card:first-child{background:var(--navy)}
+.bauplan-phase{font-family:'Asap',sans-serif;font-size:.72rem;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase}
+.bauplan-title{font-family:'Asap',sans-serif;font-size:.88rem;font-weight:800;color:#fff;line-height:1.25}
+.bauplan-items{list-style:none;margin-top:.35rem;display:flex;flex-direction:column;gap:.3rem}
+.bauplan-items li{font-size:.74rem;color:rgba(255,255,255,.8);padding-left:.85rem;position:relative;line-height:1.4}
+.bauplan-items li::before{content:'–';position:absolute;left:0;opacity:.6}
+
+/* Prompt Bibliothek */
+.prompt-app-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.75rem}
+.p-app-tab{display:inline-flex;align-items:center;gap:6px;background:var(--off);border:1.5px solid var(--border);border-radius:8px;padding:.45rem .9rem;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s}
+.p-app-tab:hover{border-color:var(--blue);color:var(--navy)}
+.p-app-tab.p-active{background:var(--navy);border-color:var(--navy);color:#fff}
+.prompt-app-pane{display:none}
+.prompt-app-pane.p-active{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.prompt-card{background:#23282c;border:1px solid rgba(99,179,46,.3);border-radius:var(--r);padding:1.1rem 1.25rem;position:relative;transition:border-color .2s;cursor:pointer}
+.prompt-card:hover{border-color:rgba(99,179,46,.7)}
+.prompt-card p{font-size:.82rem;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:.6rem}
+.prompt-copy-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(99,179,46,.25);border:1px solid rgba(99,179,46,.4);color:#9edb74;font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:6px;cursor:pointer;transition:all .2s;border-width:1px}
+.prompt-copy-btn:hover{background:rgba(99,179,46,.45)}
+.prompt-copy-btn.copied{background:rgba(0,180,80,.25);border-color:rgba(0,180,80,.5);color:#4ecb6e}
+.prompt-placeholder{font-family:'Asap',monospace;color:var(--accent);font-weight:600}
+
+/* Copilot personalisieren */
+.copilot-pers-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:1.75rem}
+.pers-card{background:var(--off);border:1.5px solid var(--border);border-radius:var(--rlg);padding:1.6rem;transition:all .25s}
+.pers-card:hover{border-color:var(--blue);box-shadow:var(--sh)}
+.pers-card-head{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+.pers-icon{font-size:1.4rem}
+.pers-card h4{font-family:'Asap',sans-serif;font-size:.95rem;font-weight:800;color:var(--navy)}
+.pers-status{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:100px;margin-left:auto;flex-shrink:0}
+.pers-status.on{background:#e6f9ee;color:#1a7a3c;border:1px solid #a3dbb7}
+.pers-status.neutral{background:var(--sky);color:var(--navy);border:1px solid var(--border)}
+.pers-card p{font-size:.83rem;color:var(--muted);line-height:1.6;margin-bottom:.9rem}
+.pers-tip{background:#fff;border:1px solid var(--border);border-radius:8px;padding:.7rem .9rem;font-size:.78rem;color:var(--text);line-height:1.5}
+.pers-tip strong{color:var(--blue)}
+.pers-path{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:600;color:var(--muted);background:var(--sky);padding:3px 9px;border-radius:6px;margin-bottom:.6rem}
+
+@media(max-width:900px){
+  .agent-intro-grid{grid-template-columns:1fr}
+  .bauplan-grid{grid-template-columns:1fr 1fr}
+  .copilot-pers-grid{grid-template-columns:1fr}
+  .prompt-app-pane.p-active{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .agent-fit-grid{grid-template-columns:1fr}
+  .bauplan-grid{grid-template-columns:1fr}
+  .bp-tab{font-size:.78rem;padding:.6rem .9rem}
+}
+
+/* Reifegrad Interview - main site design */
+#page-reifegrad .rg-wrap{min-height:calc(100vh - 60px);background:var(--off);display:flex;flex-direction:column;align-items:center;padding:2rem 1rem 4rem}
+.rg-pw{width:100%;max-width:680px;margin-bottom:1.5rem}
+.rg-pt{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.rg-pf{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);width:0%}
+.rg-card{background:#fff;border:1px solid var(--border);border-radius:var(--rlg);box-shadow:var(--sh);padding:2.5rem;width:100%;max-width:680px;animation:kiv2Up .4s ease both;position:relative;overflow:hidden}
+.rg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--blue))}
+.rg-lbl{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:.6rem}
+.rg-h1{font-family:'Asap',sans-serif;font-size:clamp(1.6rem,3vw,2rem);font-weight:800;line-height:1.15;margin-bottom:.5rem;color:var(--navy)}
+.rg-sub{font-size:.92rem;color:var(--muted);line-height:1.7;margin-bottom:1.75rem}
+.rg-pills{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2rem}
+.rg-pill{display:flex;align-items:center;gap:5px;background:rgba(99,179,46,.12);border:1px solid rgba(99,179,46,.25);color:var(--blue);font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:100px}
+.rg-lbl-t{display:block;font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:.35rem}
+.rg-input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.75rem 1rem;font-family:'Asap',sans-serif;font-size:.92rem;color:var(--text);background:var(--off);outline:none;margin-bottom:1rem;transition:border-color .2s,background .2s}
+.rg-input:focus{border-color:var(--blue);background:#fff}
+.rg-chat{display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem;max-height:400px;overflow-y:auto;padding-right:.25rem;scroll-behavior:smooth}
+.rg-chat::-webkit-scrollbar{width:3px}
+.rg-chat::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+.rg-msg{display:flex;gap:.75rem;animation:msgIn .3s ease both}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.rg-msg-ai{align-items:flex-start}
+.rg-msg-user{flex-direction:row-reverse}
+.rg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Asap',sans-serif;font-size:.75rem;font-weight:800;flex-shrink:0}
+.rg-av-ai{background:var(--navy);color:#fff}
+.rg-av-user{background:var(--sky);color:var(--navy);border:1px solid var(--border)}
+.rg-bubble{max-width:82%;padding:.85rem 1.1rem;border-radius:12px;font-size:.9rem;line-height:1.65}
+.rg-bubble-ai{background:var(--off);border:1px solid var(--border);color:var(--text);border-top-left-radius:4px}
+.rg-bubble-user{background:var(--sky);border:1px solid var(--border);color:var(--navy);border-top-right-radius:4px;text-align:right}
+.rg-typing{display:flex;gap:.3rem;align-items:center;padding:.5rem 0}
+.rg-typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:rgblink 1.2s ease-in-out infinite}
+.rg-typing span:nth-child(2){animation-delay:.2s}
+.rg-typing span:nth-child(3){animation-delay:.4s}
+@keyframes rgblink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.rg-input-row{display:flex;gap:.75rem;align-items:flex-end}
+.rg-ta{flex:1;background:var(--off);border:1.5px solid var(--border);border-radius:10px;padding:.75rem 1rem;font-family:'Asap',sans-serif;font-size:.9rem;color:var(--text);resize:none;min-height:50px;max-height:130px;outline:none;transition:border-color .2s,background .2s}
+.rg-ta:focus{border-color:var(--blue);background:#fff}
+.rg-send{width:44px;height:44px;border-radius:50%;border:none;background:var(--navy);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.rg-send:hover{background:var(--blue);transform:scale(1.08)}
+.rg-send:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.rg-res-section{margin-bottom:1.75rem}
+.rg-res-section h3{font-family:'Asap',sans-serif;font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.rg-badge{display:inline-flex;align-items:center;gap:.5rem;padding:4px 13px;border-radius:100px;font-family:'Asap',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1rem}
+.rg-badge-anf{background:var(--sky);color:var(--blue)}
+.rg-badge-fort{background:#fff8e6;color:#b07500}
+.rg-badge-exp{background:#e8f7ee;color:#1e7e45}
+.rg-pfad{background:var(--off);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem;margin-bottom:.75rem}
+.rg-pfad h4{font-family:'Asap',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:.35rem;color:var(--navy)}
+.rg-pfad p{font-size:.85rem;color:var(--muted);line-height:1.6}
+.rg-pfad .rg-tag{display:inline-block;font-size:.7rem;padding:2px 8px;border-radius:4px;background:var(--sky);color:var(--blue);font-weight:700;margin-bottom:.35rem}
+.rg-sbar-wrap{margin:.5rem 0 1rem}
+.rg-sbar-lbl{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-bottom:.3rem}
+.rg-sbar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.rg-sbar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--navy),var(--blue));transition:width 1.2s ease}
+.rg-btn{display:inline-flex;align-items:center;gap:8px;font-family:'Asap',sans-serif;font-weight:700;font-size:.88rem;padding:10px 22px;border-radius:9px;border:none;cursor:pointer;transition:all .2s}
+.rg-btnp{background:var(--navy);color:#fff}.rg-btnp:hover{background:var(--blue)}
+.rg-btng{background:#fff;color:var(--muted);border:1.5px solid var(--border)!important}.rg-btng:hover{border-color:var(--navy)!important;color:var(--navy)}
+@media(max-width:480px){.rg-card{padding:1.5rem 1.1rem}.rg-chat{max-height:260px}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo" onclick="showPage('main')">HandsOnAI <span>OWL</span></div>
+  <div class="nav-links">
+    <a onclick="showPage('main');navTo('#leistungen')">Leistungen</a>
+    <a onclick="showPage('main');navTo('#best-practices')">Best Practices</a>
+    <a onclick="showPage('main');navTo('#ueber-uns')">Über uns</a>
+    <div class="nav-dropdown" id="navDropdown">
+      <a onclick="toggleNavDropdown(event)">KI-Assessment</a>
+      <div class="nav-sub">
+        <span class="sub-label">Für Unternehmen</span>
+        <a onclick="closeNavDropdown();showPage('ki-check')">KI-Readiness-Check</a>
+        <span class="sub-label">Für Menschen</span>
+        <a onclick="closeNavDropdown();showPage('reifegrad')">KI-Kompass</a>
+      </div>
+    </div>
+    <a onclick="showPage('canvas')">Use-Case Canvas</a>
+    <a class="nav-cta" onclick="showPage('main');navTo('#kontakt')">Kontakt</a>
+  </div>
+  <div class="nav-burger" id="burger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a onclick="closeMobile();showPage('main');navTo('#leistungen')">Leistungen</a>
+  <a onclick="closeMobile();showPage('main');navTo('#best-practices')">Best Practices</a>
+  <a onclick="closeMobile();showPage('main');navTo('#ueber-uns')">Über uns</a>
+  <a onclick="closeMobile();showPage('ki-check')">KI-Assessment: Für Unternehmen</a>
+  <a onclick="closeMobile();showPage('reifegrad')">KI-Assessment: KI-Kompass</a>
+  <a onclick="closeMobile();showPage('canvas')">Use-Case Canvas</a>
+  <a onclick="closeMobile();showPage('main');navTo('#kontakt')">Kontakt</a>
+  <a onclick="closeMobile();showPage('impressum')">Impressum</a>
+  <a onclick="closeMobile();showPage('datenschutz')">Datenschutz</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     MAIN PAGE
+     ════════════════════════════════════════════════════════ -->
+<div id="page-main" class="page-section">
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div class="hero-badge">KI-Beratung für den Mittelstand</div>
+      <h1>KI, die <em>einfach</em><br>funktioniert.</h1>
+      <p class="hero-sub">Praxisnahe Beratung, Workshops und Implementierung — ohne Buzzwords, ohne Vendor-Lock-in. Für Unternehmen in OWL und der DACH-Region.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showPage('ki-check')">🎯 KI-Readiness prüfen</button>
+        <button class="btn-outline" onclick="navTo('#kontakt')">Beratungsgespräch buchen</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong>4</strong><span>Klare Leistungsmodule</span></div>
+        <div class="hero-stat"><strong>1:1</strong><span>Persönliche Beratung</span></div>
+        <div class="hero-stat"><strong>OWL</strong><span>Regional verwurzelt</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOOLS BANNER -->
+  <div id="audit-banner">
+    <div class="audit-inner fade-in">
+      <div>
+        <h2>Kostenlose Tools für Ihren KI-Einstieg</h2>
+        <p>Einfache Werkzeuge — ohne Login, ohne Account, sofort nutzbar.</p>
+      </div>
+      <div class="audit-right">
+        <button class="btn-pri" onclick="showPage('ki-check')">🎯 KI-Readiness-Check</button>
+        <button class="btn-sec" onclick="showPage('canvas')">🗺️ Use-Case Canvas</button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- LEISTUNGEN -->
+  <section id="leistungen">
+    <div class="container">
+      <div class="section-head fade-in">
+        <div class="section-label">Was ich anbiete</div>
+        <h2 class="section-title">Leistungen</h2>
+        <p class="section-sub">Vier Module — klar abgegrenzt, direkt buchbar. Von der ersten Standortbestimmung bis zur laufenden strategischen Begleitung.</p>
+      </div>
+      <div class="leistungen-grid">
+        <div class="leistung-card fade-in">
+          <div class="leistung-icon">🔍</div>
+          <h3>AI Readiness Audit</h3>
+          <p>Strukturierte Bestandsaufnahme Ihrer KI-Reife in 5 Dimensionen — als Basis für alle weiteren Schritte.</p>
+          <ul class="leistung-features">
+            <li>25-Fragen-Assessment (5 Dimensionen)</li>
+            <li>Scoring & Reifegrad-Einordnung</li>
+            <li>Schriftlicher Bericht mit Handlungsfeldern</li>
+            <li>Optional: 60-min Debrief-Session</li>
+          </ul>
+          <a class="btn-card" onclick="navTo('#kontakt')">Jetzt anfragen →</a>
+        </div>
+        <div class="leistung-card fade-in">
+          <div class="leistung-icon">🛠️</div>
+          <h3>AI Tool Onboarding</h3>
+          <p>Einführung ausgewählter KI-Tools ins Team — praxisnah, auf Ihre Workflows zugeschnitten.</p>
+          <ul class="leistung-features">
+            <li>Tool-Auswahl & Vorbereitung</li>
+            <li>Halbtag / Ganztag / Premium-Workshop</li>
+            <li>Hands-on Übungen für Ihr Team</li>
+            <li>Nachhaltigkeits-Coaching inklusive</li>
+          </ul>
+          <a class="btn-card" onclick="navTo('#kontakt')">Jetzt anfragen →</a>
+        </div>
+        <div class="leistung-card featured fade-in">
+          <div class="featured-badge">Empfohlen</div>
+          <div class="leistung-icon">⚡</div>
+          <h3>AI Consulting Sprint</h3>
+          <p>Intensives 2-Tage-Format: Vom Problem zur priorisierten KI-Roadmap — fertig zur Umsetzung.</p>
+          <ul class="leistung-features">
+            <li>Ist-Analyse & Use-Case-Discovery</li>
+            <li>Priorisierte KI-Roadmap</li>
+            <li>Konkrete Umsetzungs-Empfehlungen</li>
+            <li>30-Tage Follow-up inklusive</li>
+          </ul>
+          <a class="btn-card" onclick="navTo('#kontakt')">Jetzt anfragen →</a>
+        </div>
+        <div class="leistung-card fade-in">
+          <div class="leistung-icon">🤝</div>
+          <h3>Fractional AI Officer</h3>
+          <p>Laufende strategische KI-Begleitung — wenn Sie einen erfahrenen Sparringspartner auf Abruf brauchen.</p>
+          <ul class="leistung-features">
+            <li>Starter / Growth / Premium Retainer</li>
+            <li>Monatliche Strategie-Sessions</li>
+            <li>Asynchrone Beratung & Reviews</li>
+            <li>Umsetzungsbegleitung nach Bedarf</li>
+          </ul>
+          <a class="btn-card" onclick="navTo('#kontakt')">Jetzt anfragen →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEST PRACTICES -->
+  <section id="best-practices">
+    <div class="container">
+      <div class="section-head fade-in">
+        <div class="section-label">Copilot & Agenten — Praxiswissen</div>
+        <h2 class="section-title">Best Practices</h2>
+        <p class="section-sub">Drei Themenbereiche für Ihren Einstieg: Agenten in 30 Minuten aufbauen, Copilot-Prompts für Office und Copilot gezielt personalisieren.</p>
+      </div>
+
+      <!-- TABS -->
+      <div class="bp-tabs fade-in">
+        <div class="bp-tab bp-active" onclick="bpSwitch('agents',this)">🤖 30-Minuten-Agenten</div>
+        <div class="bp-tab" onclick="bpSwitch('prompts',this)">💬 Prompt-Bibliothek</div>
+        <div class="bp-tab" onclick="bpSwitch('personal',this)">⚙️ Copilot personalisieren</div>
+      </div>
+
+      <!-- ─── TAB 1: 30-Minuten-Agenten ─────────────────── -->
+      <div class="bp-pane bp-active" id="bp-agents">
+
+        <div class="agent-intro-grid fade-in">
+
+          <!-- Flow-Karte -->
+          <div class="agent-flow">
+            <div class="agent-flow-step">
+              <div class="agent-flow-num">1</div>
+              <div class="agent-flow-val">30</div>
+              <div class="agent-flow-lbl">Min investieren</div>
+            </div>
+            <span class="agent-flow-arrow">⌄</span>
+            <div class="agent-flow-step">
+              <div class="agent-flow-num">2</div>
+              <div class="agent-flow-val" style="font-size:1.3rem">Agent</div>
+              <div class="agent-flow-lbl">bauen</div>
+            </div>
+            <span class="agent-flow-arrow">⌄</span>
+            <div class="agent-flow-step">
+              <div class="agent-flow-num">3</div>
+              <div class="agent-flow-val">80 %</div>
+              <div class="agent-flow-lbl">Vorarbeit automatisieren</div>
+            </div>
+            <p class="agent-tagline">Klein starten. Schnell entlasten. Agent für Agent skalieren.</p>
+          </div>
+
+          <!-- Flywheel -->
+          <div class="flywheel-card">
+            <p style="font-family:'Asap',sans-serif;font-size:.8rem;font-weight:800;color:var(--navy);text-align:center;margin-bottom:.25rem">Das Flywheel-Prinzip</p>
+            <p style="font-size:.76rem;color:var(--muted);text-align:center;margin-bottom:.5rem">Gesparte Zeit baut den nächsten Agenten</p>
+            <div class="fw-nodes">
+              <div class="fw-node"><span>⏱️</span>Zeit<br>sparen</div>
+              <div class="fw-node"><span>💰</span>Zeit<br>reinvestieren</div>
+              <div class="fw-node"><span>👥</span>Mehr<br>Entlastung</div>
+              <div class="fw-node"><span>🤖</span>Nächsten<br>Agenten bauen</div>
+            </div>
+            <div class="flywheel-center" style="margin-top:.85rem">
+              <p>Gesparte Zeit<br>baut den<br>nächsten Agenten</p>
+            </div>
+          </div>
+
+          <!-- Geeignet / Grenzen -->
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div class="fit-card fit-yes">
+              <h4>✅ Geeignet, wenn …</h4>
+              <ul class="fit-list">
+                <li>Aufgabe ist wiederkehrend</li>
+                <li>Prozess ist strukturierbar</li>
+                <li>Input ist klar definiert</li>
+                <li>Output ist prüfbar</li>
+              </ul>
+            </div>
+            <div class="fit-card fit-no">
+              <h4>⛔ Grenzen, wenn …</h4>
+              <ul class="fit-list">
+                <li>Hohe Verantwortung</li>
+                <li>Unklare Entscheidungskriterien</li>
+                <li>Sensible Entscheidungen</li>
+                <li>Starke Kontextabhängigkeit</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bauplan -->
+        <div class="fade-in" style="margin-top:2rem">
+          <p style="font-family:'Asap',sans-serif;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">Der 30-Minuten-Bauplan</p>
+          <div class="bauplan-grid">
+            <div class="bauplan-card">
+              <div class="bauplan-phase">Min 0–5</div>
+              <div class="bauplan-title">Use Case festnageln</div>
+              <ul class="bauplan-items">
+                <li>Einen klaren Satz formulieren</li>
+                <li>Grenzen definieren</li>
+                <li>Agent-Canvas ausfüllen</li>
+              </ul>
+            </div>
+            <div class="bauplan-card">
+              <div class="bauplan-phase">Min 6–10</div>
+              <div class="bauplan-title">Rolle & Arbeitsweise definieren</div>
+              <ul class="bauplan-items">
+                <li>Systemprompt mit Copilot vorbereiten</li>
+                <li>Aufgabe – Arbeitsweise – Grenzen</li>
+                <li>Mit Copilot überarbeiten</li>
+              </ul>
+            </div>
+            <div class="bauplan-card">
+              <div class="bauplan-phase">Min 11–15</div>
+              <div class="bauplan-title">Output-Template bauen</div>
+              <ul class="bauplan-items">
+                <li>Feste Struktur für den Output vorgeben</li>
+                <li>Kapitel / Tabelle / Listen definieren</li>
+              </ul>
+            </div>
+            <div class="bauplan-card">
+              <div class="bauplan-phase">Min 16–25</div>
+              <div class="bauplan-title">Tooling ergänzen</div>
+              <ul class="bauplan-items">
+                <li>Variante A: Nur Prompt-Agent</li>
+                <li>Variante B: Agent + Wissensquellen</li>
+                <li>Variante C: Agent mit Aktionen</li>
+              </ul>
+            </div>
+            <div class="bauplan-card">
+              <div class="bauplan-phase">Min 26–30</div>
+              <div class="bauplan-title">Test mit realistischen Beispielen</div>
+              <ul class="bauplan-items">
+                <li>Outputstruktur korrekt?</li>
+                <li>Risiken erkannt?</li>
+                <li>Grenzen eingehalten?</li>
+                <li>Zeit gespart?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="fade-in" style="margin-top:2rem;background:var(--sky);border:1.5px solid var(--border);border-radius:var(--rlg);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
+          <div>
+            <p style="font-family:'Asap',sans-serif;font-weight:800;color:var(--navy);margin-bottom:.25rem">Eigenen Agenten bauen lassen?</p>
+            <p style="font-size:.84rem;color:var(--muted)">Im AI Tool Onboarding bauen wir gemeinsam Ihren ersten produktiven Agenten.</p>
+          </div>
+          <button class="btn-pri" onclick="navTo('#kontakt')" style="flex-shrink:0">Jetzt anfragen →</button>
+        </div>
+
+      </div><!-- /bp-agents -->
+
+      <!-- ─── TAB 2: Prompt-Bibliothek ──────────────────── -->
+      <div class="bp-pane" id="bp-prompts">
+
+        <p class="fade-in" style="font-size:.88rem;color:var(--muted);margin-bottom:1.5rem;max-width:600px">Fertige Prompt-Vorlagen für Microsoft 365 Copilot — einfach auf das Karten-Symbol klicken und in Copilot einfügen. Platzhalter in <span class="prompt-placeholder">[eckigen Klammern]</span> anpassen.</p>
+
+        <div class="prompt-app-tabs fade-in">
+          <div class="p-app-tab p-active" onclick="promptSwitch('outlook',this)">📧 Outlook</div>
+          <div class="p-app-tab" onclick="promptSwitch('teams',this)">💬 Teams</div>
+          <div class="p-app-tab" onclick="promptSwitch('word',this)">📄 Word & PowerPoint</div>
+          <div class="p-app-tab" onclick="promptSwitch('excel',this)">📊 Excel</div>
+        </div>
+
+        <!-- Outlook -->
+        <div class="prompt-app-pane p-active" id="pp-outlook">
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Schreibe eine höfliche aber bestimmte Zahlungserinnerung an <span class="prompt-placeholder">[Unternehmen]</span> für Rechnung <span class="prompt-placeholder">[Nr.]</span> vom <span class="prompt-placeholder">[Datum]</span>, Betrag <span class="prompt-placeholder">[X]</span> €, Zahlungsziel überschritten um <span class="prompt-placeholder">[X]</span> Tage. Ton: professionell, nicht vorwurfsvoll.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Fasse diesen E-Mail-Verlauf zusammen: Was ist der aktuelle Stand, was wurde vereinbart, was ist meine nächste Aktion?</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Ich muss auf diese E-Mail antworten und eine Terminabsage kommunizieren. Formuliere eine freundliche Absage mit konkretem Alternativvorschlag für <span class="prompt-placeholder">[Zeitraum]</span>.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Erstelle aus diesem E-Mail-Thread eine strukturierte Zusammenfassung mit: Offene Punkte, Entscheidungen, nächste Schritte mit Verantwortlichen.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+        </div>
+
+        <!-- Teams -->
+        <div class="prompt-app-pane" id="pp-teams">
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Fasse dieses Meeting zusammen: Was wurde entschieden? Welche Aufgaben wurden vergeben, an wen, bis wann? Erstelle eine strukturierte Tabelle mit Aufgabe / Verantwortlich / Deadline.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Ich habe dieses Meeting verpasst. Erkläre mir in 5 Sätzen was besprochen wurde und was ich als nächstes tun muss.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Erstelle aus diesem Transkript eine Einladung für das Folgemeeting: Betreff, Ziel des Meetings, vorgeschlagene Agenda, benötigte Vorbereitung der Teilnehmer.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Wer hat in diesem Meeting die meisten offenen Punkte übernommen? Erstelle eine übersichtliche Task-Liste je Person.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+        </div>
+
+        <!-- Word & PowerPoint -->
+        <div class="prompt-app-pane" id="pp-word">
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Ich habe diesen Vertragsentwurf hochgeladen. Fasse die wichtigsten Pflichten des Mieters in fünf Stichpunkten zusammen und weise auf fehlende oder unklare Klauseln hin.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Schreibe ein Anschreiben an <span class="prompt-placeholder">[Unternehmen]</span> zur Bestätigung des Inhaberwechsels. Sachlich, freundlich, max. eine Seite. Folgende Informationen sind relevant: <span class="prompt-placeholder">[Stichpunkte]</span>.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Erstelle eine Präsentation mit 6 Folien zum Thema <span class="prompt-placeholder">[Thema]</span>: Ausgangslage, Ziele, aktuelle Maßnahmen, Ergebnisse, Ausblick, Kontakt. Sachlich, nüchtern, keine Füllfolien.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Schlage für diese Präsentation eine klarere Gliederung vor. Was fehlt, was ist redundant, wo wäre eine Visualisierung sinnvoller als Text?</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+        </div>
+
+        <!-- Excel -->
+        <div class="prompt-app-pane" id="pp-excel">
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Ich habe diese Tabelle mit offenen Zahlungen hochgeladen. Sortiere nach Fälligkeit, markiere alle Posten die mehr als 30 Tage überfällig sind und berechne den Gesamtbetrag je Kategorie.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Erkläre mir diese Formel in Zelle <span class="prompt-placeholder">[X]</span> in einfachen Worten und sage mir, ob sie für meinen Anwendungsfall korrekt ist: <span class="prompt-placeholder">[Formel einfügen]</span>.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Erstelle aus dieser Umsatztabelle eine kurze Analyse: Welche drei Positionen haben den größten Anteil? Gibt es auffällige Ausreißer? Was würdest du empfehlen zu prüfen?</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+          <div class="prompt-card" onclick="copyPrompt(this)">
+            <p>Baue mir eine einfache Vorlage für eine Mieterliste: Spalten für Mieter, Fläche, Mietbeginn, Laufzeit, monatliche Miete, Kündigungsdatum – automatisch berechnet aus Mietbeginn + Laufzeit.</p>
+            <button class="prompt-copy-btn">📋 Kopieren</button>
+          </div>
+        </div>
+
+      </div><!-- /bp-prompts -->
+
+      <!-- ─── TAB 3: Copilot personalisieren ────────────── -->
+      <div class="bp-pane" id="bp-personal">
+
+        <div class="fade-in" style="max-width:680px;margin-bottom:1.5rem">
+          <p style="font-size:.92rem;color:var(--muted);line-height:1.7">Copilot kann auf Ihre Arbeitsweise, Ihre Rolle und Ihre Sprache eingestellt werden — bevor Sie auch nur einen Prompt schreiben. Die Einstellungen finden Sie in Teams unter <strong style="color:var(--navy)">Chateinstellungen → Personalisierung</strong>.</p>
+        </div>
+
+        <div class="copilot-pers-grid fade-in">
+
+          <div class="pers-card">
+            <div class="pers-card-head">
+              <div class="pers-icon">✏️</div>
+              <h4>Benutzerdefinierte Anweisungen</h4>
+              <div class="pers-status on">● Aktivieren</div>
+            </div>
+            <div class="pers-path">Chateinstellungen → Personalisierung → Anweisungen bearbeiten</div>
+            <p>Copilot lernt, wie Sie antworten wollen: formell oder locker, auf Deutsch, mit oder ohne Bullet Points. Einmal einrichten — dauerhaft wirksam.</p>
+            <div class="pers-tip"><strong>💡 Tipp:</strong> Schreiben Sie rein, was Ihre Rolle ist, welche Sprache Sie bevorzugen und welchen Ton Sie in E-Mails anschlagen. Z.&nbsp;B.: „Ich bin Projektleiter, antworte immer auf Deutsch, E-Mails sachlich-freundlich."</div>
+          </div>
+
+          <div class="pers-card">
+            <div class="pers-card-head">
+              <div class="pers-icon">👔</div>
+              <h4>Arbeitsprofil</h4>
+              <div class="pers-status neutral">Automatisch</div>
+            </div>
+            <div class="pers-path">Chateinstellungen → Personalisierung → Arbeitsdaten anzeigen</div>
+            <p>Copilot zieht automatisch Informationen aus Ihrer Microsoft 365-Umgebung — Kalender, Kontakte, Dokumente — um relevantere Antworten zu geben.</p>
+            <div class="pers-tip"><strong>💡 Tipp:</strong> Prüfen Sie, welche Daten Copilot über Sie sieht. Das Profil bestimmt, wie gut Copilot Sie im Kontext kennt.</div>
+          </div>
+
+          <div class="pers-card">
+            <div class="pers-card-head">
+              <div class="pers-icon">🧠</div>
+              <h4>Gespeicherte Erinnerungen</h4>
+              <div class="pers-status on">● Aktivieren</div>
+            </div>
+            <div class="pers-path">Chateinstellungen → Personalisierung → Erinnerungen verwalten</div>
+            <p>Copilot merkt sich wichtige Details aus Ihren Gesprächen — z.&nbsp;B. bevorzugte Formate, laufende Projekte oder Ihre Präferenzen bei Texten.</p>
+            <div class="pers-tip"><strong>💡 Tipp:</strong> Sie können Erinnerungen auch manuell hinzufügen oder löschen. Wertvoll für alle, die Copilot täglich nutzen.</div>
+          </div>
+
+          <div class="pers-card">
+            <div class="pers-card-head">
+              <div class="pers-icon">📜</div>
+              <h4>Chatverlauf nutzen</h4>
+              <div class="pers-status on">● Aktivieren</div>
+            </div>
+            <div class="pers-path">Chateinstellungen → Personalisierung → Chatverlauf</div>
+            <p>Copilot kann frühere Gespräche als Kontext nutzen — so werden Antworten im Laufe der Zeit besser auf Sie zugeschnitten.</p>
+            <div class="pers-tip"><strong>💡 Tipp:</strong> Besonders nützlich, wenn Sie Copilot für immer wiederkehrende Aufgaben nutzen — der Kontext wächst mit.</div>
+          </div>
+
+        </div>
+
+        <!-- Personalisierungs-Prompt -->
+        <div class="fade-in" style="margin-top:2rem">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.9rem">
+            <div style="background:var(--accent);color:#fff;font-size:.65rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:100px">Best Practice</div>
+            <p style="font-family:'Asap',sans-serif;font-size:.95rem;font-weight:800;color:var(--navy)">Fertiger Personalisierungs-Prompt</p>
+          </div>
+          <p style="font-size:.84rem;color:var(--muted);margin-bottom:1rem;max-width:620px">Diesen Prompt direkt in <strong style="color:var(--navy)">Chateinstellungen → Personalisierung → Anweisungen bearbeiten</strong> eintragen — als dauerhafter Kontext für Copilot:</p>
+          <div class="prompt-card" onclick="copyPrompt(this)" style="background:#23282c;border-radius:var(--rlg);padding:1.5rem 1.75rem;cursor:pointer;max-width:100%">
+            <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:.85rem">Benutzerdefinierte Anweisungen — Copilot</div>
+            <p style="font-size:.86rem;color:rgba(255,255,255,.88);line-height:1.75;margin-bottom:.35rem;white-space:pre-line">Du bist mein kritischer Sparringspartner, kein Ja-Sager. Deine Aufgabe ist es, mir ehrliches, konstruktives Feedback zu geben – auch wenn es unbequem ist.
+
+Konkret bedeutet das:
+Weise mich aktiv auf Denkfehler, logische Lücken und blinde Flecken hin, auch wenn ich nicht explizit danach frage
+Wenn meine Annahmen fragwürdig sind, sage es direkt – mit Begründung
+Stelle Rückfragen, wenn meine Anfrage unklar oder unvollständig ist, bevor du antwortest
+Antworte immer konstruktiv: Kritik kommt mit einem konkreten Alternativvorschlag oder einer weiterführenden Frage
+Verzichte auf Floskeln wie „Gute Frage" oder „Das ist ein interessanter Ansatz" – komm direkt zum Punkt
+Wenn du mehrere Optionen siehst, nenne sie mit Abwägung – nicht nur die naheliegendste
+Beende komplexe Antworten mit einer gezielten Gegenfrage, die mich weiterbringt
+Mein Ziel ist es, besser zu denken – nicht bestätigt zu werden.</p>
+            <button class="prompt-copy-btn" style="margin-top:.85rem">📋 Prompt kopieren</button>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="fade-in" style="margin-top:2rem;background:var(--sky);border:1.5px solid var(--border);border-radius:var(--rlg);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
+          <div>
+            <p style="font-family:'Asap',sans-serif;font-weight:800;color:var(--navy);margin-bottom:.25rem">Copilot-Einführung im Team?</p>
+            <p style="font-size:.84rem;color:var(--muted)">Wir richten Copilot gemeinsam ein — mit echten Prompts aus Ihrem Arbeitsalltag.</p>
+          </div>
+          <button class="btn-pri" onclick="navTo('#kontakt')" style="flex-shrink:0">Jetzt anfragen →</button>
+        </div>
+
+      </div><!-- /bp-personal -->
+
+    </div>
+  </section>
+
+  <!-- ÜBER UNS -->
+  <section id="ueber-uns">
+    <div class="container">
+      <div class="ueber-grid">
+        <div class="ueber-visual fade-in">
+          <div class="ueber-card-main">
+            <h3>HandsOnAI OWL</h3>
+            <div class="title">KI-Berater · Trainer · Stratege</div>
+            <div class="expertise-tags">
+              <span>KI-Strategie</span><span>Prozessoptimierung</span><span>Six Sigma</span>
+              <span>API & Prompting</span><span>Coaching</span><span>Change Management</span>
+            </div>
+            <p class="ueber-quote">„KI muss im Alltag ankommen — nicht in der Präsentation stecken bleiben. Mein Ziel ist, dass Ihr Team morgen anders arbeitet als heute."</p>
+          </div>
+          <div class="ueber-badges">
+            <div class="ueber-badge"><span class="dot"></span>OWL-basiert · Remote aktiv</div>
+            <div class="ueber-badge"><span class="dot"></span>B2B-Fokus · KMU-Spezialist</div>
+          </div>
+        </div>
+        <div class="ueber-content fade-in">
+          <div class="section-label">Über mich</div>
+          <h2 class="section-title">Erfahrung trifft Pragmatismus</h2>
+          <p>Ich bin Berater, Coach und KI-Praktiker mit Hintergrund in Consulting, Prozessoptimierung und Change Management. Seit Jahren arbeite ich an der Schnittstelle zwischen Strategie und Umsetzung — jetzt mit dem Fokus auf Künstliche Intelligenz.</p>
+          <p>Was mich von klassischen Beratungsunternehmen unterscheidet: Ich liefere keine PowerPoint-Empfehlungen, die in der Schublade landen. Ich setze gemeinsam mit Ihnen um, bilde aus und sorge dafür, dass KI nachhaltig in Ihren Prozessen verankert ist.</p>
+          <p>HandsOnAI OWL steht für regionalen Anker mit überregionalem Anspruch — persönlich, direkt und auf Augenhöhe.</p>
+          <div class="ueber-values">
+            <div class="ueber-value"><div class="v-icon">🎯</div><h4>Pragmatisch</h4><p>Lösungen, die sofort einsetzbar sind.</p></div>
+            <div class="ueber-value"><div class="v-icon">🔬</div><h4>Methodisch</h4><p>Strukturiert, Six-Sigma-gestützt.</p></div>
+            <div class="ueber-value"><div class="v-icon">🤝</div><h4>Auf Augenhöhe</h4><p>Direkt, ehrlich, ohne Fachchinesisch.</p></div>
+            <div class="ueber-value"><div class="v-icon">🚀</div><h4>Umsetzungsstark</h4><p>Beratung, die im Alltag ankommt.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KONTAKT -->
+  <section id="kontakt">
+    <div class="container">
+      <div class="kontakt-grid">
+        <div class="kontakt-info fade-in">
+          <div class="section-label">Kontakt aufnehmen</div>
+          <h2 class="section-title">Sprechen wir miteinander.</h2>
+          <p>Fragen zu meinen Leistungen, ein unverbindliches Erstgespräch oder einfach prüfen, ob ich der richtige Partner bin — ich freue mich auf Ihre Nachricht.</p>
+          <div class="kontakt-items">
+            <div class="kontakt-item"><div class="k-icon">📍</div><div><h4>Standort</h4><p>Ostwestfalen-Lippe (OWL)<br>Deutschlandweit & remote</p></div></div>
+            <div class="kontakt-item"><div class="k-icon">✉️</div><div><h4>E-Mail</h4><p><a href="mailto:info@handsonai-owl.de">info@handsonai-owl.de</a></p></div></div>
+            <div class="kontakt-item"><div class="k-icon">💬</div><div><h4>Erstgespräch</h4><p>30 Minuten · kostenlos · unverbindlich</p></div></div>
+            <div class="kontakt-item"><div class="k-icon">⏱️</div><div><h4>Reaktionszeit</h4><p>In der Regel innerhalb von 24 h</p></div></div>
+          </div>
+        </div>
+        <div class="fade-in">
+          <div class="kontakt-form-wrap">
+            <div id="form-content">
+              <div class="kform-row">
+                <div class="kform-group"><label>Vorname *</label><input type="text" id="f-name" placeholder="Max" required></div>
+                <div class="kform-group"><label>Nachname *</label><input type="text" id="f-lastname" placeholder="Mustermann" required></div>
+              </div>
+              <div class="kform-group"><label>E-Mail *</label><input type="email" id="f-email" placeholder="max@unternehmen.de" required></div>
+              <div class="kform-group"><label>Unternehmen</label><input type="text" id="f-company" placeholder="Muster GmbH"></div>
+              <div class="kform-group">
+                <label>Worum geht es? *</label>
+                <select id="f-interest" required>
+                  <option value="">Bitte wählen</option>
+                  <option>AI Readiness Audit</option>
+                  <option>AI Tool Onboarding</option>
+                  <option>AI Consulting Sprint</option>
+                  <option>Fractional AI Officer</option>
+                  <option>Allgemeine Frage</option>
+                  <option>Sonstiges</option>
+                </select>
+              </div>
+              <div class="kform-group"><label>Nachricht</label><textarea id="f-msg" placeholder="Was beschäftigt Sie gerade? Was soll sich ändern?"></textarea></div>
+              <div class="kform-gdpr">
+                <input type="checkbox" id="k-gdpr">
+                <label for="k-gdpr">Ich stimme der Verarbeitung meiner Daten zur Bearbeitung meiner Anfrage zu. Keine Weitergabe an Dritte. Details in der <a onclick="showPage('datenschutz')">Datenschutzerklärung</a>.</label>
+              </div>
+              <button class="btn-submit" onclick="submitForm()">Nachricht senden →</button>
+            </div>
+            <div class="form-success" id="form-success">
+              <div class="success-icon">✅</div>
+              <h4>Vielen Dank!</h4>
+              <p>Ihre Nachricht ist angekommen. Ich melde mich in der Regel innerhalb von 24 Stunden bei Ihnen.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-main -->
+
+<!-- ════════════════════════════════════════════════════════
+     KI-CHECK PAGE
+     ════════════════════════════════════════════════════════ -->
+<div id="page-ki-check" class="page-section hidden">
+  <div style="height:60px"></div>
+  <div class="kiv2">
+    <div class="kiv2-pw" id="kiv2ProgressWrap" style="display:none">
+      <div class="kiv2-pm">
+        <span id="kiv2ProgressLabel">Frage 1 von 9</span>
+        <span id="kiv2ProgressPct">0%</span>
+      </div>
+      <div class="kiv2-pt"><div class="kiv2-pf" id="kiv2ProgressFill"></div></div>
+    </div>
+    <div class="kiv2-card" id="kiv2Card"></div>
+  </div>
+</div><!-- /page-ki-check -->
+
+<!-- ════════════════════════════════════════════════════════
+     USE-CASE CANVAS PAGE
+     ════════════════════════════════════════════════════════ -->
+<div id="page-canvas" class="page-section hidden">
+  <div style="height:60px"></div>
+  <div style="max-width:880px;margin:0 auto;padding:2.5rem 1.5rem 5rem">
+
+    <!-- HERO -->
+    <div class="check-hero" style="margin-bottom:2.5rem">
+      <div class="hero-bg"></div>
+      <div class="hero-grid"></div>
+      <div style="position:relative;z-index:1">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(99,179,46,.2);border:1px solid rgba(99,179,46,.4);color:#9edb74;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:100px;margin-bottom:1.25rem">🗺️ AI Use-Case Canvas</div>
+        <h2 style="font-family:'Asap',sans-serif;font-size:clamp(1.5rem,3vw,2.1rem);color:#fff;font-weight:800;margin-bottom:.75rem">Welches KI-Tool passt zu Ihrem Use Case?</h2>
+        <p style="color:rgba(255,255,255,.65);font-size:.92rem;max-width:560px;font-weight:300;line-height:1.7;margin-bottom:1.5rem">Beschreiben Sie Ihren Anwendungsfall und bewerten Sie 8 Kriterien. Das Canvas leitet Sie zur passenden KI-Toolklasse — strukturiert, nicht zufällig.</p>
+        <div class="chips">
+          <span class="chip">🧩 8 Kriterien</span>
+          <span class="chip">⚡ Sofortempfehlung</span>
+          <span class="chip">📋 Use-Case-Kategorie</span>
+          <span class="chip">🔧 Tool-Mapping</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap" id="canvas-progress-row" style="display:none;margin-bottom:2rem">
+      <div class="progress-meta">
+        <span>Schritt <strong id="canvas-prog-label">1</strong> von 8</span>
+      </div>
+      <div class="pbar"><div class="pbar-fill" id="canvas-pbar-fill" style="width:0%"></div></div>
+    </div>
+
+    <!-- STEP 0 – Use Case -->
+    <div class="section-card active" id="step-0">
+      <div class="section-header">
+        <div class="section-badge">→ Start</div>
+        <h3>Beschreiben Sie Ihren Use Case</h3>
+        <p>Worum geht es? Eine kurze Beschreibung hilft, die Bewertung einzuordnen — und erscheint am Ende in Ihrer Empfehlung.</p>
+      </div>
+      <div class="section-body">
+        <textarea class="field" id="uc-desc" style="min-height:90px;border:1.5px solid var(--border);border-radius:8px;padding:14px 16px;font-family:'Asap',sans-serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s;resize:none;background:var(--off);width:100%" placeholder="z. B. „Wir wollen eingehende Support-E-Mails automatisch klassifizieren und an die richtige Abteilung weiterleiten.""></textarea>
+        <div>
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem;font-weight:500">Beispiele zur Orientierung:</div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <span class="example-pill" onclick="setExample(this)">📧 Support-E-Mails automatisch beantworten</span>
+            <span class="example-pill" onclick="setExample(this)">📊 Wöchentlichen Vertriebsreport erstellen</span>
+            <span class="example-pill" onclick="setExample(this)">📄 Verträge analysieren und zusammenfassen</span>
+            <span class="example-pill" onclick="setExample(this)">💡 Ideenentwicklung für neue Produkte</span>
+            <span class="example-pill" onclick="setExample(this)">🔍 Markt- und Wettbewerbsanalyse</span>
+            <span class="example-pill" onclick="setExample(this)">❓ Interne HR-Fragen automatisch beantworten</span>
+          </div>
+        </div>
+      </div>
+      <div class="section-footer">
+        <button class="btn-nav btn-back" disabled>← Zurück</button>
+        <button class="btn-nav btn-fwd" onclick="goStep(0,1)">Weiter →</button>
+      </div>
+    </div>
+
+    <!-- STEPS 1–8 built by JS -->
+    <div class="section-card" id="step-1"><div class="section-header"><div class="section-badge">Kriterium 1 von 8</div><h3>Komplexität der Aufgabe</h3><p>Wie komplex ist die Problemlösung, die der Use Case erfordert?</p></div><div class="section-body"><div class="criteria-grid" id="cg-1"><div class="crit-opt" onclick="pickCrit('c1',0,this)"><div class="crit-marker">1</div><div class="crit-text"><strong>Einfache Antwort / Recherche</strong><span>z. B. FAQ beantworten, einfache Fragen stellen, Fakten nachschlagen</span></div></div><div class="crit-opt" onclick="pickCrit('c1',1,this)"><div class="crit-marker">2</div><div class="crit-text"><strong>Analyse / Strukturierung</strong><span>z. B. Dokument analysieren, Inhalte zusammenfassen, Text strukturieren</span></div></div><div class="crit-opt" onclick="pickCrit('c1',2,this)"><div class="crit-marker">3</div><div class="crit-text"><strong>Mehrstufige Problemlösung</strong><span>z. B. Strategie entwickeln, Szenarien vergleichen, Konzepte erarbeiten</span></div></div><div class="crit-opt" onclick="pickCrit('c1',3,this)"><div class="crit-marker">4</div><div class="crit-text"><strong>Planung / Agent-Verhalten</strong><span>z. B. autonomen Workflow steuern, Teilaufgaben orchestrieren, Entscheidungslogik</span></div></div></div><div class="crit-err" id="err-1">Bitte eine Option auswählen.</div></div><div class="section-footer"><button class="btn-nav btn-back" onclick="goStep(1,0)">← Zurück</button><button class="btn-nav btn-fwd" onclick="goStep(1,2)">Weiter →</button></div></div>
+    <div class="section-card" id="step-2"><div class="section-header"><div class="section-badge">Kriterium 2 von 8</div><h3>Automatisierungsgrad</h3><p>Wie autonom soll der Use Case ablaufen — ohne menschliches Eingreifen?</p></div><div class="section-body"><div class="criteria-grid" id="cg-2"><div class="crit-opt" onclick="pickCrit('c2',0,this)"><div class="crit-marker">1</div><div class="crit-text"><strong>Manuell (assistiv)</strong><span>Mensch führt alle Schritte aus, KI unterstützt einzelne Momente</span></div></div><div class="crit-opt" onclick="pickCrit('c2',1,this)"><div class="crit-marker">2</div><div class="crit-text"><strong>Assistiv im Workflow</strong><span>KI ist integrierter Assistent, Mensch behält die Kontrolle über jeden Schritt</span></div></div><div class="crit-opt" onclick="pickCrit('c2',2,this)"><div class="crit-marker">3</div><div class="crit-text"><strong>Teilautomatisiert</strong><span>Workflow läuft teilweise automatisch, Mensch prüft an definierten Punkten</span></div></div><div class="crit-opt" onclick="pickCrit('c2',3,this)"><div class="crit-marker">4</div><div class="crit-text"><strong>Vollautomatisiert</strong><span>End-to-End Automation, kein manueller Eingriff im Regelbetrieb nötig</span></div></div></div><div class="crit-err" id="err-2">Bitte eine Option auswählen.</div></div><div class="section-footer"><button class="btn-nav btn-back" onclick="goStep(2,1)">← Zurück</button><button class="btn-nav btn-fwd" onclick="goStep(2,3)">Weiter →</button></div></div>
+    <div class="section-card" id="step-3"><div class="section-header"><div class="section-badge">Kriterium 3 von 8</div><h3>Integrationsbedarf</h3><p>Wie stark muss der Use Case mit anderen Systemen, Daten oder Tools interagieren?</p></div><div class="section-body"><div class="criteria-grid" id="cg-3"><div class="crit-opt" onclick="pickCrit('c3',0,this)"><div class="crit-marker">1</div><div class="crit-text"><strong>Keine Integration</strong><span>Rein textbasiert, keine Systemzugriffe nötig (z. B. Ideen generieren, Texte schreiben)</span></div></div><div class="crit-opt" onclick="pickCrit('c3',1,this)"><div class="crit-marker">2</div><div class="crit-text"><strong>Dokumente / Dateien</strong><span>Zugriff auf interne Dokumente, E-Mails, SharePoint, Ablage (z. B. Verträge analysieren)</span></div></div><div class="crit-opt" onclick="pickCrit('c3',2,this)"><div class="crit-marker">3</div><div class="crit-text"><strong>API-Zugriffe</strong><span>Anbindung an externe oder interne APIs, Datenbanken oder Einzelsysteme (z. B. CRM)</span></div></div><div class="crit-opt" onclick="pickCrit('c3',3,this)"><div class="crit-marker">4</div><div class="crit-text"><strong>Komplexe Systemlandschaft</strong><span>Mehrere Systeme, ERP + CRM + API + Datenbank parallel (z. B. Prozesskette über Abteilungen)</span></div></div></div><div class="crit-err" id="err-3">Bitte eine Option auswählen.</div></div><div class="section-footer"><button class="btn-nav btn-back" onclick="goStep(3,2)">← Zurück</button><button class="btn-nav btn-fwd" onclick="goStep(3,4)">Weiter →</button></div></div>
+    <div class="section-card" id="step-4"><div class="section-header"><div class="section-badge">Kriterium 4 von 8</div><h3>Wissensabhängigkeit</h3><p>Wie stark basiert der Use Case auf spezifischem, unternehmensinternem Wissen?</p></div><div class="section-body"><div class="criteria-grid" id="cg-4"><div class="crit-opt" onclick="pickCrit('c4',0,this)"><div class="crit-marker">1</div><div class="crit-text"><strong>Allgemeines Wissen</strong><span>Öffentlich verfügbares Wissen reicht aus (z. B. Marketingideen, allgemeine Texte)</span></div></div><div class="crit-opt" onclick="pickCrit('c4',1,this)"><div class="crit-marker">2</div><div class="crit-text"><strong>Branchen-/Kontextwissen</strong><span>Branchenspezifisches oder unternehmensnahes Wissen nötig (z. B. Marktanalyse)</span></div></div><div class="crit-opt" onclick="pickCrit('c4',2,this)"><div class="crit-marker">3</div><div class="crit-text"><strong>Unternehmenswissen</strong><span>Interne Richtlinien, Prozesse, Produkte, Dokumente müssen bekannt sein</span></div></div><div class="crit-opt" onclick="pickCrit('c4',3,this)"><div class="crit-marker">4</div><div class="crit-text"><strong>Strukturierte interne Daten</strong><span>Spezifische Daten aus Datenbanken, CRM, ERP, strukturierten Wissensgraphen</span></div></div></div><div class="crit-err" id="err-4">Bitte eine Option auswählen.</div></div><div class="section-footer"><button class="btn-nav btn-back" onclick="goStep(4,3)">← Zurück</button><button class="btn-nav btn-fwd" onclick="goStep(4,5)">Weiter →</button></div></div>
+    <div class="section-card" id="step-5"><div class="section-header"><div class="section-badge">Kriterium 5 von 8</div><h3>Interaktionsform</h3><p>Wie interagiert der Nutzer (oder das System) mit der KI in diesem Use Case?</p></div><div class="section-body"><div class="criteria-grid" id="cg-5"><div class="crit-opt" onclick="pickCrit('c5',0,this)"><div class="crit-marker">1</div><div class="crit-text"><strong>Einmalige Anfrage</strong><span>Single-Shot: eine Eingabe, eine Antwort — kein fortlaufender Dialog (z. B. Recherche)</span></div></div><div class="crit-opt" onclick="pickCrit('c5',1,this)"><div class="crit-marker">2</div><div class="crit-text"><strong>Iterative Zusammenarbeit</strong><span>Mehrere Runden: Ergebnis wird gemeinsam entwickelt und verfeinert (z. B. Dokument)</span></div></div><div class="crit-opt" onclick="pickCrit('c5',2,this)"><div class="crit-marker">3</div><div class="crit-text"><strong>Kontinuierlicher Dialog</strong><span>Laufende Konversation, z. B. Support-Bot, Assistent im Hintergrund</span></div></div><div class="crit-opt" onclick="pickCrit('c5',3,this)"><div class="crit-marker">4</div><div class="crit-text"><strong>Prozesssteuerung</strong><span>KI steuert Prozess oder orchestriert Sub-Tasks ohne direkten Nutzerdialog</span></div></div></div><div class="crit-err" id="err-5">Bitte eine Option auswählen.</div></div><div class="section-footer"><button class="btn-nav btn-back" onclick="goStep(5,4)">← Zurück</button><button class="btn-nav btn-fwd" onclick="goStep(5,6)">Weiter →</button></div></div>
+    <div class="section-card" id="step-6"><div class="section-header"><div class="section-badge">Kriterium 6 von 8</div><h3>Daten- und Sicherheitsanforderungen</h3><p>Welche Schutzstufe haben die Daten, die in diesem Use Case verarbeitet werden?</p></div><div class="section-body"><div class="criteria-grid" id="cg-6"><div class="crit-opt" onclick="pickCrit('c6',0,this)"><div class="crit-marker">1</div><div class="crit-text"><strong>Öffentliche Daten</strong><span>Keine sensiblen Informationen — rein öffentliche Quellen, allgemeine Inhalte (z. B. Webrecherche)</span></div></div><div class="crit-opt" onclick="pickCrit('c6',1,this)"><div class="crit-marker">2</div><div class="crit-text"><strong>Interne Daten</strong><span>Nicht-öffentliche Unternehmensinformationen — Dokumente, Prozesse, interne Kommunikation</span></div></div><div class="crit-opt" onclick="pickCrit('c6',2,this)"><div class="crit-marker">3</div><div class="crit-text"><strong>Sensible / personenbezogene Daten</strong><span>Kundendaten, Mitarbeiterdaten, Finanzdaten — strenge DSGVO-Anforderungen</span></div></div><div class="crit-opt" onclick="pickCrit('c6',3,this)"><div class="crit-marker">4</div><div class="crit-text"><strong>Regulierte Daten</strong><span>Branchenregulierung (z. B. Medizin, Recht, Finanzen) mit spezifischen Compliance-Anforderungen</span></div></div></div><div class="crit-err" id="err-6">Bitte eine Option auswählen.</div></div><div class="section-footer"><button class="btn-nav btn-back" onclick="goStep(6,5)">← Zurück</button><button class="btn-nav btn-fwd" onclick="goStep(6,7)">Weiter →</button></div></div>
+    <div class="section-card" id="step-7"><div class="section-header"><div class="section-badge">Kriterium 7 von 8</div><h3>Outputstruktur</h3><p>Welches Format soll das Ergebnis des Use Cases haben?</p></div><div class="section-body"><div class="criteria-grid" id="cg-7"><div class="crit-opt" onclick="pickCrit('c7',0,this)"><div class="crit-marker">1</div><div class="crit-text"><strong>Freier Text</strong><span>Kreative oder explorative Ausgaben — Ideen, Textentwürfe, Zusammenfassungen</span></div></div><div class="crit-opt" onclick="pickCrit('c7',1,this)"><div class="crit-marker">2</div><div class="crit-text"><strong>Strukturierter Text</strong><span>Berichte, Präsentationen, E-Mails mit definierter Struktur und Formatierung</span></div></div><div class="crit-opt" onclick="pickCrit('c7',2,this)"><div class="crit-marker">3</div><div class="crit-text"><strong>Strukturiertes Datenformat</strong><span>JSON, Tabellen, Excel, CSV — maschinenlesbare oder weiterverarbeitbare Ausgaben</span></div></div><div class="crit-opt" onclick="pickCrit('c7',3,this)"><div class="crit-marker">4</div><div class="crit-text"><strong>Systemaktion / Prozess-Output</strong><span>Das Ergebnis ist eine ausgeführte Aktion: Ticket erstellt, E-Mail versendet, System aktualisiert</span></div></div></div><div class="crit-err" id="err-7">Bitte eine Option auswählen.</div></div><div class="section-footer"><button class="btn-nav btn-back" onclick="goStep(7,6)">← Zurück</button><button class="btn-nav btn-fwd" onclick="goStep(7,8)">Weiter →</button></div></div>
+    <div class="section-card" id="step-8"><div class="section-header"><div class="section-badge">Kriterium 8 von 8</div><h3>Wiederholbarkeit &amp; Skalierung</h3><p>Wie häufig tritt dieser Use Case auf — und in welchem Volumen?</p></div><div class="section-body"><div class="criteria-grid" id="cg-8"><div class="crit-opt" onclick="pickCrit('c8',0,this)"><div class="crit-marker">1</div><div class="crit-text"><strong>Einmalig / selten</strong><span>Der Use Case tritt selten oder einmalig auf (z. B. einmalige Analyse, Strategie-Workshop)</span></div></div><div class="crit-opt" onclick="pickCrit('c8',1,this)"><div class="crit-marker">2</div><div class="crit-text"><strong>Gelegentlich</strong><span>Mehrmals pro Monat — z. B. Präsentationen erstellen, Berichte schreiben</span></div></div><div class="crit-opt" onclick="pickCrit('c8',2,this)"><div class="crit-marker">3</div><div class="crit-text"><strong>Regelmäßig / täglich</strong><span>Täglich oder wöchentlich wiederkehrender Prozess — z. B. Reporting, E-Mail-Handling</span></div></div><div class="crit-opt" onclick="pickCrit('c8',3,this)"><div class="crit-marker">4</div><div class="crit-text"><strong>Hochfrequent / skalierbar</strong><span>Sehr hohe Frequenz, viele Nutzer oder Instanzen gleichzeitig — z. B. Support-Automation</span></div></div></div><div class="crit-err" id="err-8">Bitte eine Option auswählen.</div></div><div class="section-footer"><button class="btn-nav btn-back" onclick="goStep(8,7)">← Zurück</button><button class="btn-nav btn-fwd" onclick="calcCanvasResult()">Auswertung →</button></div></div>
+
+    <!-- RESULT -->
+    <div id="canvas-result" style="display:none">
+      <div style="background:var(--navy);border-radius:var(--rlg);padding:2.5rem 2rem;margin-bottom:1.5rem;text-align:center;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 90% at 50% 50%,rgba(99,179,46,.3),transparent 70%);pointer-events:none"></div>
+        <div style="position:relative;z-index:1">
+          <div style="width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:2.2rem" id="cr-icon">🤖</div>
+          <div style="font-family:'Asap',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:.4rem" id="cr-toolclass">–</div>
+          <p style="color:rgba(255,255,255,.6);font-size:.9rem;max-width:480px;margin:0 auto" id="cr-desc">Basierend auf Ihren Angaben</p>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:1.75rem;margin-bottom:1.25rem">
+        <div style="font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Ihre Use-Case-Kategorie</div>
+        <div style="font-family:'Asap',sans-serif;font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:.4rem" id="cr-catname">–</div>
+        <p style="font-size:.9rem;color:var(--muted);margin-bottom:1rem" id="cr-catdesc">–</p>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem" id="cr-cattasks"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:1.75rem">
+          <div style="font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Empfohlene Toolklasse &amp; Tools</div>
+          <div style="display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.9rem;padding:7px 16px;border-radius:100px;margin-bottom:.75rem" id="cr-toolpill"></div>
+          <div id="cr-tools"></div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rlg);padding:1.75rem">
+          <div style="font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem">Ihre Bewertung im Überblick</div>
+          <div id="cr-summary"></div>
+        </div>
+      </div>
+
+      <div style="background:var(--navy);border-radius:var(--rlg);padding:2rem 2.5rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap">
+        <div>
+          <h3 style="font-family:'Asap',sans-serif;font-size:1.05rem;font-weight:800;color:#fff;margin-bottom:.3rem">Möchten Sie den Use Case konkret umsetzen?</h3>
+          <p style="font-size:.88rem;color:rgba(255,255,255,.6)">Im Erstgespräch klären wir, welches Tool wirklich zu Ihrem Betrieb passt.</p>
+        </div>
+        <button onclick="showPage('main');navTo('#kontakt')" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;font-family:'Asap',sans-serif;font-weight:700;font-size:.9rem;padding:12px 24px;border-radius:9px;border:none;cursor:pointer;flex-shrink:0;transition:transform .2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">Erstgespräch buchen →</button>
+      </div>
+      <div style="text-align:center;margin-top:1rem">
+        <button class="btn-r btn-rs" onclick="restartCanvas()">↺ Neuen Use Case bewerten</button>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /page-canvas -->
+
+<!-- ════════════════════════════════════════════════════════
+     LEGAL PAGES
+     ════════════════════════════════════════════════════════ -->
+<div id="page-legal" class="page-section hidden">
+  <div style="height:60px"></div>
+  <section id="legal-section" style="display:block">
+    <div class="legal-content">
+      <div class="legal-tabs">
+        <div class="legal-tab active" id="tab-impressum" onclick="switchLegal('impressum')">Impressum</div>
+        <div class="legal-tab" id="tab-datenschutz" onclick="switchLegal('datenschutz')">Datenschutzerklärung</div>
+      </div>
+
+      <!-- IMPRESSUM -->
+      <div class="legal-pane active" id="pane-impressum">
+        <div class="legal-hero"><h1>Impressum</h1><p>Angaben gemäß § 5 DDG</p></div>
+        <div class="legal-card"><h2>Verantwortlich für den Inhalt</h2><h3>Name / Firma</h3><p>Christian Paul<br>HandsOnAI OWL<br>Bohlenweg 5a<br>33106 Paderborn<br>Deutschland</p></div>
+        <div class="legal-card"><h2>Kontakt</h2><p>E-Mail: <a href="mailto:info@handsonai-owl.de">info@handsonai-owl.de</a></p></div>
+        <div class="legal-card"><p>Gem. Kleinunternehmerregelung (§ 19 UStG) wird keine Umsatzsteuer berechnet.</p></div>
+        <div class="legal-card"><h2>Verantwortlich für den Inhalt gemäß § 18 Abs. 2 MStV</h2><p>Christian Paul – Bohlenweg 5a – 33106 Paderborn</p></div>
+        <div class="legal-card"><h2>Verbraucherstreitbeilegung</h2><p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p></div>
+        <div class="legal-card"><h2>Haftung für Inhalte</h2><p>Als Diensteanbieter sind wir für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Wir sind jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Für Inhalte externer Links sind ausschließlich deren Betreiber verantwortlich; zum Zeitpunkt der Verlinkung waren keine Rechtsverstöße erkennbar.</p></div>
+        <div class="legal-card"><h2>Urheberrecht</h2><p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.</p></div>
+      </div>
+
+      <!-- DATENSCHUTZ -->
+      <div class="legal-pane" id="pane-datenschutz">
+        <div class="legal-hero"><h1>Datenschutzerklärung</h1><p>Zuletzt aktualisiert: September 2026 · gemäß DSGVO & BDSG</p></div>
+        <div class="legal-card"><h2>1. Verantwortlicher</h2><p>Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist:</p><p>Christian Paul<br>Bohlenweg 5a<br>33106 Paderborn<br>Deutschland<br>E-Mail: <a href="mailto:info@handsonai-owl.de">info@handsonai-owl.de</a></p></div>
+        <div class="legal-card"><h2>2. Grundsätze der Datenverarbeitung</h2><p>Wir verarbeiten personenbezogene Daten nur, soweit dies gesetzlich erlaubt ist oder Sie ausdrücklich eingewilligt haben. Rechtsgrundlagen für die Verarbeitung sind Art. 6 Abs. 1 lit. a, b und f DSGVO.</p></div>
+        <div class="legal-card"><h2>3. Hosting & Server-Logs</h2><p>Diese Website wird bei IONOS gehostet. Beim Aufruf der Website werden automatisch IP-Adresse (anonymisiert), Datum und Uhrzeit des Zugriffs, aufgerufene URL sowie Browser und Betriebssystem protokolliert. Diese Daten werden nach spätestens 7 Tagen gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einem sicheren und stabilen Betrieb).</p></div>
+        <div class="legal-card"><h2>4. Kontaktformular (Formspree)</h2><p>Wenn Sie das Kontaktformular nutzen, werden Name, E-Mail-Adresse, Unternehmen (optional), ausgewähltes Thema und Nachrichtentext erhoben. Für die technische Übermittlung nutzen wir den Formulardienst Formspree (Formspree Inc., USA): Ihre Angaben werden an Formspree übertragen und uns von dort per E-Mail zugestellt. Formspree verarbeitet die Daten in unserem Auftrag (Art. 28 DSGVO); die Übermittlung in die USA wird über die EU-Standardvertragsklauseln abgesichert. Die Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage verwendet, nicht zu Werbezwecken weitergegeben und nach abschließender Bearbeitung gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen. Rechtsgrundlage: Art. 6 Abs. 1 lit. a und b DSGVO.</p></div>
+        <div class="legal-card"><h2>5. KI-Readiness-Check & KI-Reifegrad-Interview</h2><p>Auf dieser Website bieten wir freiwillige, KI-gestützte Selbsttests an. Ihre Antworten — beim Reifegrad-Interview auch Ihr angegebener Name und Ihre Chat-Nachrichten — werden zur Auswertung über einen von uns betriebenen technischen Proxy (Cloudflare Workers; Cloudflare Inc., USA) an die KI-Schnittstelle von Anthropic (Anthropic PBC, San Francisco, USA) übermittelt und dort ausschließlich zur Erstellung Ihrer Auswertung verarbeitet. Eine dauerhafte Speicherung Ihrer Antworten durch uns findet nicht statt; Anthropic nutzt über die API übermittelte Inhalte standardmäßig nicht zum Training seiner Modelle. Bitte geben Sie in Freitextfeldern keine sensiblen Daten und keine personenbezogenen Daten Dritter ein. Optional angegebene Kontaktdaten (Name, E-Mail im KI-Readiness-Check) verbleiben in Ihrem Browser und werden nicht an uns oder Dritte übermittelt. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO (die Nutzung ist freiwillig); für die technische Bereitstellung Art. 6 Abs. 1 lit. f DSGVO.</p></div>
+        <div class="legal-card"><h2>6. Google Fonts</h2><p>Diese Website lädt Schriftarten über Google Fonts (Google LLC, Mountain View, CA, USA). Dabei wird beim ersten Seitenaufruf eine Verbindung zu Google-Servern hergestellt und Ihre IP-Adresse übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a></p></div>
+        <div class="legal-card"><h2>7. Ihre Rechte</h2><h3>Auskunft (Art. 15 DSGVO)</h3><p>Sie können jederzeit Auskunft darüber verlangen, welche Daten wir über Sie gespeichert haben.</p><h3>Berichtigung, Löschung, Einschränkung</h3><p>Sie haben das Recht auf Berichtigung unrichtiger Daten, Löschung Ihrer Daten sowie Einschränkung der Verarbeitung gemäß Art. 16–18 DSGVO.</p><h3>Datenübertragbarkeit (Art. 20 DSGVO)</h3><p>Sie haben das Recht, die Sie betreffenden Daten in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten.</p><h3>Widerspruch (Art. 21 DSGVO)</h3><p>Sie können der Verarbeitung Ihrer Daten, die auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO erfolgt, jederzeit widersprechen.</p><h3>Widerruf von Einwilligungen (Art. 7 Abs. 3 DSGVO)</h3><p>Erteilte Einwilligungen können Sie jederzeit mit Wirkung für die Zukunft widerrufen.</p><h3>Beschwerderecht</h3><p>Sie haben das Recht, sich bei der Landesbeauftragten für Datenschutz und Informationsfreiheit NRW zu beschweren: <a href="https://www.ldi.nrw.de" target="_blank" rel="noopener">ldi.nrw.de</a></p><p>Zur Ausübung Ihrer Rechte: <a href="mailto:info@handsonai-owl.de">info@handsonai-owl.de</a></p></div>
+        <div class="legal-card"><h2>8. Änderungen dieser Erklärung</h2><p>Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf zu aktualisieren, insbesondere wenn neue Funktionen oder Dienste auf der Website eingebunden werden. Die jeweils aktuelle Version ist auf dieser Seite abrufbar.</p></div>
+      </div>
+    </div>
+  </section>
+</div><!-- /page-legal -->
+
+<!-- KI-REIFEGRAD PAGE -->
+<div id="page-reifegrad" class="page-section hidden">
+  <div style="height:60px"></div>
+  <div class="rg-wrap">
+    <div class="rg-pw" id="rgProgressWrap" style="display:none">
+      <div class="rg-pt"><div class="rg-pf" id="rgProgressFill"></div></div>
+    </div>
+    <div class="rg-card" id="rgCard"></div>
+  </div>
+</div><!-- /page-reifegrad -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">HandsOnAI <span>OWL</span></div>
+    <p class="footer-tagline">KI-Beratung für den Mittelstand · OWL & DACH</p>
+    <ul class="footer-links">
+      <li><a onclick="showPage('main');navTo('#leistungen')">Leistungen</a></li>
+      <li><a onclick="showPage('main');navTo('#best-practices')">Best Practices</a></li>
+      <li><a onclick="showPage('main');navTo('#ueber-uns')">Über uns</a></li>
+      <li><a onclick="showPage('ki-check')">KI-Readiness-Check</a></li>
+      <li><a onclick="showPage('reifegrad')">KI-Kompass</a></li>
+      <li><a onclick="showPage('main');navTo('#kontakt')">Kontakt</a></li>
+      <li><a onclick="showPage('impressum')">Impressum</a></li>
+      <li><a onclick="showPage('datenschutz')">Datenschutz</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 HandsOnAI OWL · Christian Paul · <a href="mailto:info@handsonai-owl.de">info@handsonai-owl.de</a></p>
+  </div>
+</footer>
+
+<script>
+/* ── PAGE ROUTING ─────────────────────────────────────── */
+function showPage(page){
+  document.querySelectorAll('.page-section').forEach(p=>p.classList.add('hidden'));
+  if(page==='main'){
+    document.getElementById('page-main').classList.remove('hidden');
+  } else if(page==='ki-check'){
+    document.getElementById('page-ki-check').classList.remove('hidden');
+    if(kiv2Current===-1 && !document.getElementById('kiv2Card').innerHTML) kiv2Render();
+  } else if(page==='impressum'||page==='datenschutz'){
+    document.getElementById('page-legal').classList.remove('hidden');
+    switchLegal(page);
+  } else if(page==='canvas'){
+    document.getElementById('page-canvas').classList.remove('hidden');
+    showStep(0);
+  } else if(page==='reifegrad'){
+    document.getElementById('page-reifegrad').classList.remove('hidden');
+    if(!document.getElementById('rgCard').innerHTML) rgRender();
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function switchLegal(tab){
+  document.querySelectorAll('.legal-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.legal-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pane-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+function navTo(id){
+  setTimeout(()=>{
+    const el=document.querySelector(id);
+    if(el)el.scrollIntoView({behavior:'smooth'});
+  },100);
+}
+
+/* ── NAV SCROLL ───────────────────────────────────────── */
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>40);
+});
+function toggleMenu(){
+  document.getElementById('burger').classList.toggle('open');
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+function toggleNavDropdown(e){
+  e.stopPropagation();
+  document.getElementById('navDropdown').classList.toggle('open');
+}
+function closeNavDropdown(){
+  const d=document.getElementById('navDropdown');
+  if(d) d.classList.remove('open');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#navDropdown')) closeNavDropdown();
+});
+function closeMobile(){
+  document.getElementById('burger').classList.remove('open');
+  document.getElementById('mobile-menu').classList.remove('open');
+}
+
+/* ── FADE-IN OBSERVER ─────────────────────────────────── */
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:.12});
+document.querySelectorAll('.fade-in').forEach(el=>io.observe(el));
+
+/* ── CONTACT FORM ─────────────────────────────────────── */
+function submitForm(){
+  const name=document.getElementById('f-name').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  const interest=document.getElementById('f-interest').value;
+  const gdpr=document.getElementById('k-gdpr').checked;
+  if(!name||!email||!interest||!gdpr){
+    alert('Bitte füllen Sie alle Pflichtfelder aus und stimmen der Datenschutzerklärung zu.');
+    return;
+  }
+  const msg=document.getElementById('f-msg').value.trim();
+  const company=document.getElementById('f-company').value.trim();
+  fetch('https://formspree.io/f/xojpqgzn',{
+    method:'POST',mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,email,company,interest,message:msg,_subject:`Anfrage: ${interest} – ${name}`,_replyto:email})
+  }).catch(()=>{});
+  document.getElementById('form-content').style.display='none';
+  document.getElementById('form-success').style.display='block';
+}
+
+
+/* Ki-Check V2 JS */
+const KIV2_PROXY_URL = 'https://aikompass.paulbuero53-cp.workers.dev/proxy';
+
+const KIV2_QUESTIONS = [
+  // ── 1. Unternehmen ────────────────────────────────────────────────────
+  {id:'betrieb',type:'text',label:'Schritt 1 · Unternehmen',
+   question:'Was macht das Unternehmen, und in welcher Branche ist es tätig?',
+   hint:'Branche, Kernleistung, Zielgruppe — 1–2 Sätze genügen',
+   placeholder:'z. B. Sanitär-/Heizungsbetrieb für Privat- und Gewerbekunden in OWL, 12 Mitarbeitende'},
+  {id:'groesse',type:'choice',label:'Schritt 2 · Teamgröße',
+   question:'Wie viele Personen arbeiten im Unternehmen (inkl. Inhaber)?',
+   options:['1–5 Personen','6–20 Personen','21–50 Personen','Mehr als 50 Personen']},
+  // ── 2. Systemlandschaft ───────────────────────────────────────────────
+  {id:'systeme',type:'text',label:'Schritt 3 · Systemlandschaft',
+   question:'Welche Software-Systeme sind im Einsatz? (Buchhaltung, CRM, Branchensoftware, Kommunikation)',
+   hint:'Bitte konkret — auch wenn es nur Excel und WhatsApp sind',
+   placeholder:'z. B. Lexware (Buchhaltung), Outlook, Handwerker-App XY, WhatsApp (intern)'},
+  {id:'systemintegration',type:'choice',label:'Schritt 4 · Systemintegration',
+   question:'Wie gut sind die eingesetzten Systeme miteinander verknüpft?',
+   options:[
+     'Kaum verknüpft — Daten werden manuell übertragen oder doppelt gepflegt',
+     'Teils verknüpft — einzelne Schnittstellen, aber noch viele Medienbrüche',
+     'Gut integriert — die meisten Systeme tauschen Daten automatisch aus',
+     'Vollständig integriert — eine durchgehende digitale Prozesskette']},
+  // ── 3. Prozesse ───────────────────────────────────────────────────────
+  {id:'prozesse_digital',type:'choice',label:'Schritt 5 · Prozessreife',
+   question:'Wie würden Sie den Digitalisierungsgrad der wichtigsten Arbeitsabläufe einschätzen?',
+   options:[
+     'Hauptsächlich Papier, Telefon und Excel — kaum digitale Prozesse',
+     'Gemischt: einiges digital, vieles noch manuell oder auf Papier',
+     'Größtenteils digital — wenige Medienbrüche',
+     'Vollständig digital und weitgehend automatisiert']},
+  {id:'prozesse_manuell',type:'text',label:'Schritt 6 · Manuelle Abläufe',
+   question:'Welche konkreten Abläufe laufen noch manuell, auf Papier oder über Umwege?',
+   hint:'Diese Bereiche sind oft die besten Ansatzpunkte für KI',
+   placeholder:'z. B. Stundenzettel auf Papier, Angebote in Word, Auftragsübergabe per Telefon'},
+  // ── 4. KI & Schulung ─────────────────────────────────────────────────
+  {id:'ki_erfahrung',type:'choice',label:'Schritt 7 · KI-Erfahrung',
+   question:'Wie ist der aktuelle Stand beim Thema KI im Unternehmen?',
+   options:[
+     'Kein Einsatz, kaum Beschäftigung mit dem Thema',
+     'Vereinzelt privat genutzt — ohne offizielle Freigabe oder Regeln',
+     'Einzelne Bereiche nutzen KI-Tools, aber unstrukturiert',
+     'KI ist im Einsatz mit klaren Regeln und aktiver Förderung']},
+  {id:'schulung',type:'choice',label:'Schritt 8 · Schulung & Einführung',
+   question:'Wie werden Mitarbeitende auf neue digitale Tools oder Prozesse vorbereitet?',
+   options:[
+     'Keine strukturierte Einführung — Selbststudium',
+     'Kurze informelle Einweisung durch Kollegen',
+     'Strukturierte Schulungen oder externe Trainings',
+     'Aktives Change Management mit Feedback und Begleitung']},
+  // ── 5. Daten & Sicherheit ─────────────────────────────────────────────
+  {id:'datenlage',type:'choice',label:'Schritt 9 · Datenlage',
+   question:'Wie gut sind Kundendaten, Aufträge und Dokumente digital erfasst und auffindbar?',
+   options:[
+     'Kaum digital — Papierordner, E-Mails, kein strukturiertes System',
+     'Teilweise digital, aber unstrukturiert und schwer auffindbar',
+     'Größtenteils digital und strukturiert, aber mit Lücken',
+     'Vollständig digital, strukturiert und jederzeit abrufbar']},
+  {id:'datenschutz',type:'choice',label:'Schritt 10 · Datenschutz & DSGVO',
+   question:'Wie ist der Umgang mit personenbezogenen Daten und DSGVO geregelt?',
+   options:[
+     'Kaum geregelt — wenig Bewusstsein für Datenschutzvorgaben',
+     'Grundsätzlich bekannt, aber keine strukturierten Prozesse',
+     'DSGVO-konform mit klaren Richtlinien (z. B. was darf in welches Tool)',
+     'Aktives Datenschutz-Management mit regelmäßiger Überprüfung']},
+  // ── 6. Ziele ──────────────────────────────────────────────────────────
+  {id:'zeitfresser',type:'text',label:'Schritt 11 · Zeitfresser',
+   question:'Was kostet das Team täglich die meiste Arbeitszeit oder verursacht die meiste Reibung?',
+   hint:'Erfahrungsgemäß der beste Ansatzpunkt für KI',
+   placeholder:'z. B. Angebotserstellung, Terminkoordination, Dokumentation, Nachfragen beantworten'},
+  {id:'ziel',type:'choice',label:'Schritt 12 · Ziel mit KI',
+   question:'Was ist das wichtigste Ziel beim Einsatz von KI?',
+   options:[
+     'Zeit sparen bei Verwaltung, Dokumentation und Bürokram',
+     'Bessere und schnellere Kundenkommunikation',
+     'Fehler reduzieren und Überblick verbessern',
+     'Wachstum ermöglichen ohne mehr Personal',
+     'Erst orientieren — noch kein konkretes Ziel']}
+];
+
+let kiv2Current = -1;
+let kiv2Answers = {};
+let kiv2Contact = {};
+
+function kiv2Render() {
+  const card = document.getElementById('kiv2Card');
+  card.style.animation = 'none'; card.offsetHeight; card.style.animation = '';
+  if (kiv2Current === -1) kiv2RenderIntro(card);
+  else if (kiv2Current < KIV2_QUESTIONS.length) { kiv2RenderQuestion(card, KIV2_QUESTIONS[kiv2Current]); kiv2UpdateProgress(); }
+  else { kiv2RenderLoading(card); kiv2RunAnalysis(); }
+}
+
+function kiv2RenderIntro(card) {
+  document.getElementById('kiv2ProgressWrap').style.display = 'none';
+  card.innerHTML = '<div class="kiv2-lbl">Kostenlos · ca. 4 Minuten</div>'
+    + '<div class="kiv2-h1">Wie KI-bereit ist Ihr Betrieb?</div>'
+    + '<div class="kiv2-sub">12 Faktenfragen. KI-gestützte Auswertung. Konkrete Empfehlungen — kein Verkaufsgespräch.</div>'
+    + '<div class="kiv2-pills"><div class="kiv2-pill">&#x23F1; ca. 6 Minuten</div><div class="kiv2-pill">&#x1F512; Anonym möglich</div><div class="kiv2-pill">&#x2705; Sofortergebnis</div><div class="kiv2-pill">&#x1F916; KI-Auswertung</div></div>'
+    + '<div><label class="kiv2-lbl-t">Ihr Name (optional)</label>'
+    + '<input type="text" class="kiv2-input" id="kiv2Name" placeholder="Vorname oder Firma">'
+    + '<label class="kiv2-lbl-t">E-Mail (optional)</label>'
+    + '<input type="email" class="kiv2-input" id="kiv2Email" placeholder="ihre@email.de"></div>'
+    + '<div class="kiv2-priv">&#x1F512; Antworten werden per KI ausgewertet (siehe <a onclick="showPage(\'datenschutz\')" style="cursor:pointer;text-decoration:underline">Datenschutzerkl&auml;rung</a>). Keine Weitergabe zu Werbezwecken. Kein Newsletter.</div>'
+    + '<div class="kiv2-brow" style="justify-content:flex-start;margin-top:1.5rem">'
+    + '<button class="kiv2-btn kiv2-btnp" onclick="kiv2Start()">Check starten &#x2192;</button></div>';
+}
+
+function kiv2Start() {
+  kiv2Contact = { name: document.getElementById('kiv2Name').value||'', email: document.getElementById('kiv2Email').value||'' };
+  kiv2Current = 0;
+  document.getElementById('kiv2ProgressWrap').style.display = 'block';
+  kiv2Render();
+}
+
+function kiv2RenderQuestion(card, q) {
+  let inp = '';
+  if (q.type === 'text') {
+    inp = '<div class="kiv2-sub">' + (q.hint||'') + '</div>'
+      + '<textarea class="kiv2-ta" id="kiv2Input" placeholder="' + (q.placeholder||'') + '">' + (kiv2Answers[q.id]||'') + '</textarea>';
+  } else if (q.type === 'choice') {
+    inp = '<div class="kiv2-choices">'
+      + q.options.map((o,i) => '<button class="kiv2-choice' + (kiv2Answers[q.id]===o?' kiv2-sel':'') + '" data-idx="'+i+'" onclick="kiv2SelectChoice(this,\''+q.id+'\')">'
+        + '<div class="kiv2-dot"></div><span>' + o + '</span></button>').join('')
+      + '</div>';
+  } else {
+    const val = kiv2Answers[q.id]||3;
+    inp = '<div class="kiv2-scale">'
+      + '<div class="kiv2-sl"><span>' + q.min + '</span><span>' + q.max + '</span></div>'
+      + '<input type="range" class="kiv2-range" min="1" max="5" value="'+val+'" id="kiv2Input" oninput="document.getElementById(\'kiv2ScaleVal\').textContent=this.value">'
+      + '<div class="kiv2-sv" id="kiv2ScaleVal">'+val+'</div></div>';
+  }
+  const isLast = kiv2Current === KIV2_QUESTIONS.length - 1;
+  card.innerHTML = '<div class="kiv2-lbl">' + q.label + '</div>'
+    + '<div class="kiv2-h2">' + q.question + '</div>'
+    + inp
+    + '<div class="kiv2-brow">'
+    + (kiv2Current > 0 ? '<button class="kiv2-btn kiv2-btng" onclick="kiv2Back()">&#x2190; Zurück</button>' : '')
+    + '<button class="kiv2-btn kiv2-btnp" onclick="kiv2Next()">' + (isLast ? 'Auswertung starten &#x2192;' : 'Weiter &#x2192;') + '</button></div>';
+}
+
+function kiv2SelectChoice(el, id) {
+  kiv2Answers[id] = KIV2_QUESTIONS[kiv2Current].options[parseInt(el.dataset.idx)];
+  document.querySelectorAll('#kiv2Card .kiv2-choice').forEach(b => b.classList.remove('kiv2-sel'));
+  el.classList.add('kiv2-sel');
+}
+
+function kiv2Next() {
+  const q = KIV2_QUESTIONS[kiv2Current];
+  if (q.type === 'text') {
+    const v = (document.getElementById('kiv2Input').value||'').trim();
+    if (!v) { document.getElementById('kiv2Input').focus(); return; }
+    kiv2Answers[q.id] = v;
+  } else if (q.type === 'scale') {
+    kiv2Answers[q.id] = parseInt(document.getElementById('kiv2Input').value);
+  } else if (!kiv2Answers[q.id]) return;
+  kiv2Current++; kiv2Render();
+}
+
+function kiv2Back() { if (kiv2Current > 0) { kiv2Current--; kiv2Render(); } }
+
+function kiv2UpdateProgress() {
+  const pct = Math.round((kiv2Current / KIV2_QUESTIONS.length) * 100);
+  document.getElementById('kiv2ProgressFill').style.width = pct + '%';
+  document.getElementById('kiv2ProgressLabel').textContent = 'Frage ' + (kiv2Current+1) + ' von ' + KIV2_QUESTIONS.length;
+  document.getElementById('kiv2ProgressPct').textContent = pct + '%';
+}
+
+function kiv2RenderLoading(card) {
+  document.getElementById('kiv2ProgressFill').style.width = '100%';
+  document.getElementById('kiv2ProgressLabel').textContent = 'Auswertung läuft …';
+  document.getElementById('kiv2ProgressPct').textContent = '100%';
+  card.innerHTML = '<div class="kiv2-h2">Ihre Antworten werden analysiert …</div>'
+    + '<div class="kiv2-spin-w"><div class="kiv2-spinner"></div><span>Analyse läuft — einen Moment bitte</span></div>';
+}
+
+async function kiv2RunAnalysis() {
+  const summary = KIV2_QUESTIONS.map(q => q.question + '\nAntwort: ' + kiv2Answers[q.id]).join('\n\n');
+  const prompt = ['Du bist KI-Berater von HandsOnAI OWL.','Analysiere die faktenbasierten Antworten des Unternehmens.','Gib eine konkrete unternehmensspezifische Auswertung basierend auf den genannten Systemen und Prozessen.','ANTWORTEN: ' + summary,'Antworte mit validem JSON ohne Markdown-Fences:','{"score":<0-100>',',"level":"Einsteiger|Fortgeschritten|Bereit"',',"headline":"<1 praegnanter Satz>"',',"staerken":["<Staerke bezogen auf genannte Systeme/Prozesse>","<Staerke 2>"]',',"felder":["<Handlungsfeld 1 mit Bezug auf Luecken im System/Prozess>","<Feld 2>","<Feld 3>"]',',"empfehlung":"<3-4 Saetze: konkret auf genannte Systeme, Prozesse, Zeitfresser eingehen>"',',"passend":"AI Readiness Audit|AI Tool Onboarding|AI Consulting Sprint|Fractional AI Officer"',',"dimensionen":{"Systemlandschaft":<1-5>,"Prozessreife":<1-5>,"Datenlage":<1-5>,"KI-Bereitschaft":<1-5>,"Schulungskultur":<1-5>,"Datenschutz":<1-5>}}','}'].join(' ')
+  try {
+    const res = await fetch(KIV2_PROXY_URL, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-opus-4-5',max_tokens:1024,messages:[{role:'user',content:prompt}]})});
+    if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error((e.error&&e.error.message)||'HTTP '+res.status); }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    kiv2RenderResult(JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim()));
+  } catch(e) {
+    document.getElementById('kiv2Card').innerHTML = '<div class="kiv2-h2">Verbindungsfehler</div>'
+      + '<div class="kiv2-sub">Proxy-URL nicht konfiguriert: ' + e.message + '</div>'
+      + '<div class="kiv2-brow"><button class="kiv2-btn kiv2-btng" onclick="kiv2Current=-1;kiv2Render()">Neu starten</button></div>';
+  }
+}
+
+function kiv2RenderResult(r) {
+  const card = document.getElementById('kiv2Card');
+  const lc = r.score < 40 ? 'kiv2-low' : r.score < 70 ? 'kiv2-mid' : 'kiv2-high';
+  const circ = 2 * Math.PI * 46;
+  const dims = Object.entries(r.dimensionen||{}).map(([k,v]) =>
+    '<div><div class="kiv2-lbl-t">'+k+'</div><div class="kiv2-dimbar"><div class="kiv2-dimfill" style="width:'+v*20+'%"></div></div></div>').join('');
+  card.innerHTML = '<div class="kiv2-res-hero">'
+    + '<div class="kiv2-ring"><svg viewBox="0 0 100 100" width="120" height="120">'
+    + '<circle class="kiv2-rt" cx="50" cy="50" r="46"/>'
+    + '<circle class="kiv2-rf" cx="50" cy="50" r="46" stroke-dasharray="'+circ+'" stroke-dashoffset="'+circ+'" id="kiv2ScoreCircle"/>'
+    + '</svg><div class="kiv2-rnum">'+r.score+'<small>/ 100</small></div></div>'
+    + '<div class="kiv2-rlvl '+lc+'">'+r.level+'</div>'
+    + '<div style="font-size:1.05rem;font-weight:500;margin-top:.5rem">'+r.headline+'</div></div>'
+    + '<div class="kiv2-h3">Ihre Stärken</div>'
+    + '<ul class="kiv2-list">'+(r.staerken||[]).map(s=>'<li>&#x2705; '+s+'</li>').join('')+'</ul>'
+    + '<div class="kiv2-h3">Handlungsfelder</div>'
+    + '<ul class="kiv2-list">'+(r.felder||[]).map(f=>'<li>&#x2192; '+f+'</li>').join('')+'</ul>'
+    + '<div class="kiv2-h3">Dimensionen</div><div class="kiv2-dimlist">'+dims+'</div>'
+    + '<div class="kiv2-h3">Empfehlung</div>'
+    + '<div style="font-size:.95rem;line-height:1.75;margin-bottom:1.5rem">'+r.empfehlung+'</div>'
+    + '<div class="kiv2-cta-box"><div class="kiv2-h3" style="margin-bottom:.5rem">Nächster Schritt: '+r.passend+'</div>'
+    + '<div style="font-size:.88rem;color:#4a4a6a;margin-bottom:1rem">Passend zu Ihrem Ergebnis — kostenloses 30-Minuten-Gespräch.</div>'
+    + '<button class="kiv2-btn kiv2-btnp" onclick="showPage(\'main\');navTo(\'#kontakt\')">Jetzt Erstgespräch buchen &#x2192;</button></div>'
+    + '<div style="text-align:center;margin-top:1.5rem">'
+    + '<button class="kiv2-btn kiv2-btng" onclick="kiv2Current=-1;kiv2Render()">&#x21BA; Neu starten</button></div>';
+  setTimeout(()=>{const c=document.getElementById('kiv2ScoreCircle');if(c)c.style.strokeDashoffset=circ-(r.score/100)*circ;},100);
+}
+
+/* ── CANVAS JS
+/* ── CANVAS JS ────────────────────────────────────────── */
+const criteria = { c1:null, c2:null, c3:null, c4:null, c5:null, c6:null, c7:null, c8:null };
+
+const CRIT_LABELS = {
+  c1:['Einfache Antwort / Recherche','Analyse / Strukturierung','Mehrstufige Problemlösung','Planung / Agent-Verhalten'],
+  c2:['Manuell (assistiv)','Assistiv im Workflow','Teilautomatisiert','Vollautomatisiert'],
+  c3:['Keine Integration','Dokumente / Dateien','API-Zugriffe','Komplexe Systemlandschaft'],
+  c4:['Allgemeines Wissen','Branchen-/Kontextwissen','Unternehmenswissen','Strukturierte interne Daten'],
+  c5:['Einmalige Anfrage','Iterative Zusammenarbeit','Kontinuierlicher Dialog','Prozesssteuerung'],
+  c6:['Öffentliche Daten','Interne Daten','Sensible / personenbezogene Daten','Regulierte Daten'],
+  c7:['Freier Text','Strukturierter Text','Strukturiertes Datenformat','Systemaktion / Prozess-Output'],
+  c8:['Einmalig / selten','Gelegentlich','Regelmäßig / täglich','Hochfrequent / skalierbar'],
+};
+const CRIT_NAMES = {
+  c1:'Komplexität', c2:'Automatisierung', c3:'Integration',
+  c4:'Wissen', c5:'Interaktion', c6:'Datenschutz', c7:'Output', c8:'Frequenz'
+};
+
+const CATEGORIES = {
+  recherche:     { name:'Recherche & Wissensgewinnung', icon:'🔍', desc:'Informationen schnell finden, zusammenfassen und einordnen — aus öffentlichen oder internen Quellen.', tasks:['Webrecherche','Marktanalyse','Wettbewerbsanalyse','Faktencheck','Literaturübersicht'] },
+  content:       { name:'Content Creation', icon:'✍️', desc:'Inhalte erstellen, überarbeiten oder übersetzen — kreativ und iterativ.', tasks:['Texte schreiben','Social Media Posts','Präsentationstexte','Übersetzungen','Marketinginhalte'] },
+  dokumenten:    { name:'Dokumentenarbeit', icon:'📄', desc:'Arbeiten mit bestehenden Dokumenten aus dem Unternehmenskontext.', tasks:['Dokumente zusammenfassen','Verträge analysieren','E-Mails formulieren','Meetingprotokolle','Präsentationen erstellen'] },
+  wissensbot:    { name:'Wissensassistenz / Q&A', icon:'❓', desc:'Fragen zu spezifischem, unternehmensinternem Wissen beantworten — wiederkehrend und skalierbar.', tasks:['Interne Richtlinien erklären','HR-FAQ beantworten','Produktwissen','Support-Fragen','Onboarding-Assistent'] },
+  analyse:       { name:'Analyse & Interpretation', icon:'📊', desc:'Daten, Märkte oder Informationen strukturiert analysieren — oft iterativ mit KI.', tasks:['Marktanalysen','Trendanalysen','Dateninterpretation','Benchmarking','Bewertungen'] },
+  entscheidung:  { name:'Entscheidungsunterstützung', icon:'⚖️', desc:'Optionen bewerten, Risiken analysieren und fundierte Empfehlungen generieren.', tasks:['Strategieoptionen bewerten','Risiken analysieren','Szenarien vergleichen','Business Cases','Prioritätssetzung'] },
+  ideation:      { name:'Ideation & Problemlösung', icon:'💡', desc:'Ideen entwickeln, Probleme lösen — explorativ und kreativ.', tasks:['Brainstorming','Innovationsideen','Lösungsansätze entwickeln','Workshops','Problemdiagnose'] },
+  coding:        { name:'Coding & technische Entwicklung', icon:'💻', desc:'Softwareentwicklung, Code-Generierung und technische Dokumentation unterstützen.', tasks:['Code schreiben','Debugging','Architekturvorschläge','Dokumentation','Code Review'] },
+  automation:    { name:'Workflow-Automation', icon:'⚙️', desc:'Wiederkehrende Prozesse automatisieren — systemübergreifend und skalierbar.', tasks:['Daten synchronisieren','Automatisierte Reports','Ticketbearbeitung','Prozessautomatisierung','Benachrichtigungen'] },
+  agent:         { name:'Agent-basierte Aufgaben', icon:'🤖', desc:'Komplexe, mehrstufige Aufgaben an KI-Agenten delegieren, die selbstständig Tools orchestrieren.', tasks:['Multi-Step Recherche','Content-Pipeline','Automatisierte Analysen','Tool-Orchestrierung','Autonome Workflows'] },
+  produktivitaet:{ name:'Persönliche Produktivität', icon:'⚡', desc:'Individuelle Arbeitsabläufe effizienter gestalten — Alltag optimieren.', tasks:['Tagesplanung','E-Mails priorisieren','Notizen & Zusammenfassungen','Meeting-Vorbereitung','Schnellrecherchen'] },
+  customer:      { name:'Customer Interaction', icon:'💬', desc:'Kundenkommunikation automatisieren oder unterstützen — dialogbasiert und skalierbar.', tasks:['Supportbots','Chatbots','Verkaufsassistenz','Onboarding-Chat','FAQ-Automatisierung'] },
+};
+
+const TOOLCLASSES = {
+  general:   { name:'General AI Assistant', icon:'💬', desc:'Flexibler Allround-Assistent.', tools:[{n:'ChatGPT',t:'OpenAI'},{n:'Claude',t:'Anthropic'},{n:'Google Gemini',t:'Google'}] },
+  recherche: { name:'Recherche-KI', icon:'🔍', desc:'Spezialisiert auf aktuelle Informationen und Faktenrecherche.', tools:[{n:'Perplexity AI',t:'Recherche'},{n:'ChatGPT + Search',t:'OpenAI'},{n:'You.com',t:'Recherche'}] },
+  copilot:   { name:'Workplace Copilot', icon:'🏢', desc:'KI direkt in Office-Produkten — Zugriff auf interne Dateien, E-Mails und Kalender.', tools:[{n:'Microsoft 365 Copilot',t:'Microsoft'},{n:'Google Gemini Workspace',t:'Google'},{n:'Notion AI',t:'Notion'}] },
+  knowledge: { name:'Knowledge Bot / RAG', icon:'🧠', desc:'Wissensbot mit Zugriff auf interne Wissensbasis.', tools:[{n:'Copilot Studio',t:'Microsoft'},{n:'Custom GPT',t:'OpenAI'},{n:'Botpress',t:'Open Source'}] },
+  automation:{ name:'Automation Tool', icon:'⚙️', desc:'Workflow-Automatisierung über Systemgrenzen hinweg.', tools:[{n:'n8n',t:'Open Source'},{n:'Zapier',t:'Cloud'},{n:'Make (Integromat)',t:'Cloud'},{n:'Power Automate',t:'Microsoft'}] },
+  agent:     { name:'Agent Framework', icon:'🤖', desc:'Für komplexe, mehrstufige Aufgaben — Agenten planen und führen selbstständig aus.', tools:[{n:'OpenAI Agents',t:'OpenAI'},{n:'LangChain / LangGraph',t:'Open Source'},{n:'CrewAI',t:'Open Source'},{n:'AutoGen',t:'Microsoft'}] },
+  chatbot:   { name:'Conversational AI / Bot', icon:'💬', desc:'Dialogsysteme für Kunden oder Mitarbeiter.', tools:[{n:'Copilot Studio',t:'Microsoft'},{n:'Botpress',t:'Open Source'},{n:'Voiceflow',t:'Chatbot'},{n:'Intercom AI',t:'Support'}] },
+  coding:    { name:'Coding Assistant', icon:'💻', desc:'KI-Unterstützung direkt in der IDE.', tools:[{n:'GitHub Copilot',t:'GitHub'},{n:'Cursor',t:'IDE'},{n:'Claude',t:'Anthropic'},{n:'ChatGPT',t:'OpenAI'}] },
+};
+
+function getCategory(c) {
+  const a=c.c2??0, i=c.c3??0, k=c.c4??0, x=c.c5??0, s=c.c6??0, o=c.c7??0, f=c.c8??0, cx=c.c1??0;
+  if(a>=2&&i>=2&&o>=2) return 'automation';
+  if(a>=3&&cx>=3) return 'agent';
+  if(a>=2&&x>=3&&f>=2) return 'automation';
+  if(x>=2&&f>=2&&k>=2) return 'customer';
+  if(k>=2&&f>=1&&i>=1) return 'wissensbot';
+  if(i>=1&&i<=2&&k<=1&&s<=1) return 'dokumenten';
+  if(cx>=2&&k<=1&&i<=0) return 'analyse';
+  if(cx>=2&&a<=1) return 'entscheidung';
+  if(cx<=1&&i<=0&&a<=0) return 'recherche';
+  if(cx>=0&&a<=1&&i<=0&&k<=1) return 'content';
+  if(f>=2&&a<=1) return 'produktivitaet';
+  return 'content';
+}
+
+function getToolclass(cat, c) {
+  const a=c.c2??0, i=c.c3??0, k=c.c4??0;
+  if(cat==='agent') return 'agent';
+  if(cat==='automation') return 'automation';
+  if(cat==='customer') return 'chatbot';
+  if(cat==='coding') return 'coding';
+  if(cat==='wissensbot') return 'knowledge';
+  if(cat==='dokumenten') return 'copilot';
+  if(cat==='recherche'&&i===0) return 'recherche';
+  if(k>=2||i>=1) return 'copilot';
+  return 'general';
+}
+
+function setExample(el) {
+  document.getElementById('uc-desc').value = el.textContent.trim();
+}
+
+function pickCrit(name, val, el) {
+  document.querySelectorAll('#cg-'+name.replace('c','')+' .crit-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  criteria[name] = val;
+  const errEl = document.getElementById('err-'+name.replace('c',''));
+  if(errEl) errEl.style.display='none';
+}
+
+function showStep(n) {
+  document.querySelectorAll('[id^="step-"]').forEach(c=>c.classList.remove('active'));
+  const stepEl = document.getElementById('step-'+n);
+  if(stepEl) stepEl.classList.add('active');
+  // update progress bar
+  const pr = document.getElementById('canvas-progress-row');
+  if(pr) {
+    if(n===0){ pr.style.display='none'; }
+    else {
+      pr.style.display='block';
+      document.getElementById('canvas-prog-label').textContent=n+' von 8';
+      document.getElementById('canvas-pbar-fill').style.width=Math.round((n/8)*100)+'%';
+    }
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goStep(from, to) {
+  if(to > from && from >= 1) {
+    const key = 'c'+from;
+    if(criteria[key] === null) {
+      const errEl = document.getElementById('err-'+from);
+      if(errEl) errEl.style.display='block';
+      return;
+    }
+  }
+  showStep(to);
+}
+
+function calcCanvasResult() {
+  if(criteria.c8 === null) {
+    document.getElementById('err-8').style.display='block';
+    return;
+  }
+  const cat = getCategory(criteria);
+  const tc  = getToolclass(cat, criteria);
+  const catData = CATEGORIES[cat] || CATEGORIES.content;
+  const tcData  = TOOLCLASSES[tc] || TOOLCLASSES.general;
+
+  document.querySelectorAll('[id^="step-"]').forEach(c=>c.classList.remove('active'));
+  const pr = document.getElementById('canvas-progress-row');
+  if(pr) pr.style.display='none';
+  const resultEl = document.getElementById('canvas-result');
+  resultEl.style.display='block';
+
+  document.getElementById('cr-icon').textContent = catData.icon;
+  document.getElementById('cr-toolclass').textContent = tcData.name;
+  document.getElementById('cr-desc').textContent = document.getElementById('uc-desc').value.trim() || 'Basierend auf Ihren Angaben';
+  document.getElementById('cr-catname').textContent = catData.icon+' '+catData.name;
+  document.getElementById('cr-catdesc').textContent = catData.desc;
+
+  const tasksEl = document.getElementById('cr-cattasks');
+  tasksEl.innerHTML='';
+  catData.tasks.forEach(t=>{
+    const s=document.createElement('span');s.className='canvas-cat-task';s.textContent=t;tasksEl.appendChild(s);
+  });
+
+  document.getElementById('cr-toolpill').innerHTML = tcData.icon+' '+tcData.name;
+  const toolsEl = document.getElementById('cr-tools');
+  toolsEl.innerHTML='';
+  tcData.tools.forEach(t=>{
+    const d=document.createElement('div');d.className='canvas-tool-item';
+    d.innerHTML='<div class="ti-dot"></div><span>'+t.n+'</span><span class="ti-tag">'+t.t+'</span>';
+    toolsEl.appendChild(d);
+  });
+
+  const summEl = document.getElementById('cr-summary');
+  summEl.innerHTML='';
+  ['c1','c2','c3','c4','c5','c6','c7','c8'].forEach(k=>{
+    const val=criteria[k];
+    if(val===null) return;
+    const label=CRIT_LABELS[k][val];
+    const pct=((val+1)/4)*100;
+    const d=document.createElement('div');d.className='canvas-cs-row';
+    d.innerHTML='<span class="canvas-cs-key">'+CRIT_NAMES[k]+'</span><div style="flex:1"><div style="font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:3px">'+label+'</div><div class="canvas-cs-bar"><div class="canvas-cs-fill" style="width:0%" id="csf-'+k+'"></div></div></div>';
+    summEl.appendChild(d);
+    setTimeout(()=>{ const f=document.getElementById('csf-'+k); if(f) f.style.width=pct+'%'; },200);
+  });
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restartCanvas() {
+  Object.keys(criteria).forEach(k=>criteria[k]=null);
+  document.querySelectorAll('.crit-opt').forEach(o=>o.classList.remove('sel'));
+  document.getElementById('uc-desc').value='';
+  document.getElementById('canvas-result').style.display='none';
+  showStep(0);
+}
+
+// Init canvas
+showStep(0);
+
+// ── BEST PRACTICES ─────────────────────────────────────
+function bpSwitch(id, tab) {
+  document.querySelectorAll('.bp-pane').forEach(p => p.classList.remove('bp-active'));
+  document.querySelectorAll('.bp-tab').forEach(t => t.classList.remove('bp-active'));
+  document.getElementById('bp-' + id).classList.add('bp-active');
+  tab.classList.add('bp-active');
+}
+
+function promptSwitch(id, tab) {
+  document.querySelectorAll('.prompt-app-pane').forEach(p => p.classList.remove('p-active'));
+  document.querySelectorAll('.p-app-tab').forEach(t => t.classList.remove('p-active'));
+  document.getElementById('pp-' + id).classList.add('p-active');
+  tab.classList.add('p-active');
+}
+
+function copyPrompt(card) {
+  // Extrahiere Text ohne den Kopieren-Button-Text
+  const p = card.querySelector('p');
+  let text = p.innerText || p.textContent;
+  const btn = card.querySelector('.prompt-copy-btn');
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ Kopiert!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(() => {
+    // Fallback für ältere Browser
+    const ta = document.createElement('textarea');
+    ta.value = text.trim();
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✅ Kopiert!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Kopieren'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+/* KI-Kompass JS */
+const PROXY_URL    = 'https://aikompass.paulbuero53-cp.workers.dev/proxy';
+const RG_API_KEY   = ''; // Key liegt in Cloudflare — nicht benoetigt wenn Proxy aktiv
+// Verfuegbare Modelle (je nach API-Key):
+// claude-opus-4-5          (neueste Generation, braucht Claude 4 Zugang)
+// claude-3-5-sonnet-20241022  (aeltere Generation)
+// claude-3-haiku-20240307  (guenstigste Option, fast ueberall verfuegbar)
+const RG_MODEL     = 'claude-opus-4-5';
+const RG_MAX_TURNS = 6;
+
+// Kenntnisse levels (Y-axis)
+const RG_KENNTNISSE = ['Starter', 'Schrauber', 'Spezialist', 'Sensei'];
+// Explorer-Level (X-axis)
+const RG_EXPLORER   = ['Skeptiker', 'Vorsichtiger Tester', 'Neugieriger Entdecker', 'Enthusiast'];
+
+const RG_SYSTEM = [
+  'Sie sind ein professioneller KI-Kompetenz-Berater bei HandsOnAI OWL.',
+  'Ihre Aufgabe: In einem kurzen adaptiven Interview herausfinden, wie jemand KI bereits kennt und einsetzt.',
+  'Stellen Sie IMMER NUR EINE Frage pro Antwort. Passen Sie die naechste Frage an die vorherige Antwort an.',
+  'Themenspektrum: KI-Grundverstaendnis, Tool-Erfahrung (ChatGPT/Copilot/Gemini), Prompt-Kompetenz, Risiken/Datenschutz, Praxiseinsatz im Berufsalltag.',
+  'Runden 1-2: Einstieg und Basiswissen. Runden 3-4: Vertiefung. Runden 5-6: Praxisbezug und Einstellung zu KI.',
+  'Ton: sachlich, wertfrei, ermutigend. Kein Wissensstand ist falsch.',
+  'Formatierung: Kurze Rueckmeldung zur Antwort (1 Satz), dann Leerzeile, dann die naechste Frage **fett** markiert.',
+  'Stellen Sie genau ' + RG_MAX_TURNS + ' Fragen. Nach der letzten Antwort eine kurze Rueckmeldung geben, dann als allerletzte Zeile nur: AUSWERTUNG_STARTEN',
+  'Sprache: Deutsch, neutrale Anrede (keine Du/Sie-Form), klar und kompetent.'
+].join(' ');
+
+let rgMessages = [];
+let rgTurns = 0;
+let rgUserName = '';
+let rgLoading = false;
+
+function rgRender() {
+  const card = document.getElementById('rgCard');
+  card.style.animation = 'none'; card.offsetHeight; card.style.animation = '';
+  card.innerHTML = '<div class="rg-lbl">KI-Kompass</div>'
+    + '<div class="rg-h1">KI-Kompetenz einordnen</div>'
+    + '<div class="rg-sub">Ein kurzes adaptives Interview bestimmt den Wissensstand und die Einstellung zu KI — '
+    + 'und gibt eine persoenliche Einordnung in das KI-Kompetenzprofil.</div>'
+    + '<div class="rg-pills">'
+    + '<div class="rg-pill">&#x1F3AF; Adaptiv</div>'
+    + '<div class="rg-pill">&#x23F1; 5-8 Min.</div>'
+    + '<div class="rg-pill">&#x1F4CB; Kompetenzprofil + Empfehlungen</div></div>'
+    + '<label class="rg-lbl-t">Name (optional, fuer die Auswertung)</label>'
+    + '<input type="text" class="rg-input" id="rgNameInput" placeholder="Vorname oder Kuerzel">'
+    + '<div style="margin-top:.5rem">'
+    + '<button class="rg-btn rg-btnp" onclick="rgStart()">Interview starten &#x2192;</button></div>';
+}
+
+async function rgStart() {
+  rgUserName = (document.getElementById('rgNameInput').value || '').trim() || 'Person';
+  rgMessages = []; rgTurns = 0;
+  document.getElementById('rgProgressWrap').style.display = 'block';
+  rgRenderChat();
+  const opening = await rgCallAPI([{role:'user', content:'Name: ' + rgUserName + '. Interview starten.'}]);
+  rgMessages.push({role:'user', content:'Name: ' + rgUserName + '. Interview starten.'});
+  rgMessages.push({role:'assistant', content: opening});
+  rgTurns = 1;
+  rgUpdateProgress();
+  rgPaintMessages();
+}
+
+function rgRenderChat() {
+  document.getElementById('rgCard').innerHTML =
+    '<div class="rg-lbl" id="rgTurnLabel">Frage 1 von ' + RG_MAX_TURNS + '</div>'
+    + '<div class="rg-chat" id="rgChatWrap"></div>'
+    + '<div class="rg-input-row">'
+    + '<textarea class="rg-ta" id="rgUserInput" placeholder="Antwort eingeben ..." rows="2"></textarea>'
+    + '<button class="rg-send" id="rgSendBtn" onclick="rgSend()">&#x27A4;</button></div>';
+  setTimeout(function() {
+    const ta = document.getElementById('rgUserInput');
+    if (ta) {
+      ta.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); rgSend(); }
+      });
+      ta.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 130) + 'px';
+      });
+    }
+  }, 50);
+}
+
+function rgFormatText(txt) {
+  txt = txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  txt = txt.replace(/[*][*]([^*]+)[*][*]/g,'<strong>$1</strong>');
+  txt = txt.replace(/\r\n|\r|\n/g,'<br>');
+  txt = txt.replace(/(^|<br>)([0-9]+[.] )/g,'$1<b>$2</b>');
+  return txt;
+}
+function rgPaintMessages(typing) {
+  const wrap = document.getElementById('rgChatWrap');
+  if (!wrap) return;
+  wrap.innerHTML = rgMessages.map(function(m) {
+    const ai = m.role === 'assistant';
+    const txt = rgFormatText(m.content.replace('AUSWERTUNG_STARTEN','').trim());
+    return '<div class="rg-msg ' + (ai ? 'rg-msg-ai' : 'rg-msg-user') + '">'
+      + '<div class="rg-av ' + (ai ? 'rg-av-ai' : 'rg-av-user') + '">' + (ai ? 'KI' : rgUserName.charAt(0).toUpperCase()) + '</div>'
+      + '<div class="rg-bubble ' + (ai ? 'rg-bubble-ai' : 'rg-bubble-user') + '">' + txt + '</div></div>';
+  }).join('');
+  if (typing) {
+    wrap.innerHTML += '<div class="rg-msg rg-msg-ai"><div class="rg-av rg-av-ai">KI</div>'
+      + '<div class="rg-bubble rg-bubble-ai"><div class="rg-typing"><span></span><span></span><span></span></div></div></div>';
+  }
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+async function rgSend() {
+  if (rgLoading) return;
+  const input = document.getElementById('rgUserInput');
+  const txt = (input.value || '').trim();
+  if (!txt) return;
+  input.value = ''; input.style.height = 'auto';
+  rgMessages.push({role:'user', content: txt});
+  rgLoading = true;
+  document.getElementById('rgSendBtn').disabled = true;
+  rgPaintMessages(true);
+  const reply = await rgCallAPI(rgMessages);
+  rgMessages.push({role:'assistant', content: reply});
+  rgTurns++;
+  rgLoading = false;
+  document.getElementById('rgSendBtn').disabled = false;
+  rgUpdateProgress();
+  if (reply.includes('AUSWERTUNG_STARTEN') || rgTurns > RG_MAX_TURNS + 1) {
+    rgPaintMessages(false);
+    setTimeout(rgTriggerEval, 800);
+  } else {
+    rgPaintMessages(false);
+  }
+}
+
+function rgUpdateProgress() {
+  document.getElementById('rgProgressFill').style.width = Math.min((rgTurns / RG_MAX_TURNS) * 100, 95) + '%';
+  const lbl = document.getElementById('rgTurnLabel');
+  if (lbl) lbl.textContent = 'Frage ' + Math.min(rgTurns, RG_MAX_TURNS) + ' von ' + RG_MAX_TURNS;
+}
+
+async function rgTriggerEval() {
+  const wrap = document.getElementById('rgChatWrap');
+  if (wrap) {
+    wrap.innerHTML += '<div class="rg-msg rg-msg-ai"><div class="rg-av rg-av-ai">KI</div>'
+      + '<div class="rg-bubble rg-bubble-ai"><div class="rg-typing"><span></span><span></span><span></span></div></div></div>';
+    wrap.scrollTop = wrap.scrollHeight;
+  }
+  const lines = rgMessages
+    .filter(function(m){ return !m.content.includes('Interview starten'); })
+    .map(function(m){ return (m.role === 'assistant' ? 'BERATER' : 'PERSON') + ': ' + m.content; });
+  const transcript = lines.join(' | ');
+  const evalPrompt = 'Basierend auf diesem Interview-Transkript erstellen Sie eine KI-Kompetenz-Auswertung.'
+    + ' TRANSKRIPT: ' + transcript
+    + ' Ordnen Sie die Person in folgende Dimensionen ein:'
+    + ' Kenntnisse: Starter (hat es gesehen, traut sich ran) | Schrauber (kriegt es hin, weiss sich zu helfen) | Spezialist (kennt smarte Loesungen) | Sensei (kennt Abkuerzungen und alle Bugs)'
+    + ' Explorer-Level: Skeptiker (beobachtet aus sicherer Entfernung) | Vorsichtiger Tester (probiert mit Schwimmfluegeln) | Neugieriger Entdecker (will sehen was moeglich ist) | Enthusiast (findet immer neue Einsatzideen)'
+    + ' Antworten Sie NUR mit JSON: '
+    + '{"name":"' + rgUserName + '",'
+    + '"kenntnisse":"Starter|Schrauber|Spezialist|Sensei",'
+    + '"explorer":"Skeptiker|Vorsichtiger Tester|Neugieriger Entdecker|Enthusiast",'
+    + '"kenntnisse_begruendung":"1-2 Saetze warum dieses Level",'
+    + '"explorer_begruendung":"1-2 Saetze warum dieses Level",'
+    + '"staerken":["...","..."],'
+    + '"empfehlungen":['
+    + '{"titel":"...","beschreibung":"...","prioritaet":"Sofort|Diese Woche|Diesen Monat","ressource":"..."},'
+    + '{"titel":"...","beschreibung":"...","prioritaet":"...","ressource":"..."},'
+    + '{"titel":"...","beschreibung":"...","prioritaet":"...","ressource":"..."}'
+    + ']}';
+  const evalReply = await rgCallAPI([{role:'user',content:evalPrompt}], true);
+  try {
+    rgRenderResult(JSON.parse(evalReply.replace(/```json|```/g,'').trim()));
+  } catch(e) {
+    const card = document.getElementById('rgCard');
+    if (card) card.innerHTML += '<p style="color:#c0392b;margin-top:1rem;font-size:.9rem">Auswertung fehlgeschlagen. Bitte neu starten.</p>';
+  }
+}
+
+function rgBuildMatrix(kenntnisse, explorer) {
+  const kIdx = RG_KENNTNISSE.indexOf(kenntnisse);
+  const eIdx = RG_EXPLORER.indexOf(explorer);
+  const explorerShort = ['Skeptiker','Vorsi. Tester','Neug. Entdecker','Enthusiast'];
+  let rows = '';
+  for (let k = RG_KENNTNISSE.length - 1; k >= 0; k--) {
+    let cells = '<td style="padding:.35rem .6rem;font-size:.78rem;font-weight:700;color:var(--navy);white-space:nowrap;border-right:2px solid var(--border)">'
+      + RG_KENNTNISSE[k] + '</td>';
+    for (let e = 0; e < RG_EXPLORER.length; e++) {
+      const isMatch = (k === kIdx && e === eIdx);
+      const bg = isMatch ? 'var(--navy)' : ((k + e) % 2 === 0 ? '#f0f5f0' : '#e8f0e8');
+      cells += '<td style="width:60px;height:44px;text-align:center;vertical-align:middle;background:' + bg + ';border-radius:4px">'
+        + (isMatch ? '<div style="width:16px;height:16px;border-radius:50%;background:var(--accent);margin:auto"></div>' : '') + '</td>';
+    }
+    rows += '<tr>' + cells + '</tr>';
+  }
+  let header = '<tr><td style="border-right:2px solid var(--border)"></td>';
+  for (let e = 0; e < RG_EXPLORER.length; e++) {
+    header += '<td style="font-size:.65rem;font-weight:700;color:var(--blue);text-align:center;padding:.3rem .4rem;vertical-align:bottom">'
+      + explorerShort[e] + '</td>';
+  }
+  header += '</tr>';
+  return '<div style="overflow-x:auto;margin:.75rem 0">'
+    + '<table style="border-collapse:separate;border-spacing:3px;width:100%">'
+    + '<thead>' + header + '</thead><tbody>' + rows + '</tbody></table>'
+    + '<div style="font-size:.72rem;color:var(--muted);margin-top:.4rem">&#x25CF; = Aktuelle Einordnung</div></div>';
+}
+
+function rgRenderResult(r) {
+  document.getElementById('rgProgressFill').style.width = '100%';
+  const kLevel = r.kenntnisse || 'Schrauber';
+  const eLevel = r.explorer || 'Vorsichtiger Tester';
+  const matrix = rgBuildMatrix(kLevel, eLevel);
+  const pfade = (r.empfehlungen || []).map(function(p) {
+    return '<div class="rg-pfad"><div class="rg-tag">' + p.prioritaet + '</div>'
+      + '<h4>' + p.titel + '</h4><p>' + p.beschreibung + '</p>'
+      + '<p style="margin-top:.4rem;font-size:.82rem;color:var(--blue)">&#x2192; ' + p.ressource + '</p></div>';
+  }).join('');
+  document.getElementById('rgCard').innerHTML =
+    '<div class="rg-lbl">KI-Kompass Auswertung &middot; ' + r.name + '</div>'
+    + '<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">'
+    + '<div style="flex:1;min-width:140px;background:var(--sky);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">'
+    + '<div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:.3rem">Kenntnisse</div>'
+    + '<div style="font-family:Asap,sans-serif;font-size:1.3rem;font-weight:800;color:var(--navy)">' + kLevel + '</div>'
+    + '<div style="font-size:.8rem;color:var(--muted);margin-top:.3rem">' + (r.kenntnisse_begruendung || '') + '</div></div>'
+    + '<div style="flex:1;min-width:140px;background:var(--sky);border:1px solid var(--border);border-radius:var(--r);padding:1rem;text-align:center">'
+    + '<div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:.3rem">Explorer-Level</div>'
+    + '<div style="font-family:Asap,sans-serif;font-size:1.3rem;font-weight:800;color:var(--navy)">' + eLevel + '</div>'
+    + '<div style="font-size:.8rem;color:var(--muted);margin-top:.3rem">' + (r.explorer_begruendung || '') + '</div></div></div>'
+    + '<div class="rg-res-section"><h3>Einordnung im KI-Kompetenzprofil</h3>'
+    + matrix + '</div>'
+    + '<div class="rg-res-section"><h3>Staerken</h3>'
+    + (r.staerken||[]).map(function(s){return '<p style="padding:.35rem 0;border-bottom:1px solid var(--border);font-size:.88rem">&#x2705; '+s+'</p>';}).join('')
+    + '</div>'
+    + '<div class="rg-res-section"><h3>Empfehlungen</h3>' + pfade + '</div>'
+    + '<div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem">'
+    + '<button class="rg-btn rg-btng" onclick="rgMessages=[];rgTurns=0;rgRender()">&#x21BA; Neu starten</button>'
+    + '<button class="rg-btn rg-btnp" onclick="window.print()">&#x1F4C4; Drucken</button></div>';
+}
+
+async function rgCallAPI(msgs, isEval) {
+  const sys = isEval
+    ? 'Sie sind ein KI-Kompetenz-Analyst. Antworten Sie ausschliesslich mit validem JSON, kein Markdown.'
+    : RG_SYSTEM;
+  try {
+    const res = await fetch(PROXY_URL || 'https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: PROXY_URL
+        ? {'Content-Type': 'application/json'}
+        : {'Content-Type':'application/json','x-api-key':RG_API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify(PROXY_URL
+        ? {model:RG_MODEL, max_tokens:1024, system:sys, messages:msgs}
+        : {model:RG_MODEL, max_tokens:1024, system:sys, messages:msgs})
+    });
+    if (!res.ok) {
+      const errBody = await res.json().catch(function(){return {};});
+      const msg = (errBody.error && errBody.error.message) || ('HTTP ' + res.status);
+      rgShowApiError(msg, res.status);
+      return '__ERROR__';
+    }
+    const data = await res.json();
+    return (data.content && data.content[0] && data.content[0].text) || '__ERROR__';
+  } catch(e) {
+    rgShowApiError('Netzwerk-Fehler: ' + e.message, 0);
+    return '__ERROR__';
+  }
+}
+
+function rgShowApiError(msg, status) {
+  const card = document.getElementById('rgCard');
+  if (!card) return;
+  const hint = status === 401 ? 'API-Key ungueltig oder falsch gesetzt (RG_API_KEY).'
+    : status === 400 ? 'Ungueltige Anfrage - Modell-Name oder Payload pruefen.'
+    : status === 529 ? 'Anthropic API ueberlastet - kurz warten und neu starten.'
+    : 'Verbindung zur Anthropic API fehlgeschlagen.';
+  card.innerHTML = '<div class="rg-lbl" style="color:#c0392b">API-Fehler</div>'
+    + '<div class="rg-h2" style="color:#c0392b">Verbindungsfehler</div>'
+    + '<div style="background:#fff0ee;border:1px solid #f5c6bb;border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem">'
+    + '<div style="font-size:.82rem;font-weight:700;color:#c0392b;margin-bottom:.3rem">Fehlermeldung der API</div>'
+    + '<div style="font-size:.88rem;color:var(--text);font-family:monospace">' + msg + '</div></div>'
+    + '<div style="font-size:.88rem;color:var(--muted);margin-bottom:1.25rem">' + hint + '</div>'
+    + '<button class="rg-btn rg-btng" onclick="rgMessages=[];rgTurns=0;rgRender()">Neu starten</button>';
+}
+
+</script>
+</body>
+</html>
