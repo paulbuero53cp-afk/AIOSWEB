@@ -347,6 +347,8 @@ export default function AiTools({ onNav }: { onNav?: (screen: string, ucId?: str
   const [statusF, setStatusF]     = useState('');
   const [catF, setCatF]           = useState('');
   const [search, setSearch]       = useState('');
+  const [sortField, setSortField] = useState<keyof AiTool>('name');
+  const [sortDir,   setSortDir]   = useState<'asc' | 'desc'>('asc');
 
   const filtered = useMemo(() => tools.filter(tool => {
     if (statusF && tool.status !== statusF) return false;
@@ -357,6 +359,29 @@ export default function AiTools({ onNav }: { onNav?: (screen: string, ucId?: str
     }
     return true;
   }), [tools, statusF, catF, search]);
+
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      const av = a[sortField];
+      const bv = b[sortField];
+      if (typeof av === 'boolean' || typeof bv === 'boolean') {
+        const an = av ? 1 : 0, bn = bv ? 1 : 0;
+        return sortDir === 'asc' ? an - bn : bn - an;
+      }
+      const as = String(av ?? ''), bs = String(bv ?? '');
+      return sortDir === 'asc' ? as.localeCompare(bs) : bs.localeCompare(as);
+    });
+  }, [filtered, sortField, sortDir]);
+
+  function toggleSort(field: keyof AiTool) {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortDir('asc'); }
+  }
+
+  function SortIcon({ field }: { field: keyof AiTool }) {
+    if (sortField !== field) return <span className="sort-icon">↕</span>;
+    return <span className="sort-icon" style={{ color: 'var(--accent)' }}>{sortDir === 'asc' ? '↑' : '↓'}</span>;
+  }
 
   function openNew()  { setActive(null); setModalOpen(true); }
   function openTool(t: AiTool) { setActive(t); setModalOpen(true); }
@@ -394,14 +419,18 @@ export default function AiTools({ onNav }: { onNav?: (screen: string, ucId?: str
           <table>
             <thead>
               <tr>
-                <th>{t('tools.colTool')}</th><th>{t('tools.colCategory')}</th><th>{t('tools.colStatus')}</th>
-                <th>{t('tools.colDataLoc')}</th><th>{t('tools.colDpa')}</th><th>{t('tools.colReview')}</th>
+                <th className="sortable" onClick={() => toggleSort('name')}>{t('tools.colTool')} <SortIcon field="name" /></th>
+                <th className="sortable" onClick={() => toggleSort('category')}>{t('tools.colCategory')} <SortIcon field="category" /></th>
+                <th className="sortable" onClick={() => toggleSort('status')}>{t('tools.colStatus')} <SortIcon field="status" /></th>
+                <th className="sortable" onClick={() => toggleSort('dataLocation')}>{t('tools.colDataLoc')} <SortIcon field="dataLocation" /></th>
+                <th className="sortable" onClick={() => toggleSort('dpa')}>{t('tools.colDpa')} <SortIcon field="dpa" /></th>
+                <th className="sortable" onClick={() => toggleSort('reviewDate')}>{t('tools.colReview')} <SortIcon field="reviewDate" /></th>
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {sorted.length === 0 ? (
                 <tr><td colSpan={6} className="empty">{t('tools.none')}</td></tr>
-              ) : filtered.map(tool => (
+              ) : sorted.map(tool => (
                 <tr key={tool.id} className="clickable" onClick={() => openTool(tool)}>
                   <td>
                     <div style={{ fontWeight: 600 }}>{tool.name}</div>

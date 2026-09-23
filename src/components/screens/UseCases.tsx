@@ -155,9 +155,11 @@ export default function UseCases({ onNav }: { onNav: (s: string, ucId?: string) 
           <option value="">{t('uc.allCategories')}</option>
           {UC_CATEGORY_OPTIONS.map(o => <option key={o}>{o}</option>)}
         </select>
-        <button className="btn btn-primary btn-sm" onClick={() => onNav('new')}>
-          ➕ {t('common.new')}
-        </button>
+        {isEditor && (
+          <button className="btn btn-primary btn-sm" onClick={() => onNav('new')}>
+            ➕ {t('common.new')}
+          </button>
+        )}
       </div>
 
       {/* Ergebnis-Info */}
