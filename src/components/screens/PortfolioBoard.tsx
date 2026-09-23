@@ -7,11 +7,11 @@ import type { UseCase, PortfolioDecision } from '@/types';
 type View = 'kanban' | 'bubble';
 
 const PD_COLS: { id: PortfolioDecision; label: string; color: string }[] = [
+  { id: 'Backlog', label: 'Backlog', color: '#8b5cf6' },
   { id: 'Start',   label: 'Start',   color: '#3b82f6' },
   { id: 'Scale',   label: 'Scale',   color: '#10b981' },
   { id: 'Hold',    label: 'Hold',    color: '#f59e0b' },
   { id: 'Stop',    label: 'Stop',    color: '#ef4444' },
-  { id: 'Backlog', label: 'Backlog', color: '#8b5cf6' },
 ];
 
 const RT_COLOR: Record<string, string> = {

@@ -37,7 +37,7 @@ const de: Dict = {
   'sec.documents': 'Dokumente',
   'sec.admin': 'Admin',
   // ── Topbar / Shell ──
-  'top.config': '⚙ Konfig',
+  'top.config': 'ℹ️ Info',
   'top.logout': 'Abmelden',
   'shell.loading': 'AIOS wird geladen…',
   'shell.signInMs': 'Mit Microsoft anmelden',
@@ -532,7 +532,7 @@ const en: Dict = {
   'sec.documents': 'Documents',
   'sec.admin': 'Admin',
   // ── Topbar / Shell ──
-  'top.config': '⚙ Config',
+  'top.config': 'ℹ️ Info',
   'top.logout': 'Sign out',
   'shell.loading': 'Loading AIOS…',
   'shell.signInMs': 'Sign in with Microsoft',

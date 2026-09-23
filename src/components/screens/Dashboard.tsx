@@ -191,6 +191,7 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
   const { useCases, loading } = useUseCases();
   const { incidents } = useIncidents();
   const config = useAppConfig();
+  const { isEditor, isApprover } = useAuth();
   const t = useT();
 
   const total    = useCases.length;
@@ -266,10 +267,10 @@ export default function Dashboard({ onNav }: { onNav: (screen: string) => void }
             <div className="ch"><span className="ch-title">{t('dash.quickAccess')}</span></div>
             <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
-                { labelKey: 'dash.qNewUc',      screen: 'new' },
+                ...(isEditor ? [{ labelKey: 'dash.qNewUc', screen: 'new' }] : []),
                 { labelKey: 'dash.qGovernance', screen: 'governance' },
                 { labelKey: 'dash.qDocHub',     screen: 'artefakthub' },
-                { labelKey: 'dash.qReportInc',  screen: 'incidents' },
+                ...(isApprover ? [{ labelKey: 'dash.qReportInc', screen: 'incidents' }] : []),
               ].map(({ labelKey, screen }) => (
                 <button
                   key={screen}

@@ -44,7 +44,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { id: 'dashboard',   labelKey: 'nav.dashboard',   icon: '📊' },
       { id: 'reports',     labelKey: 'nav.reports',     icon: '📑' },
-      { id: 'portfolio',   labelKey: 'nav.portfolio',   icon: '📁' },
+      { id: 'portfolio',   labelKey: 'nav.portfolio',   icon: '📁', minRole: 'approver' },
       { id: 'aistrategy',  labelKey: 'nav.aistrategy',  icon: '💡' },
     ],
   },
@@ -54,7 +54,7 @@ const NAV_SECTIONS: NavSection[] = [
       { id: 'usecases',    labelKey: 'nav.usecases',    icon: '🤖' },
       { id: 'ucdashboard', labelKey: 'nav.ucdashboard', icon: '📊' },
       { id: 'agenthub',    labelKey: 'nav.agenthub',    icon: '⚡' },
-      { id: 'new',         labelKey: 'nav.new',         icon: '➕' },
+      { id: 'new',         labelKey: 'nav.new',         icon: '➕', minRole: 'editor' },
     ],
   },
   {
@@ -290,7 +290,7 @@ function AppShell() {
             <button
               className="btn btn-outline btn-sm"
               onClick={() => { setScreen('info'); setSidebarOpen(false); }}
-              title="Info & Config"
+              title="Info"
             >
               {t('top.config')}
             </button>

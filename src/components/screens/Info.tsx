@@ -8,7 +8,6 @@ import { useTx } from '@/context/LanguageContext';
 import { downloadJson } from '@/lib/exports';
 import { APP_VERSION } from '@/lib/version';
 import type { AppConfig } from '@/types';
-const REPO_URL    = 'https://github.com/paulbuero53cp-afk/AIOSWEB';
 
 // ── Config Form ───────────────────────────────────────────────
 function ConfigEditor({ initial, onSaved }: { initial: AppConfig; onSaved: () => void }) {
@@ -275,7 +274,6 @@ export default function Info() {
         <InfoRow label={tx('Organisation')} value={cfg.name} />
         <InfoRow label={tx('Norm')}         value={cfg.iso} />
         <InfoRow label="Version"            value={APP_VERSION} />
-        <InfoRow label="Repository"         value={REPO_URL} />
         <InfoRow label={tx('Angemeldet als')} value={principal?.userDetails ?? '—'} />
         <InfoRow label={tx('Rollen')}       value={principal?.userRoles?.filter(r => r.startsWith('AIOS.')).join(', ') ?? '—'} />
       </div>
@@ -284,9 +282,6 @@ export default function Info() {
       <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: 20, marginBottom: 24 }}>
         <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>Links</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
-            ↗ GitHub Repository
-          </a>
           {cfg.chatbot.enabled && cfg.chatbot.url && (
             <a href={cfg.chatbot.url} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
               ↗ {cfg.chatbot.label || tx('KI-Assistent')}

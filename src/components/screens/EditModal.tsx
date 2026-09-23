@@ -86,7 +86,7 @@ interface EditModalProps {
 export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditModalProps) {
   const { updateUC, deleteUC } = useUseCases();
   const { showToast } = useToast();
-  const { isApprover, isAdmin } = useAuth();
+  const { isEditor, isApprover, isAdmin } = useAuth();
   const tx = useTx();
   const { tools } = useAiTools();
   const linkedTool = uc?.toolRef ? tools.find(tool => tool.id === uc.toolRef) : undefined;
@@ -327,18 +327,22 @@ export default function EditModal({ uc, onClose, artStatus, onNavToArt }: EditMo
                 {exporting ? tx('Exportiere…') : tx('⬇ Export')}
               </button>
             )}
-            <button className="btn btn-outline btn-sm" onClick={() => openEditTab(0)}>
-              {tx('✎ Stammdaten')}
-            </button>
-            <button className="btn btn-outline btn-sm" onClick={() => openEditTab(1)}>
-              {tx('✎ Bewertung')}
-            </button>
-            <button className="btn btn-outline btn-sm" onClick={() => openEditTab(2)}>
-              {tx('✎ Governance')}
-            </button>
-            <button className="btn btn-outline btn-sm" onClick={() => openEditTab(3)}>
-              {tx('✎ Reliabilität')}
-            </button>
+            {isEditor && (
+              <>
+                <button className="btn btn-outline btn-sm" onClick={() => openEditTab(0)}>
+                  {tx('✎ Stammdaten')}
+                </button>
+                <button className="btn btn-outline btn-sm" onClick={() => openEditTab(1)}>
+                  {tx('✎ Bewertung')}
+                </button>
+                <button className="btn btn-outline btn-sm" onClick={() => openEditTab(2)}>
+                  {tx('✎ Governance')}
+                </button>
+                <button className="btn btn-outline btn-sm" onClick={() => openEditTab(3)}>
+                  {tx('✎ Reliabilität')}
+                </button>
+              </>
+            )}
             {isApprover && uc.app === 'Pending' && (
               <button className="btn btn-primary" style={{ marginLeft: 'auto' }} onClick={handleApprove}>
                 {tx('Freigeben')}
